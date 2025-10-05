@@ -1,24 +1,24 @@
 ---
-name: "General Help"
-about: "Request help. Before raising an issue, follow our step-by-step videos, detailed README, troubleshooting guide, and instructional guides."
-title: "Help Me: "
+name: "Общая помощь"
+about: "Запросить помощь. Перед созданием обращения ознакомьтесь с нашими пошаговыми видео, подробным README, руководством по устранению неполадок и учебными материалами."
+title: "Помогите мне: "
 labels: ["help wanted", "support"]
 ---
 
-**Introduction:**
-Before raising a help request, please ensure you've followed the necessary setup and troubleshooting steps. This will help us assist you more effectively and efficiently.
+**Введение:**
+Перед созданием запроса на помощь убедитесь, что вы выполнили необходимые шаги по настройке и устранению неполадок. Это поможет нам оказать вам поддержку более эффективно и оперативно.
 
-**Which self-help guides have you tried to follow? (required):**
-Please list the guides or resources you've consulted so far. 
+**Какие руководства по самостоятельному решению вы пытались использовать? (обязательно):**
+Пожалуйста, перечислите руководства или ресурсы, к которым вы уже обращались.
 
-**Describe Your Issue (required):**
-Please provide a clear and concise description of the help you need.
+**Опишите вашу проблему (обязательно):**
+Пожалуйста, предоставьте чёткое и краткое описание того, в чём вам нужна помощь.
 
-**Have you checked the [FAQ](https://github.com/thebrumby/HotWalletClaimer/wiki/FAQ) (required):**
-Before submitting, please confirm that you've reviewed the FAQ linked above.
+**Проверяли ли вы [FAQ](https://github.com/thebrumby/HotWalletClaimer/wiki/FAQ) (обязательно):**
+Перед отправкой убедитесь, что вы ознакомились с FAQ по ссылке выше.
 
-**Steps Taken So Far (optional):**
-Describe what you have tried so far to resolve your issue.
+**Шаги, предпринятые до сих пор (необязательно):**
+Опишите, что вы уже пробовали сделать для решения вашей проблемы.
 
-**Additional Information:**
-Include any other information that might help us assist you, such as screenshots, logs, or system details.
+**Дополнительная информация:**
+Включите любую другую информацию, которая может помочь нам вам помочь, например, скриншоты, логи или данные о системе.

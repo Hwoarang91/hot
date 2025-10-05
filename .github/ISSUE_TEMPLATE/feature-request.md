@@ -1,15 +1,15 @@
 ---
-name: "Feature Request"
-about: "Suggest a new feature to an existing game or request the modification of an existing feature."
-title: "Feature Request: "
+name: "Запрос функции"
+about: "Предложите новую функцию для существующей игры или запросите изменение существующей функции."
+title: "Запрос функции: "
 labels: ["enhancement", "feature request"]
 ---
 
-**Describe the Feature You'd Like (required):**
-Please provide a clear and concise description of the feature or enhancement you are suggesting. What problem does it solve?
+**Опишите желаемую функцию (обязательно):**  
+Пожалуйста, предоставьте чёткое и краткое описание предлагаемой функции или улучшения. Какую проблему она решает?
 
-**How Would You Use It (optional):**
-Describe how you would use this feature or why it’s important to you.
+**Как бы вы её использовали (необязательно):**  
+Опишите, как вы бы использовали эту функцию или почему она важна для вас.
 
-**Additional Context:**
-Add any other context, screenshots, or examples related to the feature request. If it’s related to an existing problem or feature, explain the connection.
+**Дополнительный контекст:**  
+Добавьте любой другой контекст, скриншоты или примеры, связанные с запросом функции. Если это связано с существующей проблемой или функцией, объясните связь.

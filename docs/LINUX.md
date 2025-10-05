@@ -1,13 +1,13 @@
-## Stand-alone Linux Installation (Ubuntu 20.04 to 24.04):
+## Отдельная установка Linux (Ubuntu 20.04 до 24.04):
 
-Ensure your Operating System is up-to-date by running these commands:
+Убедитесь, что ваша операционная система обновлена, выполнив следующие команды:
 ```bash
    sudo apt-get update
    sudo apt-get upgrade -y
    sudo reboot
 ```
 
-Execute the QuickStart command block to clone this GitHub repository, set up the Virtual Environment, and install all the dependencies:
+Выполните блок команд QuickStart, чтобы клонировать этот репозиторий GitHub, настроить виртуальное окружение и установить все зависимости:
 ```bash
    sudo apt install -y git
    git clone https://github.com/thebrumby/HotWalletBot.git
@@ -16,13 +16,13 @@ Execute the QuickStart command block to clone this GitHub repository, set up the
    ./install.sh
 ```
 
-**Ubuntu users only:** Enable PM2 to persist through reboots with the following command (Windows users follow the Windows Guide).
+**Только для пользователей Ubuntu:** Включите PM2 для сохранения состояния после перезагрузок с помощью следующей команды (пользователям Windows следовать Руководству для Windows).
 ```bash
    pm2 startup systemd
 ```
 
-If you do not have superuser rights, you look at the PM2 output for the prompt to run as a superuser. An example might be:
+Если у вас нет прав суперпользователя, обратите внимание на вывод PM2 с подсказкой выполнить команду от имени суперпользователя. Пример может выглядеть так:
 
 ```sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu```
 
-By following these steps, you will have a fully functional environment to run the Telegram Claim Bot on your Ubuntu system. Make sure to check the [DOCKER.md](docs/DOCKER.md) file for detailed instructions on using Docker if preferred.
+Следуя этим шагам, вы получите полностью рабочее окружение для запуска Telegram Claim Bot на вашей системе Ubuntu. Обязательно ознакомьтесь с файлом [DOCKER.md](docs/DOCKER.md) для подробных инструкций по использованию Docker, если это предпочтительно.

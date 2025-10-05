@@ -1,21 +1,21 @@
 ---
-name: "Bug Report"
-about: "Report a bug in the project. Before reporting a bug, ensure you have completed all the steps in the troubleshooting guide to confirm the issue is not with your session."
-title: "Bug: [Describe the issue briefly]"
+name: "Отчёт об ошибке"
+about: "Сообщите об ошибке в проекте. Перед тем как сообщать об ошибке, убедитесь, что вы выполнили все шаги из руководства по устранению неполадок, чтобы подтвердить, что проблема не связана с вашей сессией."
+title: "Ошибка: [Кратко опишите проблему]"
 labels: ["bug"]
 ---
 
-**Describe the Bug (required):**
-A clear and concise description of what the bug is.
+**Опишите ошибку (обязательно):**  
+Чёткое и краткое описание того, в чём заключается ошибка.
 
-**Have you followed the [troubleshooting guide](https://github.com/thebrumby/HotWalletClaimer/issues/166) (required):**
-Please confirm that you've reviewed the troubleshooting guide linked above and completed all steps to ensure the issue is not with your session.
+**Вы следовали [руководству по устранению неполадок](https://github.com/thebrumby/HotWalletClaimer/issues/166) (обязательно):**  
+Пожалуйста, подтвердите, что вы ознакомились с приведённым выше руководством и выполнили все шаги, чтобы убедиться, что проблема не связана с вашей сессией.
 
-**Steps to Reproduce (required):**
-List the steps to reproduce the bug.
+**Шаги для воспроизведения (обязательно):**  
+Перечислите шаги для воспроизведения ошибки.
 
-**Expected Behavior (required):**
-Describe what you expected to happen.
+**Ожидаемое поведение (обязательно):**  
+Опишите, что вы ожидали увидеть.
 
-**Screenshots or Logs:**
-If applicable, add screenshots or logs to help explain your problem.
+**Скриншоты или логи:**  
+Если возможно, добавьте скриншоты или логи, чтобы помочь объяснить вашу проблему.

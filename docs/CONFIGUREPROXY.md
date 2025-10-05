@@ -1,25 +1,25 @@
-# Telegram Claim Bot - Proxy Support Instructions
+# Telegram Claim Bot - Инструкции по поддержке прокси
 
-## Introduction
+## Введение
 
-The Telegram Claim Bot now supports a **third-party proxy tunnel**. This optional feature allows you to:
+Telegram Claim Bot теперь поддерживает **прокси-туннель сторонних разработчиков**. Эта опциональная функция позволяет вам:
 
-- **Bypass geo-location restrictions** that may prevent access to social media like Telegram Web.
-- **Enhance privacy** by routing your bot's activities through various locations.
+- **Обойти географические ограничения**, которые могут препятствовать доступу к социальным сетям, таким как Telegram Web.
+- **Повысить конфиденциальность**, маршрутизируя действия вашего бота через различные локации.
 
-Follow the steps below to enable and configure proxy support for your bot.
+Следуйте приведённым ниже шагам, чтобы включить и настроить поддержку прокси для вашего бота.
 
 ---
 
-## 1. Enabling Proxy Support
+## 1. Включение поддержки прокси
 
-Ensure you are in the main directory where you launch your scripts. Execute the following commands to enable proxy support:
+Убедитесь, что вы находитесь в главной директории, откуда запускаете свои скрипты. Выполните следующие команды для включения поддержки прокси:
 
 ```
 ./launch.sh enable-proxy
 ```
 
-Then, set up your proxy configuration with:
+Затем настройте конфигурацию прокси с помощью:
 
 ```
 ./launch.sh setup-proxy
@@ -27,68 +27,67 @@ Then, set up your proxy configuration with:
 
 ---
 
-## 2. Configuring Your Proxy
+## 2. Настройка вашего прокси
 
-During the setup process, you will be prompted to provide your proxy details. If an existing proxy configuration is detected, it will be displayed, and you can choose to **retain or remove** it.
+В процессе настройки вам будет предложено ввести данные вашего прокси. Если обнаружена существующая конфигурация прокси, она будет отображена, и вы сможете **сохранить или удалить** её.
 
-**Provide the following information when prompted:**
+**Предоставьте следующую информацию при запросе:**
 
-- **Upstream proxy host (IP or URL):**
+- **Upstream proxy host (IP или URL):**
 - **Upstream proxy port:**
 - **Upstream proxy username:**
 - **Upstream proxy password:**
 
-**Process:**
+**Процесс:**
 
-1. **Enter Proxy Details:** Input your proxy credentials as prompted.
-2. **Connection Test:** The script will attempt to establish a connection using the provided details.
-   - **Success:** The built-in proxy will restart and authenticate with your proxy server.
-   - **Failure:** An error message will appear, pompting you to re-enter the correct information.
+1. **Введите данные прокси:** Введите ваши учётные данные прокси по запросу.
+2. **Тест подключения:** Скрипт попытается установить соединение с использованием введённых данных.
+   - **Успех:** Встроенный прокси перезапустится и выполнит аутентификацию на вашем прокси-сервере.
+   - **Ошибка:** Появится сообщение об ошибке с просьбой ввести правильную информацию повторно.
 
-**Example:**
+**Пример:**
 
-- Enter upstream proxy host (IP or URL): proxy.example.com
-- Enter upstream proxy port: 8080
-- Enter upstream proxy username: yourUsername
-- Enter upstream proxy password: yourPassword
+- Enter upstream proxy host (IP or URL): proxy.example.com  
+- Enter upstream proxy port: 8080  
+- Enter upstream proxy username: yourUsername  
+- Enter upstream proxy password: yourPassword  
 
 ---
 
-## 3. Updating In-Game Settings
+## 3. Обновление настроек в игре
 
-If you are not already using the built-in proxy, after configuring your upstream proxy configuration, update the in-game settings to ensure proper routing through the proxy server.
+Если вы ещё не используете встроенный прокси, после настройки прокси upstream обновите настройки в игре, чтобы обеспечить корректную маршрутизацию через прокси-сервер.
 
-**Steps:**
+**Шаги:**
 
-1. **Enable Proxy Usage:** In your game's settings, set the **`useProxy:`** option is set to **`True`**.
-2. **Set Proxy Connector Address:** Use the following address to connect to MITM Proxy (not your upstream proxy host):
+1. **Включите использование прокси:** В настройках вашей игры установите опцию **`useProxy:`** в значение **`True`**.
+2. **Укажите адрес прокси-коннектора:** Используйте следующий адрес для подключения к MITM Proxy (а не к вашему upstream proxy host):
 
    ```
    http://127.0.0.1:8080
    ```
 
-**Important Notes:**
+**Важные замечания:**
 
-- The address `http://127.0.0.1:8080` routes through **MitMProxy (Man-in-the-Middle Proxy)**, which:
-  - Modifies data to emulate a mobile device connection.
-  - Adjusts headers as required by certain games (e.g., Blum).
-- **Selenium**, the tool used for navigating Telegram Web pages, cannot directly authenticate proxies with usernames and passwords. MitMProxy handles this authentication seamlessly using your provided credentials.
-
----
-
-## 4. Per-Session Proxy Connections
-
-For users requiring **per-session proxy connections**, consider using **Docker containers**:
-
-**Implementation:**
-
-- **Create Separate Containers:** Set up individual Docker containers for each session requiring a distinct proxy connection.
-- **Configure Proxies Individually:** Assign different proxy settings to each container as needed.
-
-**Benefits:**
-
-- **Isolation:** Each session runs independently, reducing cross-interference.
-- **Flexibility:** Easily manage and scale multiple sessions with varied proxy configurations.
+- Адрес `http://127.0.0.1:8080` маршрутизируется через **MitMProxy (Man-in-the-Middle Proxy)**, который:
+  - Модифицирует данные, чтобы эмулировать подключение мобильного устройства.
+  - Корректирует заголовки, необходимые для некоторых игр (например, Blum).
+- **Selenium**, инструмент для навигации по страницам Telegram Web, не может напрямую аутентифицировать прокси с использованием имени пользователя и пароля. MitMProxy обрабатывает эту аутентификацию бесшовно, используя ваши предоставленные учётные данные.
 
 ---
 
+## 4. Прокси-подключения для каждой сессии
+
+Для пользователей, которым требуются **прокси-подключения для каждой сессии**, рекомендуется использовать **Docker-контейнеры**:
+
+**Реализация:**
+
+- **Создавайте отдельные контейнеры:** Настройте отдельные Docker-контейнеры для каждой сессии, требующей отдельного прокси-подключения.
+- **Настраивайте прокси индивидуально:** Назначайте разные настройки прокси для каждого контейнера по необходимости.
+
+**Преимущества:**
+
+- **Изоляция:** Каждая сессия работает независимо, снижая взаимное влияние.
+- **Гибкость:** Легко управлять и масштабировать несколько сессий с разными конфигурациями прокси.
+
+---

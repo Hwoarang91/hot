@@ -1,210 +1,211 @@
-# Your automated assistant for Telegram mini-app games!
+# Ваш автоматизированный помощник для мини-игр Telegram!
 
-Automate claims in popular Telegram nini-games, and track their status. For a full list of supported games and launch commands, visit: [Launch Commands](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/LAUNCHCOMMANDS.md).
+Автоматизируйте получение наград в популярных мини-играх Telegram и отслеживайте их статус. Для полного списка поддерживаемых игр и команд запуска посетите: [Launch Commands](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/LAUNCHCOMMANDS.md).
 
 ---
 
-Hello, Fellow Crypto Game Enthusiasts! Maintaining the Telegram Claim Bot takes several hours per week, and we currently receive nothing back in donations. If you find the scripts useful and want to support our ongoing development, consider becoming a [Patreon](https://www.patreon.com/TelegramClaimBot) or treat us to a [cup of coffee](https://www.buymeacoffee.com/philstockdale) ☕ for as little as $5. Your contribution helps keep the project actively maintained! 
+Здравствуйте, коллеги-энтузиасты криптоигр! Поддержка Telegram Claim Bot занимает несколько часов в неделю, и в настоящее время мы не получаем пожертвований. Если вы находите скрипты полезными и хотите поддержать наше дальнейшее развитие, рассмотрите возможность стать [Patreon](https://www.patreon.com/TelegramClaimBot) или угостить нас [чашечкой кофе](https://www.buymeacoffee.com/philstockdale) ☕ всего за $5. Ваш вклад помогает поддерживать проект в активном состоянии!
 
-You can also support us at no cost by subscribing to and watching our [YouTube channel](https://www.youtube.com/channel/UCygSGwCLIaQAZiYs1lLcRGw), where we share more content and insights. Prefer crypto? Donations are welcome of any token through any of these [30 supported chains](https://github.com/thebrumby/HotWalletClaimer/blob/main/extras/chains.md), including BSC, Polygon, or Ethereum, to:
+Вы также можете поддержать нас бесплатно, подписавшись и посмотрев наш [YouTube канал](https://www.youtube.com/channel/UCygSGwCLIaQAZiYs1lLcRGw), где мы делимся дополнительным контентом и инсайтами. Предпочитаете криптовалюту? Пожертвования принимаются в любых токенах через любой из этих [30 поддерживаемых блокчейнов](https://github.com/thebrumby/HotWalletClaimer/blob/main/extras/chains.md), включая BSC, Polygon или Ethereum, на адрес:
 ```
 0x070411DD6D9Ef8331F57349dD1952D3921456AA6
 ```
 
-## Want to learn more about the Telegram Claim Bot?  
-Our blog posts are **FREE** to read on [Patreon](https://www.patreon.com/TelegramClaimBot)!  
+## Хотите узнать больше о Telegram Claim Bot?  
+Наши блог-посты доступны **БЕСПЛАТНО** на [Patreon](https://www.patreon.com/TelegramClaimBot)!  
 
-- **🆕 Meet xNode**: xNode combines *real-world node hosting* with a Telegram mini-game. [read more](https://www.patreon.com/posts/meet-xnode-and-137374846?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link)  
-- **🎉 HOT Claims Are Back!**: [read more](https://www.patreon.com/posts/hot-claims-are-130096227?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link)  
-- **📢 Telegram Claim Bot Status**: HOT has now gone & overview of the 7 still-working bots. [read more](https://www.patreon.com/posts/patreon-update-129865295?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link)  
+- **🆕 Знакомьтесь с xNode**: xNode объединяет *реальный хостинг нод* с мини-игрой в Telegram. [читать далее](https://www.patreon.com/posts/meet-xnode-and-137374846?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link)  
+- **🎉 Возвращение HOT Claims!**: [читать далее](https://www.patreon.com/posts/hot-claims-are-130096227?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link)  
+- **📢 Статус Telegram Claim Bot**: HOT завершён & обзор 7 ботов, которые всё ещё работают. [читать далее](https://www.patreon.com/posts/patreon-update-129865295?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link)  
 
-## Clever Claiming - How to Use a Virtual Browser and Python Script to Maximize Rewards 24/7
+## Умное получение наград — как использовать виртуальный браузер и Python-скрипт для максимизации вознаграждений 24/7
 
-Many popular Telegram apps require frequent logins to maximize rewards – this Python script uses Selenium to automate human-like interactions in a real browser session without injecting suspicious API calls. Designed to run on your local computer or VPS, the script monitors your account status within each app, claiming rewards at the optimal time. With an optional random timer offset, it further mimics natural behavior, minimizing risks and keeping your accounts active. It’s ideal for automating reward claims on Telegram mini-apps like **HOT**, and **xNode**, offering convenience without constant manual involvement.
+Многие популярные Telegram-приложения требуют частых входов для максимизации наград — этот Python-скрипт использует Selenium для автоматизации взаимодействий, похожих на человеческие, в реальной сессии браузера без внедрения подозрительных API-запросов. Скрипт предназначен для запуска на вашем локальном компьютере или VPS, он отслеживает статус аккаунта в каждом приложении и забирает награды в оптимальное время. С опциональным случайным смещением таймера он ещё больше имитирует естественное поведение, минимизируя риски и поддерживая активность аккаунтов. Идеально подходит для автоматизации получения наград в мини-приложениях Telegram, таких как **HOT** и **xNode**, обеспечивая удобство без постоянного ручного участия.
 
-**WARNING:** Always do your own research, as some projects may ultimately deliver no real-world value and might try to upsell features for cold hard cash!
+**ПРЕДУПРЕЖДЕНИЕ:** Всегда проводите собственное исследование, так как некоторые проекты в итоге могут не приносить реальной пользы и могут пытаться продать дополнительные функции за реальные деньги!
 
 <a name="videos"></a>
-## 🎥 Step-by-Step Video Walkthrough 🎬
+## 🎥 Пошаговое видео руководство 🎬
 
-Watch along while I perform each step, from server setup, downloading and installing the script, configuring the options, and initiating your automated claims with the [Video Walkthrough](#videos).
+Смотрите, как я выполняю каждый шаг: настройка сервера, загрузка и установка скрипта, конфигурация опций и запуск автоматизированных заявок с помощью [Видео Руководства](#videos).
 
-## Quick Start Install via Docker (best option for non-technical users)
+## Быстрый старт: установка через Docker (лучший вариант для не технических пользователей)
 
-Using Docker simplifies the setup for non-technical users, by "containerizing" the application and its dependencies, keeping it separate from your main operating system, and ensuring a consistent environment across different architectures (X86/ARM64) and operating systems (Linux-based/Windows). This approach eliminates issues related to dependency management and version conflicts.
+Использование Docker упрощает настройку для нетехнических пользователей, "контейнеризируя" приложение и его зависимости, изолируя их от основной ОС и обеспечивая стабильную среду на разных архитектурах (X86/ARM64) и ОС (Linux/Windows). Такой подход устраняет проблемы с управлением зависимостями и конфликтами версий.
 
-Install Docker Desktop on your PC or CLI Docker on a VPS and then type the following commands into a terminal. Refer to the [DOCKER.md](docs/DOCKER.md) or video walkthrough for full details.
+Установите Docker Desktop на ПК или CLI Docker на VPS, затем введите следующие команды в терминал. Подробности смотрите в [DOCKER.md](docs/DOCKER.md) или видео руководстве.
 
-#### Run a Container with the Script and Dependencies from the Latest Image (with automatic restart set)
+#### Запуск контейнера со скриптом и зависимостями из последнего образа (с автоматическим перезапуском)
 ```sh
 docker run -d --name telegram-claim-bot --restart unless-stopped thebrumby/telegram-claim-bot
 ```
-#### Enter the Container To Interact with the Script - Add New Game Accounts, Monitor for Errors etc
+#### Вход в контейнер для взаимодействия со скриптом — добавление новых игровых аккаунтов, мониторинг ошибок и т.д.
 ```sh
 docker exec -it telegram-claim-bot /bin/bash
 ```
-#### Once Inside the Container - To launch a game:
+#### Внутри контейнера — запуск игры:
 ```sh
 ./launch.sh
 ```
-#### To see the status of all your accounts, delete processes, and see PM2 logs on one page:
+#### Просмотр статуса всех аккаунтов, удаление процессов и просмотр логов PM2 на одной странице:
 ```sh
 ./launch.sh status
 ```
-For more details on status, check out its [STATUS.md](docs/STATUS.md) guide.
+Для подробностей по статусу смотрите руководство [STATUS.md](docs/STATUS.md).
 
-You can type `exit` or `CTRL+D` to leave the container, which will remain running until stopped. You may use the `docker exec` command above to re-enter the container as often as needed. 
-## Setting Up a Relay from This Script to a Telegram Bot
+Для выхода из контейнера введите `exit` или нажмите `CTRL+D`. Контейнер продолжит работу до остановки. Для повторного входа используйте команду `docker exec` выше.
 
-We've detailed the process of setting up a relay from this script to a Telegram bot in step-by-step instructions. This includes creating a bot using BotFather, configuring your script to use the bot, and adding interaction levels. For comprehensive instructions, refer to the [TG-BOT.md](docs/TG-BOT.md) guide.
+## Настройка ретрансляции от скрипта к Telegram-боту
 
-## Windows 10 & 11 Alternative Installation - Utilize WSL2:
-You can check out the [WINDOWS.md](docs/WINDOWS.md) guide or check out this [video](https://www.youtube.com/watch?v=wOajWwO32P4) for further instructions.
+Мы подробно описали процесс настройки ретрансляции от скрипта к Telegram-боту с пошаговыми инструкциями. Это включает создание бота через BotFather, настройку скрипта для работы с ботом и добавление уровней взаимодействия. Полные инструкции доступны в [TG-BOT.md](docs/TG-BOT.md).
+
+## Альтернативная установка для Windows 10 и 11 — использование WSL2:
+Смотрите руководство [WINDOWS.md](docs/WINDOWS.md) или это [видео](https://www.youtube.com/watch?v=wOajWwO32P4) для подробностей.
 
 <a name="quick-start"></a>
-## Stand-alone Linux Installation (best option for technically-minded users):
-To create a stand-alone (non-Docker) version, follow the instructions at [LINUX.md](docs/LINUX.md) or watch the [video](https://www.youtube.com/watch?v=aXwg8U4Qlvc) walkthrough. This method is compatible with Ubuntu-style operating systems and tested on Ubuntu 20.04 - 24.04. 
+## Отдельная установка на Linux (лучший вариант для технически подкованных пользователей):
+Для создания отдельной (не Docker) версии следуйте инструкциям в [LINUX.md](docs/LINUX.md) или смотрите [видео](https://www.youtube.com/watch?v=aXwg8U4Qlvc). Этот метод совместим с Ubuntu-подобными ОС и протестирован на Ubuntu 20.04 - 24.04.
 
-## General Instructions
+## Общие инструкции
 
-💻 **TIP:** This project has no control over the size of your hardware, how many servers or devices you will use, or the number of game sessions that you will initiate on each device. However, it's important to remember that every game session you initiate using the recommended process manager (PM2) has an overhead in system resources.
+💻 **СОВЕТ:** Этот проект не контролирует размер вашего оборудования, количество серверов или устройств, которые вы используете, или количество игровых сессий, которые вы запускаете на каждом устройстве. Однако важно помнить, что каждая игровая сессия, запущенная с помощью рекомендуемого менеджера процессов (PM2), потребляет системные ресурсы.
 
-1) When not actively making a claim, each session uses around 35 MB of RAM (memory) and virtually no CPU load. During the Setup and Claim phases, each concurrent session requires approximately 450 MB of memory and utilizes a larger portion of your CPU resources. The concurrent claims setting (default value 1) limits the number of active claims to prevent hardware overload, if additional claim sessions become due, they will queue until a concurrent claim slot becomes free. If you have a multiple-core processor and generous RAM, you can increase this by changing the settings as described in the [Usage Notes](#usage-notes). 
+1) В режиме ожидания каждая сессия использует около 35 МБ ОЗУ и практически не нагружает CPU. Во время этапов установки и получения наград каждая параллельная сессия требует примерно 450 МБ памяти и значительную часть ресурсов CPU. Настройка количества параллельных заявок (по умолчанию 1) ограничивает число активных заявок, чтобы избежать перегрузки оборудования; дополнительные заявки будут поставлены в очередь до освобождения слота. Если у вас многоядерный процессор и достаточно ОЗУ, вы можете увеличить это значение, изменив настройки, как описано в [Usage Notes](#usage-notes).
 
-| Example Hardware Configuration     | Recommended Maximum Concurrent Claims |
+| Пример конфигурации оборудования | Рекомендуемое максимальное количество параллельных заявок |
 |----------------------------|---------------------------|
-| 1 core, 1 GB RAM           | 1                         |
-| 2 cores, 3 GB RAM          | 4                         |
-| 4 cores, 4 GB RAM          | 6                         |
-| 4 cores, 6 GB RAM          | 8                         |
+| 1 ядро, 1 ГБ ОЗУ           | 1                         |
+| 2 ядра, 3 ГБ ОЗУ           | 4                         |
+| 4 ядра, 4 ГБ ОЗУ           | 6                         |
+| 4 ядра, 6 ГБ ОЗУ           | 8                         |
 
-2) Hard disk space: Each game session has a saved browser cache which includes images, CSS, and JavaScript assets used by the game. Depending on the game, this can range from 100 to 400 MB. Additionally, the recommended process manager (PM2) also stores logs. If disk space is a concern, you can set limits on the [PM2-LOGS.md](docs/PM2-LOGS.md) or set **`enableCache`** to 'n' in the script settings.
+2) Место на жёстком диске: каждая игровая сессия сохраняет кэш браузера, включающий изображения, CSS и JavaScript-ресурсы игры. В зависимости от игры это может занимать от 100 до 400 МБ. Кроме того, рекомендуемый менеджер процессов (PM2) хранит логи. Если место на диске ограничено, вы можете установить лимиты в [PM2-LOGS.md](docs/PM2-LOGS.md) или отключить кэш, установив **`enableCache`** в 'n' в настройках скрипта.
 
-It is the script user's responsibility to assess the capacity of their hardware, review it regularly, and limit the number of game session instances that they initiate to stay within the limits of their hardware. Failure to do so may lead to slow processing, script/server crashes, and the possibility you will be locked out of your server.
+Пользователь скрипта несёт ответственность за оценку возможностей своего оборудования, регулярный мониторинг и ограничение количества игровых сессий, чтобы не превышать возможности железа. Несоблюдение может привести к замедлению работы, сбоям скрипта/сервера и блокировке доступа к серверу.
 
 <a name="videos"></a>
-| Step-by-Step Video Walkthrough                                                                                                   | YouTube Link                                                                                                                                                                                                                                     | Video Length |
+| Пошаговое видео руководство                                                                                                   | Ссылка на YouTube                                                                                                                                                                                                                                     | Длительность |
 |----------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
-| **Introduction: Play2Earn - Automating Claims in Telegram Games with Python - CryptoRank, Iceberg, PitchTalk, Yupalka, Oxygen, MDAO, and TimeFarm** 
-Dive into the exciting world of Play2Earn games as we explore automation techniques using Python. This video provides a comprehensive walkthrough on how to set up automated claims for games such as Hot, Cold, Vertus, and Tree. Learn how to efficiently manage game rewards and maximize your earnings with our step-by-step guide.       | [![Play2Earn: Automating Claims in Telegram Games with Python - Hot, Cold, Vertus, and Tree](https://img.youtube.com/vi/cub6cIg6d1o/0.jpg)](https://www.youtube.com/watch?v=cub6cIg6d1o)<br>[Watch Video](https://www.youtube.com/watch?v=cub6cIg6d1o)    | 03:38        |
-| **Windows Guide: Experience the Simplicity of Docker**  
-Explore how to use Docker, a powerful tool for rolling out software such as our automation script. This guide is tailored for Windows users, providing a straightforward approach to setting up and using Docker for efficient software deployment. | [![Windows Guide: Experience the Simplicity of Docker](https://img.youtube.com/vi/5lwO3KogPnQ/0.jpg)](https://www.youtube.com/watch?v=5lwO3KogPnQ)<br>[Watch Video](https://www.youtube.com/watch?v=5lwO3KogPnQ) | 10:09        |
-| **Step 2a: Setting Up an Amazon VPS for Automated Crypto Claiming Scripts**  
-Setting up a virtual private server (VPS) on Amazon Web Services is easier than you think! This tutorial covers everything from creating your VPS to configuring it for automated crypto claiming scripts. Whether you're managing Hot, Cold, Vertus, or Tree, these strategies will help streamline your operations and enhance your mining efficiency. **Note: If you're using the AWS free trial, select the Minimal Ubuntu 22.04 LTS - Jammy image, as 1 GB of RAM is no longer viable with Chrome version 130 and Ubuntu 24.**     | [![Setting Up an Amazon VPS for Automated Crypto Claiming Scripts](https://img.youtube.com/vi/aXwg8U4Qlvc/0.jpg)](https://www.youtube.com/watch?v=aXwg8U4Qlvc)<br>[Watch Video](https://www.youtube.com/watch?v=aXwg8U4Qlvc)                            | 03:57        |
-| **Step 2b: Setting Up Ubuntu on Windows Using WSL for Crypto Automation**  
-Learn how to integrate Ubuntu with Windows using the Windows Subsystem for Linux (WSL) for enhanced crypto automation capabilities. This guide will take you through the installation and setup process, showing you how to prepare your system for automating claims in games like Hot, Cold, Vertus, and Tree.       | [![Setting Up Ubuntu on Windows Using WSL for Crypto Automation](https://img.youtube.com/vi/wOajWwO32P4/0.jpg)](https://www.youtube.com/watch?v=wOajWwO32P4)<br>[Watch Video](https://www.youtube.com/watch?v=wOajWwO32P4)                               | 03:47        |
-| **Step 3: Installing the Python Script and Configuring Automated Claims**  
-Master the setup of automated claiming scripts in this detailed tutorial. We walk you through the installation of necessary Python scripts and show you how to configure them for efficient operation across various games such as Hot, Cold, Vertus, and Tree. This video is perfect for anyone looking to automate their gameplay and claiming process.       | [![Installing the Python Script and Configuring Automated Claims](https://img.youtube.com/vi/Wg2gQBrlCIc/0.jpg)](https://www.youtube.com/watch?v=Wg2gQBrlCIc)<br>[Watch Video](https://www.youtube.com/watch?v=Wg2gQBrlCIc)                             | 06:37        |
-| **Step 4: Setting Up Telegram Accounts: QR Codes and One-Time Passwords**  
-Setting up Telegram accounts for mining games doesn't have to be complex. This guide demonstrates the use of QR codes and one-time passwords to access games like Hot, Cold, Vertus, and Tree. Follow along to learn how to secure and optimize your game accounts for maximum productivity and ease of use.       | [![Setting Up Telegram Accounts: QR Codes and One-Time Passwords](https://img.youtube.com/vi/gYeiWolV6oY/0.jpg)](https://www.youtube.com/watch?v=gYeiWolV6oY)<br>[Watch Video](https://www.youtube.com/watch?v=gYeiWolV6oY)                          | 03:45        |
-| **Mining Hot on Near Protocol - Wallet Setup and Automated Claiming Guide**  
-This tutorial focuses on setting up a wallet and automating claims for the Hot game on the Near Protocol blockchain. We'll show you the crucial steps to ensure your wallet is properly configured and automated to claim rewards efficiently. Whether you're a beginner or an experienced miner, these insights will help you make the most of your mining efforts.       | [![Mining Hot on Near Protocol - Wallet Setup and Automated Claiming Guide](https://img.youtube.com/vi/hLBeF4o65KI/0.jpg)](https://www.youtube.com/watch?v=hLBeF4o65KI)<br>[Watch Video](https://www.youtube.com/watch?v=hLBeF4o65KI)                    | 05:42        |
-| **Automating Tree Mining with BNB Wallet: Setup and Claims Guide**  
-Automate your Tree mining efforts using the BNB Wallet with this straightforward guide. Discover the essential steps for setting up your wallet, initiating claims, and optimizing the process to ensure continuous mining success. This video will equip you with the tools and knowledge needed to effectively manage and automate your mining operations.       | [![Automating Tree Mining with BNB Wallet: Setup and Claims Guide](https://img.youtube.com/vi/YQBemSH3uOA/0.jpg)](https://www.youtube.com/watch?v=YQBemSH3uOA)<br>[Watch Video](https://www.youtube.com/watch?v=YQBemSH3uOA)                            | 03:04        |
+| **Введение: Play2Earn — автоматизация заявок в Telegram-играх с Python — CryptoRank, Iceberg, PitchTalk, Yupalka, Oxygen, MDAO и TimeFarm**  
+Погрузитесь в захватывающий мир Play2Earn игр и изучите техники автоматизации с помощью Python. Видео подробно показывает, как настроить автоматические заявки для игр Hot, Cold, Vertus и Tree. Узнайте, как эффективно управлять игровыми наградами и максимизировать доход с нашим пошаговым руководством.       | [![Play2Earn: Automating Claims in Telegram Games with Python - Hot, Cold, Vertus, and Tree](https://img.youtube.com/vi/cub6cIg6d1o/0.jpg)](https://www.youtube.com/watch?v=cub6cIg6d1o)<br>[Смотреть видео](https://www.youtube.com/watch?v=cub6cIg6d1o)    | 03:38        |
+| **Руководство для Windows: Простота использования Docker**  
+Узнайте, как использовать Docker — мощный инструмент для развёртывания программного обеспечения, такого как наш скрипт автоматизации. Это руководство предназначено для пользователей Windows и предлагает простой способ настройки и использования Docker для эффективного развёртывания. | [![Windows Guide: Experience the Simplicity of Docker](https://img.youtube.com/vi/5lwO3KogPnQ/0.jpg)](https://www.youtube.com/watch?v=5lwO3KogPnQ)<br>[Смотреть видео](https://www.youtube.com/watch?v=5lwO3KogPnQ) | 10:09        |
+| **Шаг 2a: Настройка VPS Amazon для автоматизированных скриптов крипто-заявок**  
+Настройка VPS на Amazon Web Services проще, чем вы думаете! В этом уроке показано всё — от создания VPS до конфигурации для автоматических скриптов крипто-заявок. Независимо от того, управляете ли вы Hot, Cold, Vertus или Tree, эти стратегии помогут оптимизировать работу и повысить эффективность майнинга. **Примечание: если вы используете бесплатный пробный период AWS, выберите Minimal Ubuntu 22.04 LTS - Jammy, так как 1 ГБ ОЗУ больше не подходит для Chrome версии 130 и Ubuntu 24.**     | [![Setting Up an Amazon VPS for Automated Crypto Claiming Scripts](https://img.youtube.com/vi/aXwg8U4Qlvc/0.jpg)](https://www.youtube.com/watch?v=aXwg8U4Qlvc)<br>[Смотреть видео](https://www.youtube.com/watch?v=aXwg8U4Qlvc)                            | 03:57        |
+| **Шаг 2b: Настройка Ubuntu на Windows с помощью WSL для криптоавтоматизации**  
+Узнайте, как интегрировать Ubuntu с Windows через Windows Subsystem for Linux (WSL) для расширенных возможностей криптоавтоматизации. Руководство проведёт вас через процесс установки и настройки, показывая, как подготовить систему для автоматизации заявок в играх Hot, Cold, Vertus и Tree.       | [![Setting Up Ubuntu on Windows Using WSL for Crypto Automation](https://img.youtube.com/vi/wOajWwO32P4/0.jpg)](https://www.youtube.com/watch?v=wOajWwO32P4)<br>[Смотреть видео](https://www.youtube.com/watch?v=wOajWwO32P4)                               | 03:47        |
+| **Шаг 3: Установка Python-скрипта и настройка автоматических заявок**  
+Освойте настройку скриптов для автоматического получения наград в этом подробном уроке. Мы покажем, как установить необходимые Python-скрипты и настроить их для эффективной работы с играми Hot, Cold, Vertus и Tree. Это видео идеально подходит для тех, кто хочет автоматизировать игровой процесс и получение наград.       | [![Installing the Python Script and Configuring Automated Claims](https://img.youtube.com/vi/Wg2gQBrlCIc/0.jpg)](https://www.youtube.com/watch?v=Wg2gQBrlCIc)<br>[Смотреть видео](https://www.youtube.com/watch?v=Wg2gQBrlCIc)                             | 06:37        |
+| **Шаг 4: Настройка аккаунтов Telegram: QR-коды и одноразовые пароли**  
+Настройка аккаунтов Telegram для майнинговых игр не должна быть сложной. Это руководство демонстрирует использование QR-кодов и одноразовых паролей для доступа к играм Hot, Cold, Vertus и Tree. Следуйте инструкциям, чтобы обезопасить и оптимизировать игровые аккаунты для максимальной продуктивности и удобства.       | [![Setting Up Telegram Accounts: QR Codes and One-Time Passwords](https://img.youtube.com/vi/gYeiWolV6oY/0.jpg)](https://www.youtube.com/watch?v=gYeiWolV6oY)<br>[Смотреть видео](https://www.youtube.com/watch?v=gYeiWolV6oY)                          | 03:45        |
+| **Майнинг Hot на Near Protocol — настройка кошелька и автоматизация заявок**  
+Это руководство посвящено настройке кошелька и автоматизации заявок для игры Hot на блокчейне Near Protocol. Мы покажем ключевые шаги для правильной настройки кошелька и эффективного автоматического получения наград. Независимо от вашего опыта, эти советы помогут максимально использовать майнинг.       | [![Mining Hot on Near Protocol - Wallet Setup and Automated Claiming Guide](https://img.youtube.com/vi/hLBeF4o65KI/0.jpg)](https://www.youtube.com/watch?v=hLBeF4o65KI)<br>[Смотреть видео](https://www.youtube.com/watch?v=hLBeF4o65KI)                    | 05:42        |
+| **Автоматизация майнинга Tree с BNB Wallet: настройка и руководство по заявкам**  
+Автоматизируйте майнинг Tree с помощью BNB Wallet с этим простым руководством. Узнайте основные шаги по настройке кошелька, запуску заявок и оптимизации процесса для непрерывного успеха майнинга. Это видео даст вам инструменты и знания для эффективного управления и автоматизации майнинга.       | [![Automating Tree Mining with BNB Wallet: Setup and Claims Guide](https://img.youtube.com/vi/YQBemSH3uOA/0.jpg)](https://www.youtube.com/watch?v=YQBemSH3uOA)<br>[Смотреть видео](https://www.youtube.com/watch?v=YQBemSH3uOA)                            | 03:04        |
 
 <a name="pm2"></a>
-### Addional Process Manager 2 ```PM2``` commands you may find useful.  
+### Дополнительные команды Process Manager 2 ```PM2```, которые могут быть полезны  
 
-- View all PM2 managed processes:
+- Просмотр всех процессов, управляемых PM2:
     ```bash
     pm2 list
     ```
-- View logs for a specific session (Replace `Iceberg:Wallet1` with the actual name):
+- Просмотр логов конкретной сессии (замените `Iceberg:Wallet1` на актуальное имя):
     ```bash
     pm2 log Iceberg:Wallet1
     ```
-- To remove a managed wallet:
+- Удаление управляемого кошелька:
     ```bash
     pm2 delete Iceberg:Wallet1
     ```
-- Save configuration if you add or delete processes:
+- Сохранение конфигурации после добавления или удаления процессов:
     ```bash
     pm2 save
     ```
     
-### Proxy Configuration
-   - You can now configure the Telegram Claim Bot to use a third-party proxy connection to bypass geo-location blocks or enhance privacy. Detailed instructions on how to configure a third-party proxy can be found [here](docs/CONFIGUREPROXY.md).
+### Настройка прокси
+   - Теперь вы можете настроить Telegram Claim Bot для использования стороннего прокси-соединения, чтобы обходить геоблокировки или повысить приватность. Подробные инструкции по настройке стороннего прокси доступны [здесь](docs/CONFIGUREPROXY.md).
 
 <a name="usage-notes"></a>
 
-## V3.0.3 Release Notes
+## Выпуск V3.0.3
 
-## Usage Instructions: Configuring a Game Session (Example: HOT)
+## Инструкции по использованию: настройка игровой сессии (пример: HOT)
 
-After executing the script with `./launch.sh`, you'll be prompted to update settings and configure your session. Remember to adjust your settings upon startup to optimize the script's performance according to your server's capabilities.
+После запуска скрипта командой `./launch.sh` вам будет предложено обновить настройки и сконфигурировать сессию. Не забудьте настроить параметры при старте, чтобы оптимизировать работу скрипта в соответствии с возможностями вашего сервера.
 
-### Update Settings
+### Обновление настроек
 
-If you choose **"yes"** when prompted to update settings, you can review and modify the following options:
+Если вы выберете **"yes"** при запросе обновления настроек, сможете просмотреть и изменить следующие опции:
 
-- **`forceClaim`**: Forces a claim the first time the script runs, regardless of whether the wallet is full.
-- **`debugIsOn`**: Enables debugging to save screenshots locally (default is **on**).
-- **`hideSensitiveInput`**: Hides sensitive information like phone numbers and seed phrases (default is **on**).
-- **`screenshotQRCode`**: When enabled, attempts to log in via QR code scan instead of phone number and OTP.
-- **`maxSessions`**: Sets the maximum number of concurrent claim sessions; additional wallets will wait for an available slot.
-- **`verboseLevel`**: Adjusts the verbosity of console messages (1 = minimal, 2 = major steps, 3 = all messages).
-- **`telegramVerboseLevel`**: Adjusts the verbosity of messages sent to the Telegram bot (0 = none, 3 = all messages).
-- **`forceNewSession`**: Forces a new login, useful if the existing session encounters errors.
-- **`lowestClaimOffset`** and **`highestClaimOffset`**: Define the range for randomized claim timing relative to when the pot is filled.
+- **`forceClaim`**: принудительно выполнить заявку при первом запуске скрипта, независимо от заполненности кошелька.
+- **`debugIsOn`**: включает режим отладки с сохранением скриншотов локально (по умолчанию **включён**).
+- **`hideSensitiveInput`**: скрывает конфиденциальные данные, такие как номера телефонов и seed-фразы (по умолчанию **включено**).
+- **`screenshotQRCode`**: при включении пытается войти через сканирование QR-кода вместо номера телефона и OTP.
+- **`maxSessions`**: максимальное количество параллельных сессий заявок; дополнительные кошельки будут ждать свободного слота.
+- **`verboseLevel`**: уровень подробности сообщений в консоли (1 = минимум, 2 = основные шаги, 3 = все сообщения).
+- **`telegramVerboseLevel`**: уровень подробности сообщений, отправляемых Telegram-боту (0 = нет, 3 = все сообщения).
+- **`forceNewSession`**: принудительный новый вход, полезно при ошибках текущей сессии.
+- **`lowestClaimOffset`** и **`highestClaimOffset`**: диапазон случайного смещения времени заявки относительно заполнения пула.
 
-   - **Examples of Random Claim Timing Based on Claim Offset**:
-     - `-30, -15`: Early claims randomly between 30 and 15 minutes before the pot is full.
-     - `30, 60`: Late claims randomly 30 minutes to 1 hour after the pot is full.
-     - `-15, 15`: Random claims within a 15-minute window before or after the pot is filled.
+   - **Примеры случайного времени заявки на основе смещения**:
+     - `-30, -15`: ранние заявки случайно между 30 и 15 минутами до заполнения пула.
+     - `30, 60`: поздние заявки случайно от 30 минут до 1 часа после заполнения пула.
+     - `-15, 15`: случайные заявки в окне ±15 минут от заполнения пула.
 
-- **`useProxy`**: Decides whether to use the built-in proxy (as of September 19, 2024, recommended **off**).
-- **`requestUserAgent`**: If enabled, the script will prompt you to enter your user-agent each time.
-- **`telegramBotToken`**: Allows you to relay information to a Telegram bot via BotFather.
-- **`enableCache`**: Disabling saves disk space but increases network load.
+- **`useProxy`**: использовать ли встроенный прокси (на 19 сентября 2024 года рекомендуется **выключить**).
+- **`requestUserAgent`**: если включено, скрипт будет запрашивать user-agent при каждом запуске.
+- **`telegramBotToken`**: позволяет отправлять информацию в Telegram-бота через BotFather.
+- **`enableCache`**: отключение экономит место на диске, но увеличивает сетевую нагрузку.
 
-### Session Name Configuration
+### Конфигурация имени сессии
 
-- Sessions are auto-named numerically in the format "Wallet1" but can be customized to your preference. Reusing a name attempts to resume that session.
+- Сессии автоматически именуются числовым форматом "Wallet1", но вы можете задать своё имя. Повторное использование имени пытается возобновить сессию.
 
-### Telegram Login: Saved Account Options
+### Вход в Telegram: варианты сохранённых аккаунтов
 
-- If the script detects a saved Telegram session and you want to reuse it, you can choose it from a numbered list.
-- To log into a new Telegram account, select 'n'. You will then be prompted to log in with a QR code or telephone number and OTP.
-- If the QR code method is unsuccessful or disabled in settings, follow the OTP login procedure outlined below.
+- Если скрипт обнаружит сохранённую сессию Telegram и вы хотите её использовать, выберите её из списка.
+- Для входа в новый аккаунт Telegram выберите 'n'. Затем вас попросят войти через QR-код или номер телефона с OTP.
+- Если метод QR-кода не сработает или отключён в настройках, следуйте процедуре входа с OTP, описанной ниже.
 
-### Telegram OTP Login Procedure
+### Процедура входа в Telegram с OTP
 
-1. **Country Name and Phone Number**
-   - Enter your country name using the same spelling as Telegram's login page or accept the default, which is auto-detected based on your IP.
-2. **One-Time Password (OTP)**
-   - Enter the OTP sent to your registered Telegram account.
-3. **Two-Factor Authentication (2FA)**
-   - If 2FA is enabled on your Telegram account, enter your 2FA password after the QR code scan or OTP entry.
+1. **Название страны и номер телефона**
+   - Введите название страны так же, как на странице входа Telegram, или примите значение по умолчанию, определённое по IP.
+2. **Одноразовый пароль (OTP)**
+   - Введите OTP, отправленный на ваш зарегистрированный аккаунт Telegram.
+3. **Двухфакторная аутентификация (2FA)**
+   - Если 2FA включена, введите пароль 2FA после сканирования QR-кода или ввода OTP.
 
-### Game Login: Seed Phrase Input for HereWalletBot
+### Вход в игру: ввод seed-фразы для HereWalletBot
 
-- If your selected game requires a seed phrase to log in, carefully input your 12-word seed phrase, ensuring correct spacing without any punctuation or numbers.
-  - **Note**: Be cautious when entering seed phrases. Ensure the script is from a trusted source and your connection is secure to protect your sensitive information.
-- Alternatively, if the game's login is based on your Telegram account, ensure you are logging into the correct account.
+- Если выбранная игра требует seed-фразу для входа, аккуратно введите 12 слов seed-фразы, соблюдая правильные пробелы, без пунктуации и цифр.
+  - **Важно**: будьте осторожны при вводе seed-фраз. Убедитесь, что скрипт получен из доверенного источника и соединение защищено, чтобы защитить ваши данные.
+- Если вход в игру основан на вашем аккаунте Telegram, убедитесь, что вы вошли в правильный аккаунт.
 
-### Final Options After Session Configuration
+### Финальные опции после настройки сессии
 
-- Select **"a"** or press **Enter** to automatically add the session to PM2.
-- Select **"e"** to exit to the Command Line Interface without adding to PM2.
-- Select **"y"** to continue and attempt to make a claim.
+- Выберите **"a"** или нажмите **Enter**, чтобы автоматически добавить сессию в PM2.
+- Выберите **"e"** для выхода в командную строку без добавления в PM2.
+- Выберите **"y"** для продолжения и попытки сделать заявку.
 
-After following these steps, if all inputs are correctly entered and no flooding block is in place, you'll be successfully logged into Telegram and your chosen game.
+Если все данные введены корректно и нет блокировки из-за частых запросов, вы успешно войдёте в Telegram и выбранную игру.
 
-# Security Considerations for HotWalletClaimer Usage
+# Вопросы безопасности при использовании HotWalletClaimer
 
-💡 Communication: The only external communication is with the Telegram Web App, which occurs over HTTPS, providing a secure channel.
+💡 Связь: единственная внешняя связь происходит с Telegram Web App через HTTPS, обеспечивая защищённое соединение.
 
-⚠️ Your seed phrase and Telegram login details are not stored or transmitted by this script, except during the unavoidable one-time login process. As of version v1.3.4, the Google Chrome session is now saved into the ```selenium``` folder, as of v.1.3.6 there is also a duplicate of the session in ```./HotWalletBot/backups``` - if this information were to become compromised, it would allow a suitably experienced individual to access your account.  
+⚠️ Ваши seed-фразы и данные для входа в Telegram не сохраняются и не передаются скриптом, за исключением единовременного процесса входа. Начиная с версии v1.3.4, сессия Google Chrome сохраняется в папке ```selenium```, а с версии v1.3.6 — также дублируется в ```./HotWalletBot/backups```. Если эти данные будут скомпрометированы, опытный злоумышленник сможет получить доступ к вашему аккаунту.
 
-💡 Debugging: Enabling debug mode captures the whole process as screenshots, excluding the seed phrase entry step. These images are stored locally to assist you in the event of errors and are not otherwise transmitted or uploaded in any way.
+💡 Отладка: включение режима отладки делает скриншоты всего процесса, кроме шага ввода seed-фразы. Эти изображения сохраняются локально для помощи при ошибках и не передаются и не загружаются куда-либо.
 
-## Security Best Practice:
+## Рекомендации по безопасности:
 
-💡 Private Devices: Only use this script on private, secure machines or Virtual Private Servers that only you can access.
+💡 Личные устройства: используйте скрипт только на личных, защищённых компьютерах или VPS, доступных только вам.
 
-⚠️ Caution with Seed Phrases: Be very cautious with accounts of significant value. Consider the effect of any unintended loss should your seed phrase become compromised.
+⚠️ Осторожность с seed-фразами: будьте особенно внимательны с аккаунтами значительной ценности. Оцените последствия возможной утечки seed-фразы.
 
-💡 Awareness and Discretion: Understand the security trade-offs of using this automation tool or any other third-party tools. Your vigilance is crucial in safeguarding your information.
+💡 Осведомлённость и осторожность: понимайте риски использования этого или любого другого стороннего инструмента автоматизации. Ваша бдительность — ключ к защите ваших данных.
 
-## Disclaimer:
-Use of HotWalletClaimer is at your own risk. While we are confident that the script neither transmits nor stores your sensitive data, it is essential to acknowledge that devices can become compromised through viruses or other malicious software. The developers of HotWalletClaimer exclude any liability for potential security breaches or financial losses. It is your responsibility to safeguard your digital security. Always prioritize protecting your accounts and sensitive information.
+## Отказ от ответственности:
+Использование HotWalletClaimer осуществляется на ваш страх и риск. Несмотря на уверенность, что скрипт не передаёт и не сохраняет ваши конфиденциальные данные, устройства могут быть скомпрометированы вирусами или вредоносным ПО. Разработчики HotWalletClaimer не несут ответственности за возможные нарушения безопасности или финансовые потери. Защищайте свою цифровую безопасность самостоятельно. Всегда ставьте безопасность аккаунтов и конфиденциальной информации на первое место.

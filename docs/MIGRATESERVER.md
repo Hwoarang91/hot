@@ -1,30 +1,30 @@
-## Migrate Server
+## Миграция сервера
 
-### On the server to be retired
+### На сервере, который будет выведен из эксплуатации
 
-1. Change directory into the `HotWalletBot` directory:
+1. Перейдите в директорию `HotWalletBot`:
    ```bash
    cd HotWalletBot
    ```
 
-2. Save the PM2 process list and create a `pm2-backup.json` from the dump:
+2. Сохраните список процессов PM2 и создайте `pm2-backup.json` из дампа:
    ```bash
    pm2 save
    cp ~/.pm2/dump.pm2 pm2-backup.json
    ```
 
-3. Create a compressed tarball of necessary files:
+3. Создайте сжатый tar-архив с необходимыми файлами:
    ```bash
    tar -czvf compressed_files.tar.gz selenium backups screenshots pm2-backup.json
    ```
 
-### On the new server
+### На новом сервере
 
-4. Follow the general installation instructions at [LINUX.md](docs/LINUX.md).
+4. Следуйте общим инструкциям по установке в [LINUX.md](docs/LINUX.md).
 
-5. Using SSH, ShellNGN, or some other tool that you connect to the server with, copy `compressed_files.tar.gz` from your old server to the new one.
+5. С помощью SSH, ShellNGN или другого инструмента для подключения к серверу скопируйте `compressed_files.tar.gz` со старого сервера на новый.
 
-6. Copy `compressed_files.tar.gz` into the `HotWalletBot` directory and decompress it:
+6. Скопируйте `compressed_files.tar.gz` в директорию `HotWalletBot` и распакуйте его:
    ```bash
    cp /path/to/compressed_files.tar.gz /path/to/HotWalletBot
    ```
@@ -33,23 +33,23 @@
    tar -xzvf compressed_files.tar.gz
    ```
 
-7. Create the recovery script:
+7. Создайте скрипт восстановления:
    ```bash
    nano recover_pm2.sh
    ```
 
-   Paste the following into `recover_pm2.sh`:
+   Вставьте следующее в `recover_pm2.sh`:
    ```
    #!/bin/bash
 
-   # Path to your PM2 dump file
+   # Путь к вашему PM2 dump файлу
    DUMP_FILE="pm2-backup.json"
 
-   # Base directory replacement
+   # Замена базовой директории
    OLD_BASE_DIR="/root/HotWalletBot"
    NEW_BASE_DIR="/home/ubuntu/HotWalletBot"
 
-   # Iterate over each process in the dump file and start it with a delay
+   # Перебор каждого процесса в dump файле и запуск с задержкой
    jq -c '.[]' $DUMP_FILE | while read -r process; do
      NAME=$(echo $process | jq -r '.name')
      SCRIPT_PATH=$(echo $process | jq -r '.pm_exec_path' | sed "s|$OLD_BASE_DIR|$NEW_BASE_DIR|g")
@@ -58,34 +58,34 @@
      RELATIVE_SCRIPT_PATH=$(realpath --relative-to="$CWD" "$SCRIPT_PATH")
      ENV=$(echo $process | jq -c '.env')
      
-     # Use the process name as session_name if not explicitly defined
+     # Использовать имя процесса как session_name, если явно не задано
      SESSION_NAME=${SESSION_NAME:-$NAME}
      
-     # Check if the process is already running
+     # Проверка, запущен ли процесс уже
      if pm2 describe "$NAME" >/dev/null 2>&1; then
-       echo "Process $NAME is already running. Skipping..."
+       echo "Процесс $NAME уже запущен. Пропускаем..."
      else
-       echo "Starting process: $NAME with script: $RELATIVE_SCRIPT_PATH in CWD: $CWD and session: $SESSION_NAME"
-       # Change to the correct working directory before starting the process
+       echo "Запуск процесса: $NAME со скриптом: $RELATIVE_SCRIPT_PATH в рабочей директории: $CWD и сессией: $SESSION_NAME"
+       # Перейти в правильную рабочую директорию перед запуском процесса
        cd "$CWD" || exit
        NODE_NO_WARNINGS=1 pm2 start "$RELATIVE_SCRIPT_PATH" --name "$NAME" --interpreter "venv/bin/python3" --watch "$RELATIVE_SCRIPT_PATH" -- "$SESSION_NAME"
        
-       echo "Waiting for 2 minutes before starting the next process..."
-       sleep 120 # 120 seconds = 2 minutes
+       echo "Ожидание 2 минуты перед запуском следующего процесса..."
+       sleep 120 # 120 секунд = 2 минуты
      fi
    done
 
-   echo "All processes have been processed."
+   echo "Все процессы обработаны."
    ```
 
-8. Make the script executable:
+8. Сделайте скрипт исполняемым:
    ```bash
    chmod +x recover_pm2.sh
    ```
 
-9. Execute the script:
+9. Запустите скрипт:
    ```bash
    ./recover_pm2.sh
    ```
 
-This process will migrate your PM2 processes, ensuring that scripts are started correctly on the new server with updated paths and settings.
+Этот процесс мигрирует ваши процессы PM2, гарантируя корректный запуск скриптов на новом сервере с обновлёнными путями и настройками.

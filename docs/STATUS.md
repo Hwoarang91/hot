@@ -1,136 +1,136 @@
 # STATUS.md
 
-## Overview
+## Обзор
 
-This script allows you to manage and monitor your PM2 processes for various games. You can view the status of all your accounts, delete processes, and see PM2 logs all in one place.
+Этот скрипт позволяет управлять и контролировать ваши процессы PM2 для различных игр. Вы можете просматривать статус всех ваших аккаунтов, удалять процессы и просматривать логи PM2 — всё в одном месте.
 
-## Usage
+## Использование
 
-To launch the status script, run:
+Для запуска скрипта статуса выполните:
 ```
 ./launch.sh status
 ```
 
-## Options
+## Опции
 
-### Sort by Time of Next Claim
-To sort the processes by the time of the next claim:
+### Сортировка по времени следующего запроса
+Чтобы отсортировать процессы по времени следующего запроса:
 ```
 t
 ```
 
-### Delete Processes
+### Удаление процессов
 
-#### Delete by Pattern
-To delete all games matching a specific pattern:
+#### Удаление по шаблону
+Чтобы удалить все игры, соответствующие определённому шаблону:
 ```
 delete [pattern]
 ```
-**Example:**
+**Пример:**
 ```
 delete HOT
 ```
-This command will delete all processes that match the pattern "HOT".
+Эта команда удалит все процессы, соответствующие шаблону "HOT".
 
-#### Delete by Single ID
-To delete a process by its ID:
+#### Удаление по одному ID
+Чтобы удалить процесс по его ID:
 ```
 delete [ID]
 ```
-**Example:**
+**Пример:**
 ```
 delete 51
 ```
-This command will delete the process with ID 51.
+Эта команда удалит процесс с ID 51.
 
-#### Delete by Range of IDs
-To delete a range of processes by their IDs:
+#### Удаление по диапазону ID
+Чтобы удалить диапазон процессов по их ID:
 ```
 delete [startID]-[endID]
 ```
-**Example:**
+**Пример:**
 ```
 delete 1-4
 ```
-This command will delete all processes from ID 1 to ID 4.
+Эта команда удалит все процессы с ID от 1 до 4.
 
-#### Delete by Multiple IDs
-To delete multiple processes by their IDs, separated by commas:
+#### Удаление по нескольким ID
+Чтобы удалить несколько процессов по их ID, разделённым запятыми:
 ```
 delete [ID1],[ID2],[ID3]
 ```
-**Example:**
+**Пример:**
 ```
 delete 1,3,5
 ```
-This command will delete the processes with IDs 1, 3, and 5.
+Эта команда удалит процессы с ID 1, 3 и 5.
 
-### View Status Logs
+### Просмотр логов статуса
 
-#### View Last 20 Balance and Status Logs
-To view the last 20 balance and status logs for a specific process:
+#### Просмотр последних 20 логов баланса и статуса
+Чтобы просмотреть последние 20 логов баланса и статуса для конкретного процесса:
 ```
 status [ID]
 ```
-**Example:**
+**Пример:**
 ```
 status 5
 ```
-This command will show the last 20 balance and status logs for the process with ID 5.
+Эта команда покажет последние 20 логов баланса и статуса для процесса с ID 5.
 
-### View PM2 Logs
+### Просмотр логов PM2
 
-#### View Last N Lines of PM2 Logs
-To view the last N lines of raw PM2 logs for a specific process:
+#### Просмотр последних N строк логов PM2
+Чтобы просмотреть последние N строк необработанных логов PM2 для конкретного процесса:
 ```
 logs [ID] [lines]
 ```
-**Example:**
+**Пример:**
 ```
 logs 5 100
 ```
-This command will show the last 100 lines of raw PM2 logs for the process with ID 5.
+Эта команда покажет последние 100 строк необработанных логов PM2 для процесса с ID 5.
 
-### Exit the Program
-To exit the script:
+### Выход из программы
+Чтобы выйти из скрипта:
 ```
 exit
 ```
-or simply press enter without typing any command.
+или просто нажмите Enter, не вводя команду.
 
-## Examples
+## Примеры
 
-1. **Delete all games matching the pattern "Vertus":**
+1. **Удалить все игры, соответствующие шаблону "Vertus":**
     ```
     delete Vertus
     ```
 
-2. **Delete all saved Telegram accounts:**
+2. **Удалить все сохранённые аккаунты Telegram:**
     ```
     delete Telegram
     ```
 
-3. **Delete processes in the range from 1 to 4:**
+3. **Удалить процессы в диапазоне от 1 до 4:**
     ```
     delete 1-4
     ```
 
-4. **Delete the process with ID 51:**
+4. **Удалить процесс с ID 51:**
     ```
     delete 51
     ```
 
-5. **Delete processes with IDs 1, 3, and 5:**
+5. **Удалить процессы с ID 1, 3 и 5:**
     ```
     delete 1,3,5
     ```
 
-6. **Show the last 20 balance and status logs for process with ID 5:**
+6. **Показать последние 20 логов баланса и статуса для процесса с ID 5:**
     ```
     status 5
     ```
 
-7. **Show the last 100 raw lines from PM2 logs for process with ID 5:**
+7. **Показать последние 100 необработанных строк из логов PM2 для процесса с ID 5:**
     ```
     logs 5 100
     ```

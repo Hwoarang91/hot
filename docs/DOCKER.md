@@ -1,28 +1,28 @@
-# Utilize Our Docker Image to Set Up the Telegram Claim Bot
+# Используйте Наш Docker-образ для Настройки Telegram Claim Bot
 
-Using Docker simplifies the setup of the Telegram Claim Bot by containerizing the application and its dependencies. This ensures a consistent environment across different architectures (x86/ARM64) and operating systems (Linux-based/Windows), eliminating issues related to dependency management and version conflicts. Docker also provides an easy way to deploy, scale, and manage the application, making it an ideal choice for running the Telegram Claim Bot efficiently.
+Использование Docker упрощает настройку Telegram Claim Bot за счёт контейнеризации приложения и его зависимостей. Это обеспечивает единообразную среду на разных архитектурах (x86/ARM64) и операционных системах (на базе Linux/Windows), устраняя проблемы, связанные с управлением зависимостями и конфликтами версий. Docker также предоставляет простой способ развертывания, масштабирования и управления приложением, что делает его идеальным выбором для эффективного запуска Telegram Claim Bot.
 
-To get started with Docker, you need to have Docker installed on your device.
+Для начала работы с Docker необходимо установить Docker на ваше устройство.
 
-## Installing Docker
+## Установка Docker
 
-### For Windows or Mac (Docker Desktop)
+### Для Windows или Mac (Docker Desktop)
 
-Download and install **Docker Desktop** from Docker's official website [here](https://www.docker.com/products/docker-desktop). 
+Скачайте и установите **Docker Desktop** с официального сайта Docker [здесь](https://www.docker.com/products/docker-desktop).
 
-**NOTE:** Docker Desktop provides the Docker Engine and needs to be running when you wish to use the Claim Bot, however individual command windows may be closed once the sessions are running as PM2 processes. 
+**ПРИМЕЧАНИЕ:** Docker Desktop включает Docker Engine и должен быть запущен, когда вы хотите использовать Claim Bot, однако отдельные окна командной строки можно закрывать после запуска сессий в виде процессов PM2.
 
 - **Windows**:
-  - Start the Docker Engine by opening Docker Desktop and leaving it open.
-  - Open a Command Prompt (Press `Win + R`, type `cmd`, and press Enter).
-  - Proceed to the [Common Commands](#common-commands) section below.
+  - Запустите Docker Engine, открыв Docker Desktop и оставив его открытым.
+  - Откройте Командную строку (нажмите `Win + R`, введите `cmd` и нажмите Enter).
+  - Перейдите к разделу [Общие команды](#common-commands) ниже.
 
 - **Mac**:
-  - Start the Docker Engine by opening Docker Desktop and leaving it open.
-  - Open a Terminal (Finder > Applications > Utilities > Terminal).
-  - Proceed to the [Common Commands](#common-commands) section below.
+  - Запустите Docker Engine, открыв Docker Desktop и оставив его открытым.
+  - Откройте Терминал (Finder > Applications > Utilities > Terminal).
+  - Перейдите к разделу [Общие команды](#common-commands) ниже.
 
-### For Virtual Private Servers (CLI Access)
+### Для Виртуальных Частных Серверов (доступ через CLI)
 
 #### Amazon Linux
 
@@ -45,21 +45,21 @@ sudo usermod -aG docker $USER
 exit
 ```
 
-After running these commands, re-login to your VPS and proceed to the [Common Commands](#common-commands) section below.
+После выполнения этих команд повторно войдите в систему на вашем VPS и перейдите к разделу [Общие команды](#common-commands) ниже.
 
-## Common Commands
+## Общие команды
 
-### Step 1: Create Your Container Based on Our Master Image (First Run Only)
+### Шаг 1: Создайте Контейнер на Основе Нашего Основного Образа (только при первом запуске)
 
-To create and start the Docker container:
+Для создания и запуска Docker-контейнера:
 
 ```bash
 docker run -d --name telegram-claim-bot --restart unless-stopped thebrumby/telegram-claim-bot:latest
 ```
 
-The Docker container inherits it's networking properties from the host computer. If you experience DNS issues using Docker's default network settings (e.g., GitHub fails to resolve and no games load), you can manually override the DNS using the commands below:
+Docker-контейнер наследует сетевые свойства от хост-компьютера. Если у вас возникают проблемы с DNS при использовании стандартных сетевых настроек Docker (например, GitHub не разрешается и игры не загружаются), вы можете вручную переопределить DNS с помощью команд ниже:
 
-**Using Cloudflare's DNS (if the standard command above doesn't work)**
+**Использование DNS Cloudflare (если стандартная команда выше не работает)**
 
 ```bash
 docker stop telegram-claim-bot
@@ -67,7 +67,7 @@ docker rm telegram-claim-bot
 docker run -d --name telegram-claim-bot --dns="1.1.1.1" --restart unless-stopped thebrumby/telegram-claim-bot:latest
 ```
 
-**Using Google's DNS (if the standard command above doesn't work)**
+**Использование DNS Google (если стандартная команда выше не работает)**
 
 ```bash
 docker stop telegram-claim-bot
@@ -75,61 +75,62 @@ docker rm telegram-claim-bot
 docker run -d --name telegram-claim-bot --dns="8.8.8.8" --restart unless-stopped thebrumby/telegram-claim-bot:latest
 ```
 
-### Step 2: Operate Within the Container
+### Шаг 2: Работа Внутри Контейнера
 
-To interact with the script, including adding accounts or monitoring:
+Для взаимодействия со скриптом, включая добавление аккаунтов или мониторинг:
 
 ```bash
 docker exec -it telegram-claim-bot /bin/bash
 ```
 
-### Step 3: Adding Games
+### Шаг 3: Добавление Игр
 
-Once inside the container, you can add games.
+Оказавшись внутри контейнера, вы можете добавлять игры.
 
-- To pick from a list of available scripts:
+- Чтобы выбрать из списка доступных скриптов:
 
   ```bash
   ./launch.sh
   ```
 
-- Or to specify the script by name:
+- Или указать скрипт по имени:
 
   ```bash
   ./launch.sh hot
   ```
 
-All other instructions are in line with the main `README.md`.
+Все остальные инструкции соответствуют основному `README.md`.
 
-## Additional Docker Commands and Hints (used within the container)
+## Дополнительные команды и подсказки Docker (используются внутри контейнера)
 
-  - To manually update to the latest code or add new games (the update script automatically does this every 12 hours)
+- Для ручного обновления до последнего кода или добавления новых игр (скрипт обновления делает это автоматически каждые 12 часов):
 
-  ```bash
-  ./pull-games.sh
-  ```
+```bash
+./pull-games.sh
+```
 
-- To exit the container and return to the command prompt:
+- Чтобы выйти из контейнера и вернуться к командной строке:
 
 ```bash
 exit
 ```
 
-## Additional Docker Commands and Hints (used at the command prompt outside the container)
-- To start the container after a reboot or stopping:
+## Дополнительные команды и подсказки Docker (используются в командной строке вне контейнера)
 
-  ```bash
-  docker start telegram-claim-bot
-  docker exec -it telegram-claim-bot /bin/bash
-  ```
+- Чтобы запустить контейнер после перезагрузки или остановки:
 
-- To stop and remove the container:
+```bash
+docker start telegram-claim-bot
+docker exec -it telegram-claim-bot /bin/bash
+```
 
-  ```bash
-  docker stop telegram-claim-bot
-  docker rm telegram-claim-bot
-  ```
+- Чтобы остановить и удалить контейнер:
+
+```bash
+docker stop telegram-claim-bot
+docker rm telegram-claim-bot
+```
 
 ---
 
-All other instructions are in line with the main `README.md`.
+Все остальные инструкции соответствуют основному `README.md`.

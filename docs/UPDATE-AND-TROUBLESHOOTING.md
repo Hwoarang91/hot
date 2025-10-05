@@ -1,123 +1,123 @@
-# Troubleshooting Guide:
-### Please follow this guide in addition to the main instructions, walkthrough videos, and documentation before raising a support ticket.
+# Руководство по устранению неполадок:
+### Пожалуйста, следуйте этому руководству дополнительно к основным инструкциям, обучающим видео и документации перед созданием заявки в службу поддержки.
 
-Before raising an issue, please be aware that many reported problems are often linked to common issues such as search queries blocking the GUI, running outdated code, becoming logged out of Telegram, or incorrect use of the script. To help us assist you more efficiently and minimize the time spent on support, we encourage you to follow all relevant steps in this troubleshooting guide.
+Перед тем как создать заявку, имейте в виду, что многие зарегистрированные проблемы часто связаны с распространёнными причинами, такими как блокировка GUI поисковыми запросами, использование устаревшего кода, выход из аккаунта Telegram или неправильное использование скрипта. Чтобы помочь нам эффективнее вам помочь и сократить время на поддержку, рекомендуем пройти все соответствующие шаги из этого руководства по устранению неполадок.
 
-From time to time, games update their Graphical User Interface (GUI) or add new screens or in-game challenges that may require adjustments to the script. In such cases, it would be appreciated if you raise an issue to ensure we are aware of the issue - in this situation, screenshots of the issue are always beneficial.
+Время от времени игры обновляют свой графический интерфейс (GUI) или добавляют новые экраны и внутриигровые задания, что может потребовать корректировок в скрипте. В таких случаях будет полезно, если вы создадите заявку, чтобы мы были в курсе проблемы — в этом случае скриншоты проблемы всегда приветствуются.
 
-> **Note:** We now use a template format to direct users to self-help guides and troubleshooting. When raising a ticket, make sure to clearly outline what steps you've already taken. Issues raised with no evidence of following this guide may be closed without further action.
+> **Примечание:** Сейчас мы используем шаблон для направления пользователей к руководствам по самообслуживанию и устранению неполадок. При создании заявки обязательно чётко опишите, какие шаги вы уже предприняли. Заявки без доказательств выполнения данного руководства могут быть закрыты без дальнейших действий.
 
-## Ensure Your Script is Up-to-Date
+## Убедитесь, что ваш скрипт обновлён
 
-Before raising an issue, check the status of the script you're experiencing problems with by using [this table](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/LAUNCHCOMMANDS.md) to ensure there are no known bugs and that your local copy of the script is up-to-date. We frequently update the code, and if a problem has affected other users, chances are a fix has already been deployed. Running an outdated version of the code may cause you to experience issues that have already been resolved.
+Перед созданием заявки проверьте статус скрипта, с которым у вас возникли проблемы, используя [эту таблицу](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/LAUNCHCOMMANDS.md), чтобы убедиться, что нет известных ошибок и ваша локальная копия скрипта актуальна. Мы регулярно обновляем код, и если проблема затронула других пользователей, скорее всего, исправление уже выпущено. Использование устаревшей версии кода может привести к возникновению уже решённых проблем.
 
-> **Note:** Docker-based installs automatically pull the latest code every 12 hours. However, if an error was briefly introduced into the code, your install might have automatically pulled the faulty version before the fix was applied. Manually checking that you're up-to-date before raising a support ticket can save time for both you and the development team.
+> **Примечание:** Установки на базе Docker автоматически подтягивают последний код каждые 12 часов. Однако, если в коде временно появилась ошибка, ваша установка могла автоматически загрузить неисправную версию до применения исправления. Ручная проверка актуальности перед созданием заявки сэкономит время вам и команде разработчиков.
 
-### On Docker:
-Ensure you are inside the container and run this command:
+### В Docker:
+Убедитесь, что вы внутри контейнера, и выполните команду:
 ```
 ./pull-scripts.sh
 ```
 
-### On a stand-alone installation:
-Navigate to the **`HotWalletBot`** directory, or the location of your local installation, by using the change directory command (`cd`), and then execute:
+### При автономной установке:
+Перейдите в директорию **`HotWalletBot`** или в папку с локальной установкой с помощью команды смены каталога (`cd`), затем выполните:
 
 ```
 git pull
 ```
 
-## Check the GUI in Telegram Web (https://web.telegram.org/):
-1. Ensure to use the web version of Telegram, as this is the version used by the script. The fact it is working in your mobile or desktop app does not guarantee it is working in the web version. Game developers frequently block this version to deter automated claiming.
-2. Is the game working correctly or under maintenance? The script can only interact with a game that is working as expected and that humans can interact with.
-3. Are you being challenged by Cloudflare? This can often block the script from claiming, although sometimes selecting the option to use the same user agent as you are using in the GUI may help. Most games that enable Cloudflare often remove it after a few weeks (perhaps due to cost).
-4. Can you manually trigger a claim? Games get bugs too - check there are no error messages when manually triggering a claim and that there is no in-game lag. Sometimes games like Hexacore show you are clicking the cube, but when the screen is refreshed, it never registers your progress.
-5. Is there anything in the search bar that might be blocking the script from accessing the game window?
-6. If all else fails with the solutions below, consider deleting the current chat with the bot in the Telegram GUI and starting with a fresh chat. Failing that, if you are using a saved Telegram session, renew it. These two actions can remove any blocks that are preventing the script from working.
+## Проверьте GUI в Telegram Web (https://web.telegram.org/):
+1. Используйте веб-версию Telegram, так как именно её использует скрипт. То, что игра работает в мобильном или десктопном приложении, не гарантирует её работу в веб-версии. Разработчики игр часто блокируют эту версию, чтобы препятствовать автоматическому сбору.
+2. Работает ли игра корректно или находится на техническом обслуживании? Скрипт может взаимодействовать только с игрой, которая функционирует нормально и с которой могут взаимодействовать люди.
+3. Присутствует ли проверка Cloudflare? Она часто блокирует скрипт при сборе наград, хотя иногда помогает выбор опции использования того же user agent, что и в GUI. Большинство игр, использующих Cloudflare, обычно отключают его через несколько недель (возможно, из-за стоимости).
+4. Можете ли вы вручную инициировать сбор награды? В играх тоже бывают баги — проверьте, нет ли сообщений об ошибках при ручном сборе и отсутствует ли внутриигровая задержка. Иногда, например, в Hexacore, кажется, что вы кликаете по кубу, но после обновления экрана прогресс не сохраняется.
+5. Есть ли что-то в строке поиска, что может блокировать скрипт от доступа к игровому окну?
+6. Если ничего из вышеперечисленного не помогает, попробуйте удалить текущий чат с ботом в Telegram GUI и начать новый чат. Если вы используете сохранённую сессию Telegram, обновите её. Эти действия могут снять блокировки, мешающие работе скрипта.
 
-## Ensure you have sufficient Gas Fee
-Games such as Hot, Cold, and Ocean/Sui mine your rewards directly onto the blockchain and consume a small amount of the network base token as a gas fee with each claim. For example, in the case of Hot, you must hold more than 0.1 NEAR to avoid the transaction being rejected by the game. This acts as a minimum balance requirement to ensure you have enough funds to cover transaction costs. While the game requires this higher balance, the network will only deduct the standard gas fee for each transaction.
+## Убедитесь, что у вас достаточно средств на оплату Gas Fee
+Игры, такие как Hot, Cold и Ocean/Sui, записывают ваши награды напрямую в блокчейн и расходуют небольшое количество базового токена сети в качестве комиссии за каждую транзакцию. Например, в случае Hot вы должны иметь более 0.1 NEAR, чтобы транзакция не была отклонена игрой. Это минимальное требование к балансу, чтобы покрыть стоимость транзакций. Хотя игра требует такого баланса, сеть снимет только стандартную комиссию за газ для каждой транзакции.
 
-## Enable debugging:
-1. Open the script using **`./launch.sh`** as if you wish to create a new game session (more advanced users may prefer to directly edit the settings in **`variables.txt`**).
-2. Edit the settings and enable the “Debug” option by choosing 'y.' If editing variables.txt, set **`"debugIsOn": true`**. Enabling this option saves step-by-step screenshots of your claim attempts.
-3. Restart any session that is stuck:
+## Включите отладку:
+1. Запустите скрипт с помощью **`./launch.sh`**, как при создании новой игровой сессии (более продвинутые пользователи могут напрямую редактировать настройки в **`variables.txt`**).
+2. Включите опцию “Debug”, выбрав 'y'. Если редактируете variables.txt, установите **`"debugIsOn": true`**. Включение этой опции сохраняет пошаговые скриншоты ваших попыток сбора наград.
+3. Перезапустите зависшую сессию:
 ```
 pm2 restart [process name]
 ```
-Example:
+Пример:
 ```
 pm2 restart HOT:Wallet1
-# Or use pattern matching
+# Или используйте паттерн
 pm2 restart /Hot/
 ```
-4. Open the screenshots from the file browser of ShellNGN, the explorer pane of WinSCP, or your preferred file transfer client. You will need to navigate inside the installation folder to the **`screenshots`** directory and then to the directory with the same name as your stuck game session. Each saved screenshot will be prefixed by the step number visible in PM2 logs.
-5. If you are using Docker, the easiest way to view the screenshots is to copy them into your local environment file system:
+4. Откройте скриншоты через файловый браузер ShellNGN, панель проводника WinSCP или ваш предпочитаемый клиент для передачи файлов. Перейдите в папку установки, затем в директорию **`screenshots`** и далее в папку с именем вашей зависшей игровой сессии. Каждый сохранённый скриншот будет иметь префикс с номером шага, видимым в логах PM2.
+5. Если вы используете Docker, самый простой способ просмотреть скриншоты — скопировать их в локальную файловую систему:
 ```
 docker cp telegram-claim-bot:/usr/src/app/screenshots/ screenshots/
 ```
-> Note: The script interacts with two main entities: Telegram and the Game. On checking your screenshots you may see that the Telegram interactions are showing correctly, but that the iFrame for the game is blank. This may indicate that the game is offline, or that they are blocking Telegram Web. Enabling the built-in proxy may help the script appear to be coming from a mobile device app in the case of the second issue.
+> Примечание: Скрипт взаимодействует с двумя основными сущностями: Telegram и Игрой. При просмотре скриншотов вы можете увидеть, что взаимодействия с Telegram отображаются корректно, а iFrame игры пуст. Это может означать, что игра офлайн или блокирует Telegram Web. Включение встроенного прокси может помочь скрипту выглядеть как приложение мобильного устройства в случае второй проблемы.
 
-## Enable maximum verbosity:
-1. This will show all the steps of the process, no matter how minor. It may give clues as to why or at what step the script is failing.
-2. Open the script as if you wish to create a new game session (more advanced users can directly edit the settings in **`variables.txt`**).
-3. Set the **`verboseLevel`** to 3 (maximum) and restart the scripts as above.
+## Включите максимальную подробность логов:
+1. Это покажет все шаги процесса, даже самые незначительные. Это может дать подсказки, почему и на каком шаге скрипт не работает.
+2. Запустите скрипт, как при создании новой игровой сессии (более продвинутые пользователи могут напрямую редактировать настройки в **`variables.txt`**).
+3. Установите **`verboseLevel`** в 3 (максимум) и перезапустите скрипты, как описано выше.
 
-## Restart the stuck game session:
-1. If you have not already restarted the stuck game session, use the Linux Process Manager 2 (PM2) command to restart it:
+## Перезапустите зависшую игровую сессию:
+1. Если вы ещё не перезапускали зависшую сессию, используйте команду Linux Process Manager 2 (PM2):
 ```
 pm2 restart [process name]
 ```
-2. Use PM2 logs command (**`pm2 logs`**) or the packaged status command (**`./launch.sh status`**) to monitor the process for errors as it restarts.
+2. Используйте команду просмотра логов PM2 (**`pm2 logs`**) или команду статуса (**`./launch.sh status`**) для мониторинга процесса на наличие ошибок при перезапуске.
 
-## Renew the stuck game session:
-1. Launch the provided status monitor with the following command:
+## Обновите зависшую игровую сессию:
+1. Запустите монитор статуса командой:
 ```
 ./launch.sh status
 ```
-2. Delete the stuck game session according to these instructions: [STATUS.md](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/STATUS.md). Example:
+2. Удалите зависшую игровую сессию согласно инструкции: [STATUS.md](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/STATUS.md). Пример:
 ```
 delete HOT:Wallet1
 ```
-3. Use **`./launch.sh`** to recreate the game session.
+3. Используйте **`./launch.sh`** для создания игровой сессии заново.
 
-If none of the above works, kindly open a support ticket, including sufficient screenshots and information to allow us to help you. Support tickets that don’t show evidence of following this troubleshooting guide may just get closed without further communication from us.
+Если ничего из вышеперечисленного не помогло, пожалуйста, создайте заявку в поддержку, приложив достаточное количество скриншотов и информации, чтобы мы могли помочь. Заявки без доказательств выполнения данного руководства могут быть закрыты без дальнейшего общения.
 
-The preferred language of support is English. We may choose to provide support in other languages using ChatGPT as an interpreter. However, for the benefit of all members and because the developer’s main language is English, non-English requests may be closed without further communication.
+Предпочтительный язык поддержки — английский. Мы можем предоставить поддержку на других языках с помощью ChatGPT в роли переводчика. Однако для удобства всех участников и поскольку основной язык разработчика — английский, запросы на других языках могут быть закрыты без дальнейшего общения.
 
-## Step 100 - QR code is showing:
-If you get the error for the QR code still showing, it means that the Telegram session that you used to set up the game session has been revoked (in the mobile app, Settings --> Devices --> Terminate Session). For you to resolve this error you will need to delete the saved Telegram session, along with all games that were set up using that Telegram session, and then reauthenticate the Telegram sessions and set the games up again.
+## Шаг 100 — отображается QR-код:
+Если вы получаете ошибку, что QR-код всё ещё отображается, это значит, что сессия Telegram, которую вы использовали для настройки игровой сессии, была отозвана (в мобильном приложении: Настройки --> Устройства --> Завершить сессию). Чтобы исправить эту ошибку, вам нужно удалить сохранённую сессию Telegram вместе со всеми играми, созданными с её использованием, затем повторно аутентифицировать сессии Telegram и заново настроить игры.
 
-## Built-in proxy - needs to be running for Blum, Vertus, and some others!
-The built-in proxy is an optional feature for most games, but when enabled, it intercepts data between the browser session and the game. If a user-agent is set and matches an iOS device, the proxy will attempt to rewrite the "tg-data" to show the platform as the iOS app (instead of a desktop browser). Similarly, for Android devices, the data will be modified to indicate it is coming from the Android app.
+## Встроенный прокси — должен работать для Blum, Vertus и некоторых других!
+Встроенный прокси — это опциональная функция для большинства игр, но при включении он перехватывает данные между сессией браузера и игрой. Если установлен user-agent, соответствующий устройству iOS, прокси попытается переписать "tg-data", чтобы показать платформу как iOS-приложение (вместо десктопного браузера). Аналогично для Android — данные будут изменены, чтобы указывать на Android-приложение.
 
-If the proxy is used and no user-agent is set, it defaults to mimicking an Apple iPhone. Some games, such as Blum, require the use of the proxy to connect, even if it is disabled in the user settings. In such cases, the proxy is automatically enabled for functionality.
+Если прокси используется, но user-agent не установлен, по умолчанию он имитирует Apple iPhone. Некоторые игры, например Blum, требуют использования прокси для подключения, даже если он отключён в настройках пользователя. В таких случаях прокси автоматически включается для корректной работы.
 
-If the proxy crashes, you may need to reset it by following these steps:
+Если прокси упал, возможно, потребуется его сбросить, выполнив следующие команды:
 
 ```
 pm2 delete http-proxy
 pm2 save
 apt install lsof
-# or `sudo apt install lsof` if you are on stand-alone Linux and require sudo authority
+# или `sudo apt install lsof`, если вы на автономном Linux и требуется sudo
 sudo lsof -i :8080
 ```
 
 ![image](https://github.com/user-attachments/assets/340039b3-0d28-4ede-a6ee-3e079b395148)
 
-If a process is using port 8080, find the process ID (PID) and terminate it. For example, the PID in the above screenshot is 351071, however, you should substitute your real PID for the one in the example. You can kill the process with the following command:
+Если порт 8080 занят, найдите ID процесса (PID) и завершите его. Например, PID на скриншоте — 351071, но вам нужно подставить свой PID. Завершить процесс можно командой:
 
 ```
 taskkill /PID 351071 /F
-# or alternatively use `kill` as below. You may also need to use sudo if prompted.  
+# или альтернативно используйте `kill` ниже. Возможно, потребуется sudo.
 kill -9 351071
 ```
 
-After that, restart the built-in proxy:
+После этого перезапустите встроенный прокси:
 ```
 ./launch.sh enable-proxy
 ```
 
-### Final thought:
-If you're having trouble setting up the dependencies and requirements to run this script, consider using Docker Desktop (on Windows or macOS) or Docker CLI (on a VPS). The [Docker setup](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/DOCKER.md) includes everything pre-built and tested, making it much easier to get up and running.
+### Заключительная мысль:
+Если у вас возникают трудности с настройкой зависимостей и требований для запуска скрипта, рассмотрите возможность использования Docker Desktop (на Windows или macOS) или Docker CLI (на VPS). [Настройка Docker](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/DOCKER.md) включает всё предустановленное и протестированное, что значительно упрощает запуск.
 
-If the troubleshooting steps here don’t resolve your issue and you can’t find the answer in previously closed issues, feel free to open a support ticket. However, please note that vague posts like "doesn't work" without any detailed information may be closed, locked, or deleted.
+Если шаги по устранению неполадок не помогли и вы не нашли ответ в ранее закрытых вопросах, не стесняйтесь создавать заявку в поддержку. Однако учтите, что расплывчатые сообщения типа «не работает» без подробностей могут быть закрыты, заблокированы или удалены.

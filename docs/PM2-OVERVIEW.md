@@ -1,21 +1,21 @@
-# PM2 Overview
+# Обзор PM2
 
-## Introduction to PM2
-PM2 (Process Manager 2) is a production-grade process manager for Node.js applications. It helps you manage and monitor your applications to keep them online indefinitely, offering features like automatic restarts, log management, and clustering.
+## Введение в PM2
+PM2 (Process Manager 2) — это менеджер процессов промышленного уровня для приложений на Node.js. Он помогает управлять и мониторить ваши приложения, чтобы они работали непрерывно, предлагая такие функции, как автоматический перезапуск, управление логами и кластеризация.
 
-This guide will walk you through the basics of PM2, more advanced uses like pattern matching, configuring log rotation, and OS-specific tips for both Ubuntu and Windows users.
+Это руководство познакомит вас с основами PM2, более продвинутыми возможностями, такими как сопоставление по шаблону, настройка ротации логов и советы по работе с ОС для пользователей Ubuntu и Windows.
 
-## 1. Basic PM2 Commands
+## 1. Основные команды PM2
 
-Here are some essential commands to get started with PM2:
+Вот несколько основных команд для начала работы с PM2:
 
-- **List all processes managed by PM2**:  
+- **Показать все процессы, управляемые PM2**:  
   ```
   pm2 list
   ```
   <img width="554" alt="image" src="https://github.com/user-attachments/assets/b2765895-208d-47b9-a39c-f5a03554a914">
 
-- **Start an existing stopped process**: `pm2 start <game_session>` or `pm2 start <ID>` or `pm2 start all`. Example:
+- **Запустить существующий остановленный процесс**: `pm2 start <game_session>` или `pm2 start <ID>` или `pm2 start all`. Пример:
   ```
   pm2 start Blum:Phil
   ```
@@ -26,82 +26,82 @@ Here are some essential commands to get started with PM2:
   pm2 start all
   ```
 
-- **View logs for a specific process**: `pm2 log <game_session>` or `pm2 log <ID>` or `pm2 log` for all processes
+- **Просмотреть логи конкретного процесса**: `pm2 log <game_session>` или `pm2 log <ID>` или `pm2 log` для всех процессов
   ```
   pm2 log 
   ```
 
-- **Restart a process**: `pm2 restart <game_session>` or `pm2 restart <ID>` or `pm2 restart all`
+- **Перезапустить процесс**: `pm2 restart <game_session>` или `pm2 restart <ID>` или `pm2 restart all`
   ```
   pm2 restart Vertus:Wallet2
   ```
 
-- **Delete a process from PM2**: `pm2 delete <game_session>` or `pm2 delete <ID>` or `pm2 delete all`
+- **Удалить процесс из PM2**: `pm2 delete <game_session>` или `pm2 delete <ID>` или `pm2 delete all`
   ```
   pm2 delete Cryptorank:Wallet1
   ```
 
-- **Save the current process list** (after adding or removing processes):  
+- **Сохранить текущий список процессов** (после добавления или удаления процессов):  
   ```
   pm2 save
   ```
 
-## 2. Advanced PM2 Commands (Pattern Matching)
+## 2. Продвинутые команды PM2 (Сопоставление по шаблону)
 
-PM2 supports pattern matching, which is useful when managing multiple similar processes. This only works with the **stop** and **restart** commands:
+PM2 поддерживает сопоставление по шаблону, что полезно при управлении несколькими похожими процессами. Это работает только с командами **stop** и **restart**:
 
-- **Restart processes using pattern matching**:  
+- **Перезапуск процессов с использованием сопоставления по шаблону**:  
   ```
   pm2 restart /pattern/
   ```
 
-  Example to start all HOT games regardless of the account/session name:
+  Пример для перезапуска всех HOT игр независимо от имени аккаунта/сессии:
   ```
   pm2 restart /HOT:/
   ```
-  This would restart: HOT:Wallet1 HOT:Wallet2 HOT:Wallet3 etc.
+  Это перезапустит: HOT:Wallet1 HOT:Wallet2 HOT:Wallet3 и т.д.
 
-  Example to stop all account sessions of a certain name regardless of the game:
+  Пример для остановки всех сессий аккаунта с определённым именем независимо от игры:
   ```
   pm2 stop /:Wallet1/
   ```
-  This would stop: HOT:Wallet1, Vertus:Wallet1, HammyKombat:Wallet1, etc.
+  Это остановит: HOT:Wallet1, Vertus:Wallet1, HammyKombat:Wallet1 и т.д.
 
-## 3. Configuring PM2 Log Rotation
+## 3. Настройка ротации логов PM2
 
-PM2 can manage log files to prevent them from consuming too much disk space.
+PM2 может управлять файлами логов, чтобы они не занимали слишком много места на диске.
 
-To configure PM2 log rotation, follow the detailed guide in the separate [PM2-LOGS.md](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/PM2-LOGS.md).
+Для настройки ротации логов PM2 следуйте подробному руководству в отдельном файле [PM2-LOGS.md](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/PM2-LOGS.md).
 
-## 4. Ensuring PM2 Persistence Through Reboots
+## 4. Обеспечение сохранности PM2 после перезагрузок
 
-### For Ubuntu Users (excluding Docker which is pre-configured):
+### Для пользователей Ubuntu (кроме Docker, который уже настроен):
 
-To ensure PM2 persists through reboots, run the following command:
+Чтобы PM2 сохранялся после перезагрузки, выполните следующую команду:
 ```
 pm2 startup systemd
 ```
 
-If you don't have superuser rights, PM2 will prompt you to run a command with `sudo`. Here’s an example of what that might look like:
+Если у вас нет прав суперпользователя, PM2 предложит выполнить команду с `sudo`. Пример такой команды:
 ```
 sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
 ```
 
-### For Windows Users:
+### Для пользователей Windows:
 
-To make PM2 restart automatically after a system reboot:
+Чтобы PM2 автоматически перезапускался после перезагрузки системы:
 
-1. Open the Run dialog by pressing `Win + R`.
-2. Type `shell:startup` and press Enter.
-3. Copy the `windows_pm2_restart.bat` file from your GitHub repository into your Windows startup folder.
+1. Откройте диалоговое окно «Выполнить», нажав `Win + R`.
+2. Введите `shell:startup` и нажмите Enter.
+3. Скопируйте файл `windows_pm2_restart.bat` из вашего репозитория GitHub в папку автозагрузки Windows.
 
-This will ensure PM2 is automatically restarted on reboot.
+Это обеспечит автоматический перезапуск PM2 после перезагрузки.
 
-### For more detailed information about each OS, follow the dedicated guide in the docs folder of this repository or watch the instructional videos.
+### Для более подробной информации по каждой ОС смотрите отдельное руководство в папке docs этого репозитория или обучающие видео.
 
-## 5. Setting Limits on Disk Usage with Log Rotation
+## 5. Установка ограничений на использование диска с помощью ротации логов
 
-To manage the size of logs and prevent them from filling up your disk, you can configure PM2's log rotation feature. Refer to the [PM2-LOGS.md](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/PM2-LOGS.md) document for in-depth configuration details.
+Чтобы контролировать размер логов и не допустить заполнения диска, вы можете настроить функцию ротации логов PM2. Подробности настройки смотрите в документе [PM2-LOGS.md](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/PM2-LOGS.md).
 
 ```
 pm2 install pm2-logrotate
@@ -109,6 +109,6 @@ pm2 set pm2-logrotate:max_size 100M
 pm2 set pm2-logrotate:retain 30
 ```
 
-This will ensure that logs are rotated when they reach 100MB, and PM2 will retain the last 30 rotated logs.
+Это обеспечит ротацию логов при достижении размера 100 МБ, а PM2 будет хранить последние 30 файлов ротации.
 
-For further details, you can explore the PM2 documentation or check the example scripts in this repository.
+Для дополнительных сведений вы можете изучить документацию PM2 или посмотреть пример скриптов в этом репозитории.
