@@ -32,8 +32,8 @@ class HotClaimer(Claimer):
         self.script = "games/hot.py"
         self.prefix = "HOT:"
         self.url = "https://web.telegram.org/k/#@herewalletbot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "заполняется"
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
@@ -52,33 +52,33 @@ class HotClaimer(Claimer):
         
     def add_widget_and_open_storage(self):
         try:
-            # Probe presence/scrollability of "Add widget" without forcing a click
+            # Проверка наличия/прокручиваемости "Добавить виджет" без принудительного клика
             probe_xpath = "//p[normalize-space()='Add widget']"
             present = self.move_and_click(
                 probe_xpath, 20, False,
-                "test if 'Add widget' present (may not be present)",
+                "проверка наличия 'Добавить виджет' (может отсутствовать)",
                 self.step, "clickable"
             )
             self.increase_step()
 
             if not present:
-                self.output(f"Step {self.step} - 'Add widget' not present/visible. Skipping.", 3)
+                self.output(f"Шаг {self.step} - 'Добавить виджет' отсутствует/не виден. Пропускаем.", 3)
                 return False
 
-            # Single brute-click pass on Add widget
-            self.brute_click(probe_xpath, timeout=15, action_description="click the 'Add widget' icon")
+            # Один проход грубого клика по Добавить виджет
+            self.brute_click(probe_xpath, timeout=15, action_description="клик по иконке 'Добавить виджет'")
             self.increase_step()
 
-            # Single brute-click pass on Storage
+            # Один проход грубого клика по Хранилищу
             storage_xpath = "(//h4[contains(normalize-space(.), 'Storage')])[last()]"
-            self.brute_click(storage_xpath, timeout=15, action_description="click the 'Storage' link (single pass)")
+            self.brute_click(storage_xpath, timeout=15, action_description="клик по ссылке 'Хранилище' (один проход)")
             self.increase_step()
 
             self.set_cookies()
 
 
         except Exception as e:
-            self.output(f"Step {self.step} - Error in Add widget + Storage sequence: {e}", 1)
+            self.output(f"Шаг {self.step} - Ошибка в последовательности Добавить виджет + Хранилище: {e}", 1)
             return False
 
     def next_steps(self):
@@ -87,27 +87,27 @@ class HotClaimer(Claimer):
             self.increase_step()
 
             xpath = "//button[.//p[normalize-space()='Import account']]"
-            self.move_and_click(xpath, 30, True, "find the HereWallet log-in button", "08", "clickable")
+            self.move_and_click(xpath, 30, True, "найти кнопку входа HereWallet", "08", "clickable")
             self.increase_step()
 
             xpath = "//p[normalize-space(text())='Seed phrase or private key']"
-            self.move_and_click(xpath, 30, True, "find the seed phrase or private key element", "08", "clickable")
+            self.move_and_click(xpath, 30, True, "найти элемент с seed фразой или приватным ключом", "08", "clickable")
             self.increase_step()
 
             xpath = "//p[contains(text(), 'Seed or private key')]/ancestor-or-self::*/textarea"
-            input_field = self.move_and_click(xpath, 30, True, "locate seedphrase textbox", self.step, "clickable")
+            input_field = self.move_and_click(xpath, 30, True, "найти текстовое поле seed фразы", self.step, "clickable")
             if not self.imported_seedphrase:
                 self.imported_seedphrase = self.validate_seed_phrase()
             input_field.send_keys(self.imported_seedphrase) 
-            self.output(f"Step {self.step} - Was successfully able to enter the seed phrase...", 3)
+            self.output(f"Шаг {self.step} - Успешно введена seed фраза...", 3)
             self.increase_step()
 
             xpath = "//button[contains(text(), 'Continue')]"
-            self.move_and_click(xpath, 30, True, "click continue after seedphrase entry", self.step, "clickable")
+            self.move_and_click(xpath, 30, True, "нажать продолжить после ввода seed фразы", self.step, "clickable")
             self.increase_step()
 
             xpath = "//button[contains(text(), 'Continue')]"
-            self.move_and_click(xpath, 180, True, "click continue at account selection screen", self.step, "clickable")
+            self.move_and_click(xpath, 180, True, "нажать продолжить на экране выбора аккаунта", self.step, "clickable")
             self.increase_step()
 
             self.add_widget_and_open_storage()
@@ -116,10 +116,10 @@ class HotClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
         self.step = "100"
@@ -128,28 +128,28 @@ class HotClaimer(Claimer):
         self.launch_iframe()
 
         xpath = "(//p[normalize-space(.)='NEAR']/parent::div/following-sibling::div//p[last()])[1]"
-        self.move_and_click(xpath, 30, False, "move to the 'Near' balance.", self.step, "visible")
-        near = self.monitor_element(xpath, 20, "obtain your 'Near' Balance")
+        self.move_and_click(xpath, 30, False, "перейти к балансу 'Near'.", self.step, "visible")
+        near = self.monitor_element(xpath, 20, "получить ваш баланс 'Near'")
         if near:
             try:
                 last_value_float = float(near)
                 if last_value_float > 0.2:
                     low_near = False
-                    self.output(f"Step {self.step} - Cleared the low 'Near' balance flag as current balance is: {last_value_float}", 3)
+                    self.output(f"Шаг {self.step} - Снят флаг низкого баланса 'Near', текущий баланс: {last_value_float}", 3)
                 else:
-                    self.output(f"Step {self.step} - The low 'Near' balance flag reamins in place, as current balance is: {last_value_float}", 3)
+                    self.output(f"Шаг {self.step} - Флаг низкого баланса 'Near' остается, текущий баланс: {last_value_float}", 3)
                 
             except ValueError:
-                self.output(f"Step {self.step} - Conversion of Near Balance to float failed.", 3)
+                self.output(f"Шаг {self.step} - Не удалось преобразовать баланс Near в число с плавающей точкой.", 3)
         else:
-            self.output(f"Step {self.step} - Unable to pull your near balance.", 3)
+            self.output(f"Шаг {self.step} - Не удалось получить ваш баланс Near.", 3)
         self.increase_step()
 
         self.add_widget_and_open_storage()
         self.increase_step()
 
         xpath = "//h4[normalize-space(.)='Storage']"
-        self.move_and_click(xpath, 30, True, "click the 'storage' link", self.step, "clickable")
+        self.move_and_click(xpath, 30, True, "клик по ссылке 'хранилище'", self.step, "clickable")
         self.increase_step()
 
         self.get_balance(False)
@@ -158,41 +158,41 @@ class HotClaimer(Claimer):
         wait_time_text = self.get_wait_time(self.step, "pre-claim") 
 
         try:
-            if wait_time_text != "Filled":
+            if wait_time_text != "Заполнено":
                 matches = re.findall(r'(\d+)([hm])', wait_time_text)
                 remaining_wait_time = (sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches))
-                # Determine the dynamic threshold
+                # Определение динамического порога
                 if self.settings['lowestClaimOffset'] < 0:
                     threshold = abs(self.settings['lowestClaimOffset'])
                 else:
-                    threshold = 5  # Default threshold
+                    threshold = 5  # Значение по умолчанию
                 if remaining_wait_time < threshold or self.settings["forceClaim"]:
                     self.settings['forceClaim'] = True
-                    self.output(f"Step {self.step} - the remaining time to claim is less than the minimum offset, so applying: settings['forceClaim'] = True", 3)
+                    self.output(f"Шаг {self.step} - оставшееся время до запроса меньше минимального смещения, устанавливаем: settings['forceClaim'] = True", 3)
                 else:
                     remaining_time = self.apply_random_offset(remaining_wait_time)
-                    self.output(f"STATUS: Original wait time {wait_time_text} - {remaining_wait_time} minutes, We'll sleep for {remaining_time} minutes after random offset.", 1)
+                    self.output(f"СТАТУС: Исходное время ожидания {wait_time_text} - {remaining_wait_time} минут, спим {remaining_time} минут с учетом случайного смещения.", 1)
                     return remaining_time
         except Exception as e:
-            self.output(f"Error encountered: {str(e)}", 2)
+            self.output(f"Обнаружена ошибка: {str(e)}", 2)
             return 120
 
         if not wait_time_text:
             return 60
 
         try:
-            self.output(f"Step {self.step} - The pre-claim wait time is : {wait_time_text} and random offset is {self.random_offset} minutes.", 1)
+            self.output(f"Шаг {self.step} - Время ожидания перед запросом: {wait_time_text} и случайное смещение {self.random_offset} минут.", 1)
             self.increase_step()
 
-            if wait_time_text == "Filled" or self.settings['forceClaim']:
+            if wait_time_text == "Заполнено" or self.settings['forceClaim']:
                 try:
                     original_window = self.driver.current_window_handle
                     xpath = "//button[contains(text(), 'Check NEWS')]"
-                    self.move_and_click(xpath, 20, True, "check for NEWS.", self.step, "clickable")
+                    self.move_and_click(xpath, 20, True, "проверка НОВОСТЕЙ.", self.step, "clickable")
                     self.driver.switch_to.window(original_window)
                 except TimeoutException:
                     if self.settings['debugIsOn']:
-                        self.output(f"Step {self.step} - No news to check or button not found.", 3)
+                        self.output(f"Шаг {self.step} - Нет новостей для проверки или кнопка не найдена.", 3)
                 self.increase_step()
 
                 try:
@@ -200,18 +200,18 @@ class HotClaimer(Claimer):
                     self.increase_step()
                     
                     xpath = "//button[contains(text(), 'Claim HOT')]"
-                    self.move_and_click(xpath, 20, True, "click the claim button (1st button)", self.step, "clickable")
+                    self.move_and_click(xpath, 20, True, "нажать кнопку запроса (первая кнопка)", self.step, "clickable")
                     self.increase_step()
 
-                    self.output(f"Step {self.step} - Let's wait for the pending Claim spinner to stop spinning...", 2)
+                    self.output(f"Шаг {self.step} - Ждем, пока индикатор ожидания запроса перестанет крутиться...", 2)
                     time.sleep(5)
                     wait = WebDriverWait(self.driver, 240)
                     spinner_xpath = "//*[contains(@class, 'spinner')]" 
                     try:
                         wait.until(EC.invisibility_of_element_located((By.XPATH, spinner_xpath)))
-                        self.output(f"Step {self.step} - Pending action spinner has stopped.\n", 3)
+                        self.output(f"Шаг {self.step} - Индикатор ожидания запроса остановился.\n", 3)
                     except TimeoutException:
-                        self.output(f"Step {self.step} - Looks like the site has lag - the Spinner did not disappear in time.\n", 2)
+                        self.output(f"Шаг {self.step} - Похоже, сайт завис - индикатор не исчез вовремя.\n", 2)
                     self.increase_step()
                     wait_time_text = self.get_wait_time(self.step, "post-claim") 
                     matches = re.findall(r'(\d+)([hm])', wait_time_text)
@@ -220,26 +220,26 @@ class HotClaimer(Claimer):
 
                     self.get_balance(True)
 
-                    if wait_time_text == "Filled":
+                    if wait_time_text == "Заполнено":
                         if low_near:
-                            self.output(f"STATUS: The wait timer is still showing: Filled.", 1)
-                            self.output(f"STATUS: We could not confirm you have >0.2 Near, which may have caused the claim to fail.", 1)
-                            self.output(f"STATUS: Kindly check in the GUI if you can claim manually, and consider topping up your NEAR balance.", 1)
-                            self.output(f"Step {self.step} - We'll check back in 1 hour to see if the claim processed and if not, try again.", 2)
+                            self.output(f"СТАТУС: Таймер ожидания все еще показывает: Заполнено.", 1)
+                            self.output(f"СТАТУС: Мы не смогли подтвердить, что у вас >0.2 Near, что могло привести к ошибке запроса.", 1)
+                            self.output(f"СТАТУС: Пожалуйста, проверьте в интерфейсе, можете ли вы запросить вручную, и рассмотрите возможность пополнения баланса NEAR.", 1)
+                            self.output(f"Шаг {self.step} - Проверим снова через 1 час, если запрос не прошел, попробуем снова.", 2)
                         else:
-                            self.output(f"STATUS: The wait timer is still showing: Filled - claim failed.", 1)
-                            self.output(f"Step {self.step} - This means either the claim failed, or there is >4 minutes lag in the game.", 1)
-                            self.output(f"Step {self.step} - We'll check back in 1 hour to see if the claim processed and if not, try again.", 2)
+                            self.output(f"СТАТУС: Таймер ожидания все еще показывает: Заполнено - запрос не удался.", 1)
+                            self.output(f"Шаг {self.step} - Это значит, что либо запрос не удался, либо в игре задержка более 4 минут.", 1)
+                            self.output(f"Шаг {self.step} - Проверим снова через 1 час, если запрос не прошел, попробуем снова.", 2)
                     else:
-                        self.output(f"STATUS: Successful Claim: Next claim {wait_time_text} / {total_wait_time} minutes.", 1)
+                        self.output(f"СТАТУС: Успешный запрос: Следующий запрос через {wait_time_text} / {total_wait_time} минут.", 1)
 
                     return max(60, total_wait_time)
 
                 except TimeoutException:
-                    self.output(f"STATUS: The claim process timed out: Maybe the site has lag? Will retry after one hour.", 1)
+                    self.output(f"СТАТУС: Процесс запроса превысил время ожидания: Возможно, сайт завис? Повторим через час.", 1)
                     return 60
                 except Exception as e:
-                    self.output(f"STATUS: An error occurred while trying to claim: {e}\nLet's wait an hour and try again", 1)
+                    self.output(f"СТАТУС: Произошла ошибка при попытке запроса: {e}\nПодождем час и попробуем снова", 1)
                     return 60
 
             else:
@@ -248,81 +248,81 @@ class HotClaimer(Claimer):
                     total_time = sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches)
                     total_time += 1
                     total_time = max(5, total_time)
-                    self.output(f"Step {self.step} - Not Time to claim this wallet yet. Wait for {total_time} minutes until the storage is filled.", 2)
+                    self.output(f"Шаг {self.step} - Еще не время запрашивать этот кошелек. Ждем {total_time} минут, пока хранилище не заполнится.", 2)
                     return total_time
                 else:
-                    self.output(f"Step {self.step} - No wait time data found? Let's check again in one hour.", 2)
+                    self.output(f"Шаг {self.step} - Данные о времени ожидания не найдены? Проверим снова через час.", 2)
                     return 60
         except Exception as e:
-            self.output(f"Step {self.step} - An unexpected error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла непредвиденная ошибка: {e}", 1)
             return 60
 
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
         priority = max(self.settings['verboseLevel'], default_priority)
-        balance_text = f'{prefix} BALANCE:' if claimed else f'{prefix} BALANCE:'
+        balance_text = f'{prefix} БАЛАНС:' if claimed else f'{prefix} БАЛАНС:'
         balance_xpath = f"//p[contains(text(), 'HOT')]/following-sibling::img/following-sibling::p"
 
         try:
-            element = self.monitor_element(balance_xpath, 20, "get balance")
+            element = self.monitor_element(balance_xpath, 20, "получить баланс")
             if element:
                 balance_part = element # .text.strip()
-                self.output(f"Step {self.step} - {balance_text} {balance_part}", priority)
+                self.output(f"Шаг {self.step} - {balance_text} {balance_part}", priority)
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с '{prefix} Баланс:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)
 
         self.increase_step()
 
     def get_profit_hour(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct the specific profit XPath
-        profit_text = f'{prefix} PROFIT/HOUR:'
+        # Формируем XPath для прибыли
+        profit_text = f'{prefix} ПРИБЫЛЬ/ЧАС:'
         profit_xpath = "//div[div[p[text()='Storage']]]//p[last()]"
 
         try:
-            element = self.strip_non_numeric(self.monitor_element(profit_xpath, 20, "get profit per hour"))
+            element = self.strip_non_numeric(self.monitor_element(profit_xpath, 20, "получить прибыль в час"))
 
-            # Check if element is not None and process the profit
+            # Проверяем, что элемент не None и выводим прибыль
             if element:
-                self.output(f"Step {self.step} - {profit_text} {element}", priority)
+                self.output(f"Шаг {self.step} - {profit_text} {element}", priority)
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Profit/Hour:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с '{prefix} Прибыль/Час:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Вывод ошибки в виде строки для логирования
         
         self.increase_step()
 
     def get_wait_time(self, step_number="108", beforeAfter="pre-claim"):
         try:
             xpath = f"//div[contains(., 'Storage')]//p[contains(., '{self.pot_full}') or contains(., '{self.pot_filling}')]"
-            wait_time_element = self.monitor_element(xpath, 20, "get the wait time")
+            wait_time_element = self.monitor_element(xpath, 20, "получить время ожидания")
             if wait_time_element is not None:
                 return wait_time_element
             else:
-                self.output(f"Step {self.step}: Wait time element not found. Clicking the 'Storage' link and retrying...", 3)
+                self.output(f"Шаг {self.step}: Элемент времени ожидания не найден. Кликаем по ссылке 'Хранилище' и пробуем снова...", 3)
                 storage_xpath = "//h4[text()='Storage']"
-                self.move_and_click(storage_xpath, 30, True, "click the 'storage' link", f"{self.step} recheck", "clickable")
-                wait_time_element = self.monitor_element(xpath, 20, "get the wait time after retry")
+                self.move_and_click(storage_xpath, 30, True, "клик по ссылке 'хранилище'", f"{self.step} повторная проверка", "clickable")
+                wait_time_element = self.monitor_element(xpath, 20, "получить время ожидания после повторной попытки")
                 if wait_time_element is not None:
                     return wait_time_element
                 else:
-                    self.output(f"Step {self.step}: Wait time element still not found after retry.", 3)
+                    self.output(f"Шаг {self.step}: Элемент времени ожидания все еще не найден после повторной попытки.", 3)
                 
         except TimeoutException:
-            self.output(f"Step {self.step}: Timeout occurred while trying to get the wait time.", 3)
+            self.output(f"Шаг {self.step}: Превышено время ожидания при попытке получить время ожидания.", 3)
 
         except Exception as e:
-            self.output(f"Step {self.step}: An error occurred: {e}", 3)
+            self.output(f"Шаг {self.step}: Произошла ошибка: {e}", 3)
 
         return False
 
@@ -332,10 +332,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-

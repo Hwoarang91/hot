@@ -64,45 +64,45 @@ class IcebergClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение отведенного времени.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
 
         self.step = "100"
         self.launch_iframe()
 
-        # Is there an intro screen? if so, clear it!
+        # Есть ли вступительный экран? Если да, очистим его!
         xpath = "//button[div[text()='Skip']]"
-        self.brute_click(xpath, 20, "pre-start info screen (may not be present)")
+        self.brute_click(xpath, 20, "предварительный экран информации (может отсутствовать)")
 
-        # Are we farming? if not, start!
+        # Мы занимаемся фармом? Если нет, начинаем!
         xpath = "//button[div[text()='Start farming']]"
-        self.brute_click(xpath, 20, "initial start farming (may not be present)")
+        self.brute_click(xpath, 20, "начальный запуск фарма (может отсутствовать)")
 
         pre_balance = self.get_balance(self.balance_xpath, False)
         self.increase_step()
 
-        remaining_time = self.get_wait_time(self.time_remaining_xpath, self.step, "pre-claim")
+        remaining_time = self.get_wait_time(self.time_remaining_xpath, self.step, "до запроса")
         if remaining_time:
-            self.output(f"STATUS: Claim not yet ready, we'll sleep for {remaining_time} minutes.", 2)
+            self.output(f"СТАТУС: Запрос еще не готов, будем спать {remaining_time} минут.", 2)
             return min(30,remaining_time)
 
         self.increase_step()
     
-        # We got this far, so let's try to claim!
+        # Мы дошли до этого момента, попробуем запросить!
         xpath = "//button[contains(text(), 'Collect')]"
-        success = self.brute_click(xpath, 20, "collect points")
+        success = self.brute_click(xpath, 20, "сбор очков")
         self.increase_step()
 
-        # And start farming again.
+        # И снова начинаем фармить.
         xpath = "//button[div[text()='Start farming']]"
-        self.brute_click(xpath, 20, "post-claim start farming (may not be present)")
+        self.brute_click(xpath, 20, "запуск фарма после запроса (может отсутствовать)")
         self.increase_step()
 
-        # And check the post-claim balance
+        # И проверяем баланс после запроса
         post_balance = self.get_balance(self.balance_xpath, True)
 
         try:
@@ -110,24 +110,24 @@ class IcebergClaimer(Claimer):
                 pre_balance_float = float(pre_balance)
                 post_balance_float = float(post_balance)
                 if post_balance_float > pre_balance_float:
-                    success_text = "Claim successful."
+                    success_text = "Запрос выполнен успешно."
                 else:
-                    success_text = "Claim may have failed."
+                    success_text = "Возможно, запрос не удался."
             else:
-                success_text = "Claim validation failed due to missing balance information."
+                success_text = "Проверка запроса не удалась из-за отсутствия информации о балансе."
         except ValueError:
-            success_text = "Claim validation failed due to invalid balance format."
+            success_text = "Проверка запроса не удалась из-за неверного формата баланса."
 
         self.increase_step()
 
-        # Store the wait time for later
-        remaining_time = self.get_wait_time(self.time_remaining_xpath, self.step, "post-claim")
+        # Сохраняем время ожидания для дальнейшего использования
+        remaining_time = self.get_wait_time(self.time_remaining_xpath, self.step, "после запроса")
         
-        # Finally, let's wrap up the time to come back
+        # В конце подведем итог времени до следующего запуска
         if remaining_time:
-            self.output(f"STATUS: {success_text}. Let's sleep for {remaining_time} minutes.", 2)
+            self.output(f"СТАТУС: {success_text} Спим {remaining_time} минут.", 2)
             return remaining_time
-        # Finally, if we reached the end with no action, let's come back in an hour
+        # Если дошли до конца без действий, возвращаемся через час
         return 60
 
 def main():
@@ -136,4 +136,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

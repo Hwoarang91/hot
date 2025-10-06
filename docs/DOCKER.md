@@ -54,7 +54,7 @@ exit
 Для создания и запуска Docker-контейнера:
 
 ```bash
-docker run -d --name telegram-claim-bot --restart unless-stopped thebrumby/telegram-claim-bot:latest
+docker run -d --name telegram-claim-bot --restart unless-stopped hwoarang91/hot-wallet-claimer:latest
 ```
 
 Docker-контейнер наследует сетевые свойства от хост-компьютера. Если у вас возникают проблемы с DNS при использовании стандартных сетевых настроек Docker (например, GitHub не разрешается и игры не загружаются), вы можете вручную переопределить DNS с помощью команд ниже:
@@ -64,7 +64,7 @@ Docker-контейнер наследует сетевые свойства о�
 ```bash
 docker stop telegram-claim-bot
 docker rm telegram-claim-bot
-docker run -d --name telegram-claim-bot --dns="1.1.1.1" --restart unless-stopped thebrumby/telegram-claim-bot:latest
+docker run -d --name telegram-claim-bot --dns="1.1.1.1" --restart unless-stopped hwoarang91/hot-wallet-claimer:latest
 ```
 
 **Использование DNS Google (если стандартная команда выше не работает)**
@@ -72,7 +72,7 @@ docker run -d --name telegram-claim-bot --dns="1.1.1.1" --restart unless-stopped
 ```bash
 docker stop telegram-claim-bot
 docker rm telegram-claim-bot
-docker run -d --name telegram-claim-bot --dns="8.8.8.8" --restart unless-stopped thebrumby/telegram-claim-bot:latest
+docker run -d --name telegram-claim-bot --dns="8.8.8.8" --restart unless-stopped hwoarang91/hot-wallet-claimer:latest
 ```
 
 ### Шаг 2: Работа Внутри Контейнера

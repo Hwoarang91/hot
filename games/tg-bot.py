@@ -10,83 +10,83 @@ import re
 from status import list_pm2_processes, list_all_pm2_processes, get_inactive_directories, get_logs_by_process_name, get_status_logs_by_process_name, fetch_and_process_logs, should_exclude_process
 
 def download_file(url, dest):
-    """Download a file from a URL to a destination path."""
+    """Скачать файл с URL по указанному пути назначения."""
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Ensure we notice bad responses
+        response.raise_for_status()  # Убедиться, что нет ошибок в ответе
         with open(dest, 'wb') as f:
             f.write(response.content)
-        print(f"Downloaded {url} to {dest}")
+        print(f"Загружено {url} в {dest}")
     except Exception as e:
-        print(f"Failed to download {url}: {e}")
+        print(f"Не удалось загрузить {url}: {e}")
         sys.exit(1)
 
 def modify_pull_games_script(script_path):
-    """Modify the pull-games.sh script to suit our purpose."""
+    """Изменить скрипт pull-games.sh под наши нужды."""
     script_content = """#!/bin/bash
 
-# Define the target and source directories
+# Определяем целевые и исходные директории
 TARGET_DIR="/app"
 GAMES_DIR="$TARGET_DIR/games"
 DEST_DIR="/usr/src/app/games"
 
-# Check if the directory exists and is a git repository
+# Проверяем, существует ли директория и является ли она git-репозиторием
 if [ -d "$TARGET_DIR" ] && [ -d "$TARGET_DIR/.git" ]; then
-    echo "$TARGET_DIR pulling latest changes."
+    echo "В $TARGET_DIR выполняется обновление до последней версии."
     cd $TARGET_DIR
     git pull
 elif [ -d "$TARGET_DIR" ] ; then
-    echo "$TARGET_DIR exists but is not a git repository. Removing and cloning afresh."
+    echo "$TARGET_DIR существует, но не является git-репозиторием. Удаляем и клонируем заново."
     rm -rf $TARGET_DIR
     git clone https://github.com/thebrumby/HotWalletClaimer.git $TARGET_DIR
 else
-    echo "$TARGET_DIR does not exist. Cloning repository."
+    echo "$TARGET_DIR не существует. Клонируем репозиторий."
     git clone https://github.com/thebrumby/HotWalletClaimer.git $TARGET_DIR
 fi
 
-# Set the working directory to the cloned repository
+# Устанавливаем рабочую директорию в клонированный репозиторий
 cd $GAMES_DIR
 
-# Create the destination directory
+# Создаем директорию назначения
 mkdir -p $DEST_DIR
 
-# Copy the contents of the games directory recursively
+# Рекурсивно копируем содержимое директории games
 cp -r $GAMES_DIR/* $DEST_DIR
 
-echo "All files and subdirectories have been copied to $DEST_DIR"
+echo "Все файлы и поддиректории скопированы в $DEST_DIR"
 """
     try:
         with open(script_path, 'w') as f:
             f.write(script_content)
-        print(f"Modified {script_path} successfully.")
+        print(f"Скрипт {script_path} успешно изменён.")
     except Exception as e:
-        print(f"Failed to modify {script_path}: {e}")
+        print(f"Не удалось изменить {script_path}: {e}")
         sys.exit(1)
 
 def check_and_update_games_utils():
-    """Check if games/utils exists, and if not, update using pull-games.sh."""
+    """Проверить наличие games/utils, и если нет, обновить с помощью pull-games.sh."""
     if not os.path.exists("/usr/src/app/games/utils"):
         pull_games_dest = "/usr/src/app/pull-games.sh"
 
-        # Check if pull-games.sh exists
+        # Проверяем, существует ли pull-games.sh
         if os.path.exists(pull_games_dest):
-            # Modify the pull-games.sh script
+            # Изменяем скрипт pull-games.sh
             modify_pull_games_script(pull_games_dest)
 
-            # Make the script executable
+            # Делаем скрипт исполняемым
             os.chmod(pull_games_dest, 0o755)
 
-            # Run the pull-games.sh script
+            # Запускаем скрипт pull-games.sh
             result = subprocess.run([pull_games_dest], capture_output=True, text=True)
             if result.returncode != 0:
-                print(f"Failed to execute {pull_games_dest}: {result.stderr}")
+                print(f"Не удалось выполнить {pull_games_dest}: {result.stderr}")
                 sys.exit(1)
             else:
-                print(f"Successfully executed {pull_games_dest}: {result.stdout}")
+                print(f"Успешно выполнен {pull_games_dest}: {result.stdout}")
         else:
-            print("pull-games.sh does not exist, skipping the update.")
+            print("pull-games.sh не найден, обновление пропущено.")
 
-# Ensure games/utils is present before proceeding with the imports
+# Убедиться, что games/utils присутствует перед импортом
 check_and_update_games_utils()
 
 try:
@@ -95,7 +95,7 @@ try:
     from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
                               ContextTypes, ConversationHandler, MessageHandler, filters)
 except ImportError:
-    print("The 'python-telegram-bot' module is not installed. Installing it now...")
+    print("Модуль 'python-telegram-bot' не установлен. Устанавливаю сейчас...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "python-telegram-bot"])
     from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, Update,
                           InlineKeyboardButton, InlineKeyboardMarkup)
@@ -105,18 +105,18 @@ except ImportError:
 try:
     from utils.pm2 import start_pm2_app, save_pm2
 except ImportError:
-    print("Failed to import PM2 utilities even after attempting to copy the necessary files and directories.")
+    print("Не удалось импортировать утилиты PM2 даже после попытки скопировать необходимые файлы и директории.")
     sys.exit(1)
 
 from status import list_pm2_processes, list_all_pm2_processes, get_inactive_directories, get_logs_by_process_name, get_status_logs_by_process_name, fetch_and_process_logs
 
-# Enable logging
+# Включаем логирование
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-# Define states
+# Определяем состояния
 COMMAND_DECISION, SELECT_PROCESS, PROCESS_DECISION, PROCESS_COMMAND_DECISION = range(4)
 
 stopped_processes = []
@@ -126,9 +126,9 @@ inactive_directories = []
 selected_process = None
 
 def load_telegram_token(file_path: str) -> str:
-    """Load the telegram bot token from the specified file."""
+    """Загрузить токен телеграм бота из указанного файла."""
     if not os.path.exists(file_path):
-        logger.error(f"File {file_path} does not exist.")
+        logger.error(f"Файл {file_path} не существует.")
         sys.exit(1)
 
     with open(file_path, 'r') as file:
@@ -137,21 +137,21 @@ def load_telegram_token(file_path: str) -> str:
     token = config.get("telegramBotToken")
 
     if token:
-        logger.info(f"Token extracted: {token}")
+        logger.info(f"Токен получен: {token}")
         return token
     else:
-        logger.error("telegramBotToken not found in the file.")
+        logger.error("telegramBotToken не найден в файле.")
         sys.exit(1)
 
 def run() -> None:
-    """Run the bot."""
+    """Запустить бота."""
     token = load_telegram_token('variables.txt')
     if not token:
         sys.exit(1)
 
     application = Application.builder().token(token).build()
 
-    # Add new commands as entry points
+    # Добавляем новые команды как точки входа
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler('start', start),
@@ -160,8 +160,8 @@ def run() -> None:
             CommandHandler('start_game', start_game),
             CommandHandler('restart', restart_game),
             CommandHandler('stop', stop_game),
-            CommandHandler('logs', fetch_logs),  # Added for fetching logs
-            CommandHandler('status', fetch_status)  # Added for fetching status
+            CommandHandler('logs', fetch_logs),  # Добавлено для получения логов
+            CommandHandler('status', fetch_status)  # Добавлено для получения статуса
         ],
         states={
             COMMAND_DECISION: [CallbackQueryHandler(command_decision)],
@@ -175,14 +175,14 @@ def run() -> None:
            CommandHandler('start_game', start_game),
            CommandHandler('restart', restart_game),
            CommandHandler('stop', stop_game),
-           CommandHandler('logs', fetch_logs),  # Added for fallback
-           CommandHandler('status', fetch_status)  # Added for fallback
+           CommandHandler('logs', fetch_logs),  # Добавлено для fallback
+           CommandHandler('status', fetch_status)  # Добавлено для fallback
         ]
     )
 
     application.add_handler(conv_handler)
 
-    # Other global commands
+    # Другие глобальные команды
     application.add_handler(CommandHandler("help", help))
     application.add_handler(CommandHandler("exit", exit))
     application.add_handler(CommandHandler('list', list_games))
@@ -190,75 +190,75 @@ def run() -> None:
     application.run_polling()
 
 async def fetch_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Fetch logs for a specified process."""
+    """Получить логи для указанного процесса."""
     if not context.args:
-        await send_message(update, context, "Usage: /logs <process_name> [lines]")
+        await send_message(update, context, "Использование: /logs <имя_процесса> [количество_строк]")
         return
 
     process_name = context.args[0]
     
-    # Set the number of lines to the second argument if provided, otherwise default to 30
+    # Количество строк по умолчанию 30, если указано - берем из аргументов
     lines = 30
     if len(context.args) > 1:
         try:
             lines = int(context.args[1])
         except ValueError:
-            await send_message(update, context, "Please provide a valid number for the lines.")
+            await send_message(update, context, "Пожалуйста, укажите корректное число для количества строк.")
             return
 
     logs = get_logs_by_process_name(process_name, lines)
 
     if not logs:
-        await send_message(update, context, f"No logs found for process: {process_name}")
+        await send_message(update, context, f"Логи для процесса {process_name} не найдены.")
     else:
-        # If logs are too long, split them into chunks and send them separately
-        await send_long_message(update, context, f"Logs for {process_name}:\n{logs}")
+        # Если логи слишком длинные, разбиваем на части и отправляем по частям
+        await send_long_message(update, context, f"Логи для {process_name}:\n{logs}")
 
 async def fetch_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Fetch status for a specified process or all processes if no specific process is provided."""
-    # If no process name is provided, show the status of all processes
+    """Получить статус для указанного процесса или всех процессов, если процесс не указан."""
+    # Если имя процесса не указано, показываем статус всех процессов
     if not context.args:
         await status_all(update, context)
         return
 
-    # Otherwise, fetch the status of the specified process
+    # Иначе получаем статус указанного процесса
     process_name = context.args[0]
     status = get_status_logs_by_process_name(process_name)
 
     if not status:
-        await send_message(update, context, f"No status found for process: {process_name}")
+        await send_message(update, context, f"Статус для процесса {process_name} не найден.")
     else:
-        # If status is too long, split into chunks and send them separately
-        await send_long_message(update, context, f"Status logs for {process_name}:\n{status}")
+        # Если статус слишком длинный, разбиваем на части и отправляем по частям
+        await send_long_message(update, context, f"Статус логов для {process_name}:\n{status}")
 
 async def send_long_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, chunk_size: int = 4000):
-    """Send a long message by breaking it into smaller chunks."""
+    """Отправить длинное сообщение, разбив его на части."""
     for chunk in [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]:
         await send_message(update, context, chunk)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Starts the conversation and asks the user about their preferred command type."""
+    """Запускает разговор и спрашивает пользователя о предпочтительной команде."""
     await update.message.reply_text(
-        '<b>Telegram Claim Bot!\n'
-        'How can I help you?</b>',
+        '<b>Телеграм Клейм Бот!\n'
+        'Чем могу помочь?</b>',
         parse_mode='HTML',
         reply_markup=ReplyKeyboardRemove(),
     )
 
-    # Define inline buttons for car color selection
+    # Определяем inline-кнопки для выбора
     keyboard = [
-        [InlineKeyboardButton('ALL STATUS', callback_data='status')],
-        [InlineKeyboardButton('SELECT PROCESS', callback_data='process')],
-        [InlineKeyboardButton('Help', callback_data='help')],
-        [InlineKeyboardButton('Exit', callback_data='exit')],
+        [InlineKeyboardButton('ВСЕ СТАТУСЫ', callback_data='status')],
+        [InlineKeyboardButton('ВЫБРАТЬ ПРОЦЕСС', callback_data='process')],
+        [InlineKeyboardButton('Помощь', callback_data='help')],
+        [InlineKeyboardButton('Выход', callback_data='exit')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('<b>Please choose:</b>', parse_mode='HTML', reply_markup=reply_markup)
+    await update.message.reply_text('<b>Пожалуйста, выберите:</b>', parse_mode='HTML', reply_markup=reply_markup)
 
     return COMMAND_DECISION
 
 async def command_decision(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Asks the user to fill in the mileage or skip."""
+    """Спрашивает пользователя о выборе команды."""
     query = update.callback_query
     await query.answer()
     decision = query.data
@@ -272,177 +272,177 @@ async def command_decision(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     elif decision == 'exit':
         return await exit(update, context)
     else:
-        await query.edit_message_text(f"Invalid command: {decision}")
+        await query.edit_message_text(f"Неверная команда: {decision}")
         return ConversationHandler.END
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return await send_message(update, context, """
-Available commands:
+Доступные команды:
     
-/start - Start the original bot
+/start - Запустить оригинального бота
 
-/logs <session name> <option lines> - List the logs of the process
-    Example: /logs HOT:Wallet1
-    Example: /logs HOT:Wallet2 100
+/logs <имя сессии> <опционально количество строк> - Показать логи процесса
+    Пример: /logs HOT:Wallet1
+    Пример: /logs HOT:Wallet2 100
 
-/status - Lists a status summary of every game session in PM2
-/status <session name> - Get the last 30 balances and status for a specific session
-    Example: /status HOT:Wallet1
+/status - Показать сводку статусов всех игровых сессий в PM2
+/status <имя сессии> - Получить последние 30 балансов и статус для конкретной сессии
+    Пример: /status HOT:Wallet1
 
-/list - List all active and inactive games from PM2.
-/list <pattern> - List only games matching the pattern
-    Example: /list hot
+/list - Показать все активные и неактивные игры из PM2.
+/list <шаблон> - Показать только игры, соответствующие шаблону
+    Пример: /list hot
 
-/start <pattern> - Start all PM2 processes matching the pattern
-    Example: /start HOT:Wallet1
+/start <шаблон> - Запустить все процессы PM2, соответствующие шаблону
+    Пример: /start HOT:Wallet1
 
-/restart <pattern> - Restart all PM2 processes matching the pattern
-    Example: /restart :Wallet1
+/restart <шаблон> - Перезапустить все процессы PM2, соответствующие шаблону
+    Пример: /restart :Wallet1
 
-/stop <pattern> - Stop processes matching the pattern
-    Example: /stop Vertus:
+/stop <шаблон> - Остановить процессы, соответствующие шаблону
+    Пример: /stop Vertus:
 
-/update - Update the game files (try pull-games.sh, then git pull).
+/update - Обновить игровые файлы (попытка через pull-games.sh, затем git pull).
 
-/help - Show this help message.
+/help - Показать это сообщение помощи.
 
-/exit - Exit the bot.
+/exit - Выйти из бота.
 """)
 
 async def exit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Exit the bot."""
-    return await send_message(update, context, "Goodbye!")
+    """Выйти из бота."""
+    return await send_message(update, context, "До свидания!")
 
 async def list_games(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """List all games, excluding unwanted and empty entries, and showing if they are running/stopped."""
+    """Показать все игры, исключая нежелательные и пустые, с указанием статуса (запущен/остановлен)."""
     if context.args:
-        # If there are arguments (a pattern), switch to pattern matching mode
+        # Если есть аргументы (шаблон), переключаемся в режим поиска по шаблону
         await list_games_with_pattern(update, context)
     else:
-        # Otherwise, list all games
+        # Иначе показываем все игры
         games = list_all_pm2_processes()
-        running_processes = list_pm2_processes("online")  # Get running processes
+        running_processes = list_pm2_processes("online")  # Получаем запущенные процессы
 
         for game in games:
-            # Exclude processes that match excluded keywords
+            # Исключаем процессы, соответствующие ключевым словам исключения
             if should_exclude_process(game.strip()):
-                continue  # Skip this process if it's in the exclusion list
+                continue  # Пропускаем этот процесс
 
-            # Fetch and process logs for each game
+            # Получаем и обрабатываем логи для каждой игры
             name, balance, _, _, status = fetch_and_process_logs(game.strip())
 
-            # Filter out empty or incomplete entries
+            # Отфильтровываем пустые или неполные записи
             if not name or balance == "None" or status == "Log file missing":
-                continue  # Skip if the entry is incomplete
+                continue  # Пропускаем неполные записи
 
-            # Determine if the process is running or stopped
-            process_state = "Running" if game.strip() in running_processes else "Stopped"
+            # Определяем, запущен процесс или остановлен
+            process_state = "Запущен" if game.strip() in running_processes else "Остановлен"
 
-            # Send each game's details as a separate message
-            response = f"Session Name: {name}\nBalance: {balance}\nStatus: {status}\nState: {process_state}\n"
+            # Отправляем детали каждой игры отдельным сообщением
+            response = f"Имя сессии: {name}\nБаланс: {balance}\nСтатус: {status}\nСостояние: {process_state}\n"
             await send_message(update, context, response)
 
 async def list_games_with_pattern(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """List games matching a pattern, excluding certain processes and showing if they are running/stopped."""
+    """Показать игры, соответствующие шаблону, исключая определённые процессы и показывая статус."""
     if not context.args:
-        await send_message(update, context, "Please provide a pattern to match.")
+        await send_message(update, context, "Пожалуйста, укажите шаблон для поиска.")
         return
 
     pattern = context.args[0]
-    games = list_all_pm2_processes()  # Get all PM2 processes
-    running_processes = list_pm2_processes("online")  # Get running processes
+    games = list_all_pm2_processes()  # Получаем все процессы PM2
+    running_processes = list_pm2_processes("online")  # Получаем запущенные процессы
     response = ""
 
     for game in games:
-        # Exclude processes that match excluded keywords
+        # Исключаем процессы, соответствующие ключевым словам исключения
         if should_exclude_process(game.strip()):
             continue
 
-        # Check if the pattern matches the session name (case-insensitive)
+        # Проверяем, соответствует ли шаблон имени сессии (без учёта регистра)
         if re.search(pattern, game.strip(), re.IGNORECASE):
             name, balance, _, _, status = fetch_and_process_logs(game.strip())
 
-            # Filter out empty or incomplete entries
+            # Отфильтровываем пустые или неполные записи
             if not name or balance == "None" or status == "Log file missing":
-                continue  # Skip if the entry is incomplete
+                continue  # Пропускаем неполные записи
 
-            # Determine if the process is running or stopped
-            process_state = "Running" if game.strip() in running_processes else "Stopped"
+            # Определяем, запущен процесс или остановлен
+            process_state = "Запущен" if game.strip() in running_processes else "Остановлен"
 
-            # Build the response
-            response += f"Session Name: {name}\nBalance: {balance}\nStatus: {status}\nState: {process_state}\n\n"
+            # Формируем ответ
+            response += f"Имя сессии: {name}\nБаланс: {balance}\nСтатус: {status}\nСостояние: {process_state}\n\n"
 
     if not response:
-        response = f"No games found matching the pattern: {pattern}"
+        response = f"Игры, соответствующие шаблону '{pattern}', не найдены."
 
     await send_message(update, context, response)
 
 async def manage_process(update: Update, context: ContextTypes.DEFAULT_TYPE, action: str):
-    """Manage processes (start/restart/stop) using PM2 and provide feedback."""
+    """Управлять процессами (запуск/перезапуск/остановка) через PM2 с обратной связью."""
     if not context.args:
-        await send_message(update, context, f"Usage: /{action} <pattern>")
+        await send_message(update, context, f"Использование: /{action} <шаблон>")
         return
     
-    pattern = context.args[0]  # Get the pattern provided by the user
-    games = list_all_pm2_processes()  # Fetch all processes from PM2
+    pattern = context.args[0]  # Получаем шаблон от пользователя
+    games = list_all_pm2_processes()  # Получаем все процессы из PM2
 
-    # Find processes that match the given pattern
+    # Находим процессы, соответствующие шаблону
     matched_games = [game for game in games if re.search(pattern, game)]
 
     if not matched_games:
-        await send_message(update, context, f"No matching processes found for pattern: {pattern}")
+        await send_message(update, context, f"Процессы, соответствующие шаблону '{pattern}', не найдены.")
         return
 
-    # For each matched process, execute the desired PM2 action and provide feedback
+    # Для каждого найденного процесса выполняем нужное действие PM2 и сообщаем результат
     for game in matched_games:
         command = f"pm2 {action} {game.strip()}"
-        result = await run_command(command)  # Run the PM2 command and capture the result
+        result = await run_command(command)  # Запускаем команду PM2 и получаем результат
 
-        # Send feedback to the user in Telegram
+        # Отправляем обратную связь пользователю в Телеграм
         if "Process not found" in result:
-            await send_message(update, context, f"Process not found: {game.strip()}")
+            await send_message(update, context, f"Процесс не найден: {game.strip()}")
         else:
-            # Adjust feedback based on the action performed
+            # Корректируем сообщение в зависимости от действия
             if action == "start":
-                await send_message(update, context, f"Successfully started: {game.strip()}")
+                await send_message(update, context, f"Успешно запущен: {game.strip()}")
             elif action == "restart":
-                await send_message(update, context, f"Successfully restarted: {game.strip()}")
+                await send_message(update, context, f"Успешно перезапущен: {game.strip()}")
             elif action == "stop":
-                await send_message(update, context, f"Successfully stopped: {game.strip()}")
+                await send_message(update, context, f"Успешно остановлен: {game.strip()}")
 
 async def update_game_files(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Update the game files by trying pull-games.sh first, then git pull if that fails."""
+    """Обновить игровые файлы, сначала пытаясь через pull-games.sh, затем git pull при неудаче."""
     pull_games_script = "./pull-games.sh"
     
-    # Check if pull-games.sh exists
+    # Проверяем, существует ли pull-games.sh
     if os.path.exists(pull_games_script):
-        # Try to run pull-games.sh
+        # Пытаемся выполнить pull-games.sh
         result = await run_command(pull_games_script)
         if "not found" in result.lower() or "failed" in result.lower():
-            await send_message(update, context, "Failed to execute pull-games.sh. Attempting git pull...")
-            # Attempt git pull if pull-games.sh fails
+            await send_message(update, context, "Не удалось выполнить pull-games.sh. Пытаюсь выполнить git pull...")
+            # Пытаемся выполнить git pull, если pull-games.sh не удался
             git_result = await run_git_pull(update, context)
             return
         else:
-            await send_message(update, context, f"pull-games.sh executed successfully:\n{result}")
+            await send_message(update, context, f"pull-games.sh выполнен успешно:\n{result}")
     else:
-        await send_message(update, context, "pull-games.sh not found. Attempting git pull...")
-        # Attempt git pull if pull-games.sh does not exist
+        await send_message(update, context, "pull-games.sh не найден. Пытаюсь выполнить git pull...")
+        # Пытаемся выполнить git pull, если pull-games.sh отсутствует
         git_result = await run_git_pull(update, context)
 
 async def run_git_pull(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Run git pull and handle output within the 4k message size limit."""
+    """Выполнить git pull и обработать вывод с ограничением в 4к символов."""
     git_result = await run_command("git pull")
     
     if "error" in git_result.lower() or "aborting" in git_result.lower():
-        # If there are errors, capture and send the error result
+        # Если есть ошибки, отправляем результат ошибки
         await send_limited_message(update, context, git_result)
     else:
-        # If it's a success, send the update result
+        # Если успешно, отправляем результат обновления
         await send_limited_message(update, context, git_result)
 
 async def run_command(command: str) -> str:
-    """Execute a shell command and return its output including both stdout and stderr."""
+    """Выполнить shell-команду и вернуть её вывод, включая stdout и stderr."""
     proc = await asyncio.create_subprocess_shell(
         command,
         stdout=subprocess.PIPE,
@@ -450,17 +450,17 @@ async def run_command(command: str) -> str:
     )
     stdout, stderr = await proc.communicate()
 
-    # Combine stdout and stderr into one response to capture all output
-    return stdout.decode() + "\nError: " + stderr.decode()
+    # Объединяем stdout и stderr в один ответ, чтобы захватить весь вывод
+    return stdout.decode() + "\nОшибка: " + stderr.decode()
 
 async def send_limited_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, limit: int = 4096):
-    """Send messages in chunks limited to 4k characters."""
-    # Split the text into chunks of 4096 characters and send each as a separate message
+    """Отправлять сообщения частями, ограниченными 4к символами."""
+    # Разбиваем текст на части по 4096 символов и отправляем каждую отдельно
     for i in range(0, len(text), limit):
         await send_message(update, context, text[i:i + limit])
 
 async def send_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str) -> int:
-    """Send a message with the help of the bot."""
+    """Отправить сообщение с помощью бота."""
     if update.callback_query:
         chat_id = update.callback_query.message.chat_id
         await context.bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')
@@ -468,32 +468,32 @@ async def send_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text:
     elif update.message:
         await update.message.reply_text(text)
 
-# Handlers for /start, /restart, /stop
+# Обработчики для /start, /restart, /stop
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Start the bot or handle process start based on provided arguments."""
-    # Check if there are any arguments (i.e., /start <pattern>)
+    """Запустить бота или обработать запуск процесса по шаблону, если есть аргументы."""
+    # Проверяем, есть ли аргументы (например, /start <шаблон>)
     if context.args:
-        # If arguments are provided, assume it's for starting a specific process
+        # Если есть аргументы, считаем, что нужно запустить конкретный процесс
         await manage_process(update, context, "start")
         return ConversationHandler.END
     else:
-        # No arguments provided, start the bot's conversation as usual
+        # Если аргументов нет, запускаем обычный диалог бота
         await update.message.reply_text(
-            '<b>Telegram Claim Bot!\n'
-            'How can I help you?</b>',
+            '<b>Телеграм Клейм Бот!\n'
+            'Чем могу помочь?</b>',
             parse_mode='HTML',
             reply_markup=ReplyKeyboardRemove(),
         )
 
-        # Define inline buttons for bot options
+        # Определяем inline-кнопки для опций бота
         keyboard = [
-            [InlineKeyboardButton('ALL STATUS', callback_data='status')],
-            [InlineKeyboardButton('SELECT PROCESS', callback_data='process')],
-            [InlineKeyboardButton('Help', callback_data='help')],
-            [InlineKeyboardButton('Exit', callback_data='exit')],
+            [InlineKeyboardButton('ВСЕ СТАТУСЫ', callback_data='status')],
+            [InlineKeyboardButton('ВЫБРАТЬ ПРОЦЕСС', callback_data='process')],
+            [InlineKeyboardButton('Помощь', callback_data='help')],
+            [InlineKeyboardButton('Выход', callback_data='exit')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text('<b>Please choose:</b>', parse_mode='HTML', reply_markup=reply_markup)
+        await update.message.reply_text('<b>Пожалуйста, выберите:</b>', parse_mode='HTML', reply_markup=reply_markup)
 
         return COMMAND_DECISION
 
@@ -504,24 +504,24 @@ async def stop_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await manage_process(update, context, "stop")
 
 async def start_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start a process based on a pattern using the manage_process function."""
+    """Запустить процесс по шаблону с помощью функции manage_process."""
     await manage_process(update, context, "start")
 
-#region Unique Process
+#region Уникальный процесс
 
 async def select_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     global stopped_processes, running_processes, inactive_directories
 
     await get_processes()
 
-    """Select a process to run."""
+    """Выбрать процесс для запуска."""
     query = update.callback_query
 
     keyboard = []
 
-    print("Stopped Processes: " + ', '.join(stopped_processes))
-    print("Running Processes: " + ', '.join(running_processes))
-    print("Inactive Directories: " + ', '.join(inactive_directories))
+    print("Остановленные процессы: " + ', '.join(stopped_processes))
+    print("Запущенные процессы: " + ', '.join(running_processes))
+    print("Неактивные директории: " + ', '.join(inactive_directories))
 
     for process in stopped_processes:
         keyboard.append([InlineKeyboardButton(process + u" 🔴", callback_data=process)])
@@ -533,30 +533,30 @@ async def select_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         keyboard.append([InlineKeyboardButton(directory + u" ⚫", callback_data=directory)])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text('<b>Choose an option:</b>', parse_mode='HTML', reply_markup=reply_markup)
+    await query.message.reply_text('<b>Выберите опцию:</b>', parse_mode='HTML', reply_markup=reply_markup)
 
     return PROCESS_DECISION
 
 async def process_decision(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     global selected_process
 
-    """Asks the user to fill in the mileage or skip."""
+    """Спрашивает пользователя о выборе команды."""
     query = update.callback_query
     await query.answer()
     selected_process = query.data
 
-    # Define inline buttons for car color selection
+    # Определяем inline-кнопки для выбора действия
     keyboard = [
-        [InlineKeyboardButton('STATUS', callback_data='status')],
-        [InlineKeyboardButton('LOGS', callback_data='logs')]
+        [InlineKeyboardButton('СТАТУС', callback_data='status')],
+        [InlineKeyboardButton('ЛОГИ', callback_data='logs')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text('<b>Please choose:</b>', parse_mode='HTML', reply_markup=reply_markup)
+    await query.message.reply_text('<b>Пожалуйста, выберите:</b>', parse_mode='HTML', reply_markup=reply_markup)
 
     return PROCESS_COMMAND_DECISION
 
 async def process_command_decision(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Asks the user to fill in the mileage or skip."""
+    """Обрабатывает выбор команды для процесса."""
     query = update.callback_query
     await query.answer()
     decision = query.data
@@ -566,21 +566,21 @@ async def process_command_decision(update: Update, context: ContextTypes.DEFAULT
     elif decision == 'logs':
         return await logs_process(update, context)
     else:
-        await query.edit_message_text(f"Invalid command: {decision}")
+        await query.edit_message_text(f"Неверная команда: {decision}")
         return ConversationHandler.END
 
 async def status_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Send a message with the status of the bot."""
+    """Отправить сообщение со статусом процесса."""
 
     logs = get_status_logs_by_process_name(selected_process)
-    await send_message(update, context, (f"{logs}." if logs != "" else f"The process {selected_process} was not found."))
+    await send_message(update, context, (f"{logs}." if logs != "" else f"Процесс {selected_process} не найден."))
     return ConversationHandler.END
 
 async def logs_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Send a message with the status of the bot."""
+    """Отправить сообщение с логами процесса."""
 
     logs = get_logs_by_process_name(selected_process)
-    await send_message(update, context, (f"{logs}." if logs != "" else f"The process {selected_process} was not found."))
+    await send_message(update, context, (f"{logs}." if logs != "" else f"Процесс {selected_process} не найден."))
     return ConversationHandler.END
 
 def find_index(lst, value):
@@ -591,7 +591,7 @@ def find_index(lst, value):
 
 #endregion
 
-#region All Processes
+#region Все процессы
 
 async def status_all(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     global stopped_processes, running_processes, inactive_directories
@@ -617,35 +617,35 @@ def should_exclude_process(process_name):
     return any(keyword in process_name for keyword in excluded_keywords)
 
 def show_logs(process) -> str:
-    """Send a message with the status of the bot."""
+    """Отправить сообщение со статусом процесса."""
 
     try:
         name, balance, profit_hour, next_claim_at, log_status = fetch_and_process_logs(process.strip())
-        return f"{name}\n\tBALANCE: {balance}\n\tPROFIT/HOUR: {profit_hour}\n\tNEXT CLAIM AT: {next_claim_at}\n\tLOG STATUS:\n\t{log_status}"
+        return f"{name}\n\tБАЛАНС: {balance}\n\tПРИБЫЛЬ/ЧАС: {profit_hour}\n\tСЛЕДУЮЩИЙ КЛЕЙМ В: {next_claim_at}\n\tСТАТУС ЛОГА:\n\t{log_status}"
     except Exception as e:
-        print(f"Error: {e}")
-        return f"{process}: ERROR getting information."
+        print(f"Ошибка: {e}")
+        return f"{process}: ОШИБКА при получении информации."
 
 #endregion
 
-#region Utils
+#region Утилиты
 
 async def send_message(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str) -> int:
-    """Send a message with the help of the bot."""
+    """Отправить сообщение с помощью бота."""
 
-    # Determine the correct way to send a reply based on the update type
+    # Определяем правильный способ отправки ответа в зависимости от типа обновления
     if update.callback_query:
-        # If called from a callback query, use the callback_query's message
+        # Если вызвано из callback query, используем сообщение callback_query
         chat_id = update.callback_query.message.chat_id
         await context.bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')
-        # Optionally, you might want to acknowledge the callback query
+        # Опционально можно подтвердить callback query
         await update.callback_query.answer()
     elif update.message:
-        # If called from a direct message
+        # Если вызвано из прямого сообщения
         await update.message.reply_text(text)
     else:
-        # Handle other cases or log an error/warning
-        logger.warning('skip_mileage was called without a message or callback_query context.')
+        # Обработка других случаев или логирование предупреждения
+        logger.warning('skip_mileage был вызван без контекста message или callback_query.')
 
 async def get_processes():
     global stopped_processes, running_processes, inactive_directories
@@ -664,23 +664,23 @@ def main() -> None:
     if not os.path.exists("/usr/src/app/games/utils"):
         pull_games_dest = "/usr/src/app/pull-games.sh"
 
-        # Check if pull-games.sh exists
+        # Проверяем, существует ли pull-games.sh
         if os.path.exists(pull_games_dest):
-            # Modify the pull-games.sh script
+            # Изменяем скрипт pull-games.sh
             modify_pull_games_script(pull_games_dest)
 
-            # Make the script executable
+            # Делаем скрипт исполняемым
             os.chmod(pull_games_dest, 0o755)
 
-            # Run the pull-games.sh script
+            # Запускаем скрипт pull-games.sh
             result = subprocess.run([pull_games_dest], capture_output=True, text=True)
             if result.returncode != 0:
-                print(f"Failed to execute {pull_games_dest}: {result.stderr}")
+                print(f"Не удалось выполнить {pull_games_dest}: {result.stderr}")
                 sys.exit(1)
             else:
-                print(f"Successfully executed {pull_games_dest}: {result.stdout}")
+                print(f"Успешно выполнен {pull_games_dest}: {result.stdout}")
         else:
-            print("pull-games.sh does not exist, skipping the update.")
+            print("pull-games.sh не найден, обновление пропущено.")
 
     list_pm2_processes = set(list_all_pm2_processes())
 
@@ -688,18 +688,18 @@ def main() -> None:
         script = "games/tg-bot.py"
 
         pm2_session = "Telegram-Bot"
-        print(f"You could add the new/updated session to PM use: pm2 start {script} --interpreter venv/bin/python3 --name {pm2_session} -- {pm2_session}", 1)
-        user_choice = input("Enter 'e' to exit, 'a' or <enter> to automatically add to PM2: ").lower()
+        print(f"Вы можете добавить новую/обновленную сессию в PM с помощью: pm2 start {script} --interpreter venv/bin/python3 --name {pm2_session} -- {pm2_session}", 1)
+        user_choice = input("Введите 'e' для выхода, 'a' или <Enter> для автоматического добавления в PM2: ").lower()
 
         if user_choice == "e":
-            print("Exiting script. You can resume the process later.", 1)
+            print("Выход из скрипта. Вы можете возобновить процесс позже.", 1)
             sys.exit()
         elif user_choice == "a" or not user_choice:
             start_pm2_app(script, pm2_session, pm2_session)
-            user_choice = input("Should we save your PM2 processes? (Y/n): ").lower()
+            user_choice = input("Сохранить процессы PM2? (Y/n): ").lower()
             if user_choice == "y" or not user_choice:
                 save_pm2()
-            print(f"You can now watch the session log into PM2 with: pm2 logs {pm2_session}", 2)
+            print(f"Теперь вы можете смотреть логи сессии в PM2 с помощью: pm2 logs {pm2_session}", 2)
             sys.exit()
 
     run()

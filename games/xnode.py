@@ -32,14 +32,14 @@ class XNodeClaimer(Claimer):
         self.script = "games/xnode.py"
         self.prefix = "XNODE:"
         self.url = "https://web.telegram.org/k/#@xnode_bot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "заполняется"
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
         self.step = "01"
         self.imported_seedphrase = None
-        self.start_app_xpath = "//div[contains(@class,'new-message-bot-commands-view')][contains(normalize-space(.),'Play')]"
+        self.start_app_xpath = "//div[contains(@class,'new-message-bot-commands-view')][contains(normalize-space(.),'Играть')]"
         self.start_app_menu_item = "//a[.//span[contains(@class, 'peer-title') and normalize-space(text())='xNode: Core Protocol']]"
 
     def __init__(self):
@@ -64,10 +64,10 @@ class XNodeClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.",1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.",1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}",1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}",1)
     
     def full_claim(self):
         self.step = "100"
@@ -75,59 +75,59 @@ class XNodeClaimer(Claimer):
         self.launch_iframe()
     
         xpath = "//button[normalize-space(text())='skip']"
-        self.move_and_click(xpath, 10, True, "skip the introduction screens (may not be present)", self.step, "clickable")
+        self.move_and_click(xpath, 10, True, "пропустить вступительные экраны (может отсутствовать)", self.step, "clickable")
         self.increase_step()
     
         xpath = "//button[normalize-space(text())='claim']"
-        self.move_and_click(xpath, 10, True, "claim the daily reward (may not be present)", self.step, "clickable")
+        self.move_and_click(xpath, 10, True, "забрать ежедневную награду (может отсутствовать)", self.step, "clickable")
         self.increase_step()
     
         xpath = "//div[@data-title='XNode CPU']//canvas"
-        self.move_and_click(xpath, 10, True, "tap the chip (may not be present)", self.step, "clickable")
+        self.move_and_click(xpath, 10, True, "нажать на чип (может отсутствовать)", self.step, "clickable")
         self.increase_step()
     
         xpath = "//button[normalize-space()='собрать']"
-        self.move_and_click(xpath, 10, True, "collect the TFlops (may not be present)", self.step, "clickable")
+        self.move_and_click(xpath, 10, True, "собрать TFlops (может отсутствовать)", self.step, "clickable")
         self.increase_step()
     
         balance_xpath = "//span[normalize-space(.)='XPoints']/preceding-sibling::span[1]"
         self.get_balance(balance_xpath, False)
         self.increase_step()      
     
-        # Grab the wait time 
+        # Получить время ожидания 
         wait_xpath = "//div[@class='TimeTracker']//span[contains(@class,'TimeTracker_text')]"
-        action, minutes = self.decide_wait_or_claim(wait_xpath, label="pre-claim", respect_force=True)
+        action, minutes = self.decide_wait_or_claim(wait_xpath, label="до запроса", respect_force=True)
         
-        # Then run the upgrader
+        # Затем запустить обновление
         self.get_profit_hour(False)
         skip = self.attempt_upgrade()        
         
-        # First decision: wait or claim now
+        # Первое решение: ждать или запрашивать сейчас
         if action == "sleep":
             return minutes
          
-        # If the upgrader ran, reload the UI.    
+        # Если обновление прошло, перезагрузить интерфейс.    
         if not skip:
             self.quit_driver()
             self.launch_iframe()
             self.get_profit_hour(True)
     
-        # Proceed to (re)start mining / claim sequence
+        # Продолжить (пере)запуск майнинга / последовательность запроса
         checkbox_wrap_xpath = ("//div[contains(@class,'AutoFarmChecker')]"
                                "//div[contains(@class,'CheckBox')]/div[contains(@class,'CheckBox_wrapper')]")
         
         if not self.is_autofarm_active():
-            # nice to log:
-            self.output(f"Step {self.step} - AutoFarm is OFF; toggling ON…", 2)
+            # полезно залогировать:
+            self.output(f"Шаг {self.step} - AutoFarm выключен; включаем…", 2)
         
             def became_active():
                 return self.is_autofarm_active()
         
-            # use your brute_click as a fallback; otherwise move_and_click works too
+            # используйте brute_click как запасной вариант; иначе работает move_and_click
             ok = self.brute_click(checkbox_wrap_xpath, timeout=5,
-                                  action_description="toggle AutoFarm", state_check=became_active)
+                                  action_description="переключить AutoFarm", state_check=became_active)
             if not ok and not self.is_autofarm_active():
-                # one more direct JS center click if needed
+                # ещё один прямой JS клик по центру, если нужно
                 try:
                     el = self.driver.find_element(By.XPATH, checkbox_wrap_xpath)
                     self.driver.execute_script("""
@@ -141,16 +141,16 @@ class XNodeClaimer(Claimer):
                 except Exception:
                     pass
         
-            self.output(f"Step {self.step} - AutoFarm active? {self.is_autofarm_active()}", 3)
+            self.output(f"Шаг {self.step} - AutoFarm активен? {self.is_autofarm_active()}", 3)
         else:
-            self.output(f"Step {self.step} - AutoFarm already ON; no click needed.", 3)
+            self.output(f"Шаг {self.step} - AutoFarm уже включен; клик не требуется.", 3)
     
-        # Second decision after the click
-        action2, minutes2 = self.decide_wait_or_claim(wait_xpath, label="post-restart", respect_force=False)
+        # Второе решение после клика
+        action2, minutes2 = self.decide_wait_or_claim(wait_xpath, label="после перезапуска", respect_force=False)
         if action2 == "sleep":
             return minutes2
     
-        # If we still can’t get a positive wait, be safe and try again in an hour
+        # Если всё ещё не можем получить положительное время ожидания, безопаснее попробовать снова через час
         return 60
         
     def autofarm_checkbox_root(self):
@@ -166,44 +166,44 @@ class XNodeClaimer(Claimer):
         except Exception:
             return False
     
-    def decide_wait_or_claim(self, wait_xpath, label="pre-claim", respect_force=True):
+    def decide_wait_or_claim(self, wait_xpath, label="до запроса", respect_force=True):
         mins = self.get_wait_time(wait_xpath, timeout=12, label=label)
         self.increase_step()
     
         if mins is False:
-            self.output(f"Step {self.step} - Wait time unavailable; defaulting to 60 minutes.", 2)
+            self.output(f"Шаг {self.step} - Время ожидания недоступно; по умолчанию 60 минут.", 2)
             return ("sleep", 60)
     
         remaining = float(mins)
     
-        # If there is still time left, always wait until it has elapsed +1 min
+        # Если осталось время, всегда ждать пока оно не истечёт +1 минута
         if remaining > 0 and not (respect_force and self.settings.get("forceClaim")):
             sleep_minutes = self.apply_random_offset(remaining + 1)
             self.output(
-                f"STATUS: {label} wait {remaining:.1f} min; "
-                f"sleeping {sleep_minutes:.1f} min (ensuring +1 min past timer).",
+                f"СТАТУС: {label} ожидание {remaining:.1f} мин; "
+                f"спим {sleep_minutes:.1f} мин (гарантируем +1 мин после таймера).",
                 1
             )
             return ("sleep", sleep_minutes)
     
-        # Timer has elapsed already → claim now
+        # Таймер уже истёк → запрашиваем сейчас
         if respect_force:
             self.settings['forceClaim'] = True
         self.output(
-            f"Step {self.step} - {label}: timer already elapsed; proceeding to claim.",
+            f"Шаг {self.step} - {label}: таймер уже истёк; продолжаем запрос.",
             3
         )
         return ("claim", 0)
             
-    def get_wait_time(self, wait_time_xpath, timeout=12, label="wait timer"):
+    def get_wait_time(self, wait_time_xpath, timeout=12, label="таймер ожидания"):
         import re
     
         def _read_text():
-            # Try monitor first
+            # Сначала пробуем монитор
             t = self.monitor_element(wait_time_xpath, timeout, label)
             if t and not isinstance(t, bool) and str(t).strip():
                 return str(t)
-            # Fallback: DOM textContent
+            # Запасной вариант: textContent из DOM
             try:
                 els = self.driver.find_elements(By.XPATH, wait_time_xpath)
                 for el in els:
@@ -215,22 +215,22 @@ class XNodeClaimer(Claimer):
             return ""
     
         try:
-            self.output(f"Step {self.step} - Get the wait time...", 3)
+            self.output(f"Шаг {self.step} - Получаем время ожидания...", 3)
     
             raw = _read_text()
             if not raw:
-                self.output(f"Step {self.step} - No wait time text found.", 3)
+                self.output(f"Шаг {self.step} - Текст времени ожидания не найден.", 3)
                 return False
 
-            # normalise
+            # нормализуем
             text = " ".join(raw.split()).replace(",", ".")
             txt = text.lower()
-            self.output(f"Step {self.step} - Extracted wait time text: '{text}'", 3)
+            self.output(f"Шаг {self.step} - Извлечён текст времени ожидания: '{text}'", 3)
 
             total_minutes = 0.0
             found_any = False
 
-            # A) tokenised formats like "7.8h", "1h 30m", "540s", "1d 2h"
+            # A) форматы с токенами, например "7.8ч", "1ч 30м", "540с", "1д 2ч"
             for mult, pat in [
                 (1440.0, r'(\d+(?:\.\d+)?)\s*d'),
                 (  60.0, r'(\d+(?:\.\d+)?)\s*h'),
@@ -244,7 +244,7 @@ class XNodeClaimer(Claimer):
                     except Exception:
                         pass
 
-            # B) HH:MM[:SS] if no unit tokens were found
+            # B) HH:MM[:SS] если токены не найдены
             if not found_any:
                 m = re.search(r'\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b', txt)
                 if m:
@@ -254,47 +254,47 @@ class XNodeClaimer(Claimer):
                     total_minutes = h * 60 + mn + s / 60.0
                     found_any = True
 
-            # ✅ accept zero minutes as valid
+            # ✅ принимаем ноль минут как валидное значение
             if found_any:
                 total_minutes = max(0.0, round(total_minutes, 1))
-                self.output(f"Step {self.step} - Total wait time in minutes: {total_minutes}", 3)
+                self.output(f"Шаг {self.step} - Общее время ожидания в минутах: {total_minutes}", 3)
                 return total_minutes
 
-            self.output(f"Step {self.step} - Wait time pattern not matched in text: '{text}'", 3)
+            self.output(f"Шаг {self.step} - Шаблон времени ожидания не совпал с текстом: '{text}'", 3)
             return False
     
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred in get_wait_time: {type(e).__name__}: {e}", 3)
+            self.output(f"Шаг {self.step} - Ошибка в get_wait_time: {type(e).__name__}: {e}", 3)
             return False
             
     def get_profit_hour(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
         priority = max(self.settings['verboseLevel'], default_priority)
 
         profit_xpath = "//div[contains(@class,'ItemGrout_subChildren')]//span[contains(text(),'/sec')]"
 
         try:
-            text = self.monitor_element(profit_xpath, 15, "profit per sec")
+            text = self.monitor_element(profit_xpath, 15, "прибыль в секунду")
             if not text or isinstance(text, bool):
-                self.output(f"Step {self.step} - Could not find profit text.", priority)
+                self.output(f"Шаг {self.step} - Не удалось найти текст прибыли.", priority)
                 return False
 
             raw = text.strip()
-            self.output(f"Step {self.step} - {prefix} PROFIT string: '{raw}'", priority)
+            self.output(f"Шаг {self.step} - {prefix} строка ПРИБЫЛИ: '{raw}'", priority)
             return raw
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Profit element not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент прибыли не найден.", priority)
             return False
         except Exception as e:
-            self.output(f"Step {self.step} - Error in get_profit_hour: {e}", priority)
+            self.output(f"Шаг {self.step} - Ошибка в get_profit_hour: {e}", priority)
             return False
         finally:
             self.increase_step()
             
     def attempt_upgrade(self):
-        # skip if it's not the auto-upgrade version
+        # пропустить, если это не версия с автообновлением
         return True
 
 def main():
@@ -303,6 +303,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-

@@ -35,13 +35,13 @@ class CryptoRankClaimer(Claimer):
         self.script = "games/cryptorank.py"
         self.prefix = "CryptoRank:"
         self.url = "https://web.telegram.org/k/#@CryptoRank_app_bot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "для заполнения"
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
         self.allow_early_claim = False
-        self.start_app_xpath = "//button[.//span[contains(text(),'Start Earning CR Points')]]"
+        self.start_app_xpath = "//button[.//span[contains(text(),'Начать зарабатывать CR очки')]]"
         self.start_app_menu_item = "//a[.//span[contains(@class, 'peer-title') and normalize-space(text())='CryptoRank Mini App']]"
 
     def __init__(self):
@@ -69,16 +69,16 @@ class CryptoRankClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.",1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.",1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}",1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}",1)
 
     def check_opening_screens(self):
 
-        # Check for the initial opening scrren
-        xpath = "//button[text()='Skip']"
-        if self.move_and_click(xpath, 8, True, "initial screen (may not be present)", self.step, "clickable"):
+        # Проверка начального экрана
+        xpath = "//button[text()='Пропустить']"
+        if self.move_and_click(xpath, 8, True, "начальный экран (может отсутствовать)", self.step, "кликабельно"):
             return True
         else:
             return False
@@ -89,9 +89,9 @@ class CryptoRankClaimer(Claimer):
         self.launch_iframe()
         self.check_opening_screens()
 
-        # Are we farming? if not, start!
-        xpath = "//button[div[text()='Start Farming']]"
-        self.move_and_click(xpath, 8, True, "initial start farming (may not be present)", self.step, "clickable")
+        # Мы фармим? Если нет, начинаем!
+        xpath = "//button[div[text()='Начать фарминг']]"
+        self.move_and_click(xpath, 8, True, "начальный запуск фарминга (может отсутствовать)", self.step, "кликабельно")
 
         pre_balance = self.get_balance(False)
         self.increase_step()
@@ -101,101 +101,101 @@ class CryptoRankClaimer(Claimer):
             matches = re.findall(r'(\d+)([hm])', remaining_time)
             remaining_wait_time = sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches)
             remaining_wait_time = self.apply_random_offset(remaining_wait_time)
-            self.output(f"STATUS: Considering {remaining_time} we'll sleep for {remaining_wait_time}.",2)
+            self.output(f"СТАТУС: Учитывая {remaining_time}, мы будем спать {remaining_wait_time} секунд.",2)
             return remaining_wait_time
 
         self.increase_step()
     
-        # We got this far, so let's try to claim!
-        xpath = "//button[div[contains(text(), 'Claim')]]"
-        success = self.move_and_click(xpath, 20, True, "look for the claim button.", self.step, "visible")
+        # Мы дошли до этого момента, так что попробуем заявить!
+        xpath = "//button[div[contains(text(), 'Заявить')]]"
+        success = self.move_and_click(xpath, 20, True, "поиск кнопки 'Заявить'.", self.step, "видимо")
         self.increase_step()
 
-        # And start farming again.
-        xpath = "//button[div[text()='Start Farming']]"
-        self.move_and_click(xpath, 30, True, "initial start farming (may not be present)", self.step, "clickable")
+        # И снова начинаем фарминг.
+        xpath = "//button[div[text()='Начать фарминг']]"
+        self.move_and_click(xpath, 30, True, "начальный запуск фарминга (может отсутствовать)", self.step, "кликабельно")
         self.increase_step()
 
-        # And check the post-claim balance
+        # Проверяем баланс после заявки
         post_balance = self.get_balance(True)
 
         try:
-            # Check if pre_balance and post_balance are not None
+            # Проверяем, что pre_balance и post_balance не None
             if pre_balance is not None and post_balance is not None:
-                # Attempt to convert both variables to float
+                # Пытаемся преобразовать обе переменные в float
                 pre_balance_float = float(pre_balance)
                 post_balance_float = float(post_balance)
                 if post_balance_float > pre_balance_float:
-                    success_text = "Claim successful."
+                    success_text = "Заявка успешна."
                 else:
-                    success_text = "Claim may have failed."
+                    success_text = "Заявка могла не пройти."
             else:
-                success_text = "Claim validation failed due to missing balance information."
+                success_text = "Проверка заявки не удалась из-за отсутствия информации о балансе."
         except ValueError:
-            success_text = "Claim validation failed due to invalid balance format."
+            success_text = "Проверка заявки не удалась из-за неверного формата баланса."
 
 
         self.increase_step()
 
-        # Store the wait time for later
+        # Сохраняем время ожидания для дальнейшего использования
         remaining_time = self.get_wait_time()
         
-        # And check for the daily reward.
+        # Проверяем ежедневную награду.
         self.complete_daily_reward()
        
-        # Finally, let's wrap up the time to come back
+        # В конце подводим итог времени до следующего захода
         if remaining_time:
             matches = re.findall(r'(\d+)([hm])', remaining_time)
             remaining_wait_time = sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches)
             remaining_wait_time = self.apply_random_offset(remaining_wait_time)
-            self.output(f"STATUS: {success_text} {self.daily_reward_text} Let's sleep for {remaining_time}.",2)
+            self.output(f"СТАТУС: {success_text} {self.daily_reward_text} Спим {remaining_time}.",2)
             return remaining_wait_time
 
         return 60
         
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        balance_text = f'{prefix} BALANCE:' if claimed else f'{prefix} BALANCE:'
+        balance_text = f'{prefix} БАЛАНС:' if claimed else f'{prefix} БАЛАНС:'
         balance_xpath = f"//img[contains(@src, 'crystal')]/following-sibling::span[last()]"
 
         try:
-            element = self.monitor_element(balance_xpath, 15, "get balance")
+            element = self.monitor_element(balance_xpath, 15, "получить баланс")
             if element:
                 balance_part = float(self.strip_html_and_non_numeric(element))
-                self.output(f"Step {self.step} - {balance_text} {balance_part}", priority)
+                self.output(f"Шаг {self.step} - {balance_text} {balance_part}", priority)
                 return balance_part
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Баланс:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)
 
         self.increase_step()
 
-    def get_wait_time(self, step_number="108", before_after="pre-claim"):
+    def get_wait_time(self, step_number="108", before_after="до заявки"):
         """
-        Fetches the “Receive after” timer span (e.g. "01:15:12") without retries.
-        Returns the list of matching WebElements, or False if none found / on error.
+        Получает таймер “Получить после” (например, "01:15:12") без повторных попыток.
+        Возвращает список подходящих WebElement, или False, если не найдено / ошибка.
         """
-        self.output(f"Step {self.step} - [{before_after}] fetching wait time…", 3)
+        self.output(f"Шаг {self.step} - [{before_after}] получение времени ожидания…", 3)
     
         xpath = (
             "//p"
-            "[contains(normalize-space(.), 'Receive after')]"  # find the <p> with “Receive after”
-            "/span"                                             # then its <span> child
+            "[contains(normalize-space(.), 'Получить после')]"  # найти <p> с текстом “Получить после”
+            "/span"                                             # затем его дочерний <span>
         )
     
         try:
-            elements = self.monitor_element(xpath, timeout=10, description="get claim timer")
+            elements = self.monitor_element(xpath, timeout=10, description="получить таймер заявки")
             if elements:
                 return elements
-            self.output(f"Step {self.step} - No timer element found.", 2)
+            self.output(f"Шаг {self.step} - Элемент таймера не найден.", 2)
         except Exception as e:
-            self.output(f"Step {self.step} - Error fetching wait time: {e}", 1)
+            self.output(f"Шаг {self.step} - Ошибка при получении времени ожидания: {e}", 1)
     
         return False
 
@@ -203,25 +203,25 @@ class CryptoRankClaimer(Claimer):
         pass
 
     def complete_daily_reward(self):
-        # Select the Tasks Tab
-        xpath = "//a[normalize-space(text())='Tasks']"
-        self.move_and_click(xpath, 8, True, "click the 'Tasks' tab", self.step, "clickable")
+        # Выбрать вкладку Задачи
+        xpath = "//a[normalize-space(text())='Задачи']"
+        self.move_and_click(xpath, 8, True, "клик по вкладке 'Задачи'", self.step, "кликабельно")
 
-        # Check if the daily reward if available 
-        xpath = "//div[span[text()='Daily check']]/following-sibling::div//button[normalize-space(text())='Claim']"
-        success = self.move_and_click(xpath, 8, True, "click the daily reward 'Claim'", self.step, "clickable")
+        # Проверить доступность ежедневной награды
+        xpath = "//div[span[text()='Ежедневная проверка']]/following-sibling::div//button[normalize-space(text())='Заявить']"
+        success = self.move_and_click(xpath, 8, True, "клик по кнопке 'Заявить' ежедневной награды", self.step, "кликабельно")
         if not success:
-            self.output(f"Step {self.step} - Looks like the daily reward was already claimed.", 2)
-            self.daily_reward_text = "Daily reward already claimed."
+            self.output(f"Шаг {self.step} - Похоже, ежедневная награда уже была получена.", 2)
+            self.daily_reward_text = "Ежедневная награда уже получена."
 
-        xpath = "//button[div[text()='Check in']]"
-        success = self.move_and_click(xpath, 8, True, "click the 'Check in' button", self.step, "clickable")
+        xpath = "//button[div[text()='Отметиться']]"
+        success = self.move_and_click(xpath, 8, True, "клик по кнопке 'Отметиться'", self.step, "кликабельно")
         if success:
-            self.output(f"Step {self.step} - Looks like we successfully claimed the daily reward.", 2)
-            self.daily_reward_text = "Claimed the daily reward."
+            self.output(f"Шаг {self.step} - Похоже, мы успешно получили ежедневную награду.", 2)
+            self.daily_reward_text = "Ежедневная награда получена."
         else:
-            self.output(f"Step {self.step} - Looks like the daily reward was already claimed or unsuccessful.", 2)
-            self.daily_reward_text = "Daily reward already claimed."
+            self.output(f"Шаг {self.step} - Похоже, ежедневная награда уже была получена или неудачна.", 2)
+            self.daily_reward_text = "Ежедневная награда уже получена."
 
 def main():
     claimer = CryptoRankClaimer()

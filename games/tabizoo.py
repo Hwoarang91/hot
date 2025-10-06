@@ -33,9 +33,9 @@ class TabizooClaimer(Claimer):
         self.script = "games/tabizoo.py"
         self.prefix = "TabiZoo:"
         self.url = "https://web.telegram.org/k/#@tabizoobot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
-        self.box_claim = "Never."
+        self.pot_full = "Заполнено"
+        self.pot_filling = "заполняется"
+        self.box_claim = "Никогда."
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
@@ -47,7 +47,7 @@ class TabizooClaimer(Claimer):
         self.settings_file = "variables.txt"
         self.status_file_path = "status.txt"
         self.wallet_id = ""
-        self.load_settings()  # Load settings before initializing other attributes
+        self.load_settings()  # Загрузка настроек перед инициализацией других атрибутов
         self.random_offset = random.randint(self.settings['lowestClaimOffset'], self.settings['highestClaimOffset'])
         super().__init__()
 
@@ -65,23 +65,23 @@ class TabizooClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
         self.step = "100"
     
-        # Open the driver and proceed to the game.
+        # Открыть драйвер и перейти к игре.
         self.launch_iframe()
         self.increase_step()
     
-        # Check the initial screens.
+        # Проверить начальные экраны.
         self.check_initial_screens()
         self.increase_step()
     
-        # Check the Daily rewards.
+        # Проверить ежедневные награды.
         self.click_daily_reward()
         self.increase_step()
     
@@ -89,52 +89,52 @@ class TabizooClaimer(Claimer):
         self.increase_step()
     
         xpath = "//span[contains(text(), 'Claim')]"
-        success = self.brute_click(xpath, 10, "click the 'Claim' button")
+        success = self.brute_click(xpath, 10, "нажать кнопку 'Получить'")
         old_balance = self.get_balance(True)
         if success:
             try:
                 balance_diff = float(old_balance) - float(original_balance)
                 if balance_diff > 0:
-                    self.output(f"Step {self.step} - Making a claim increased the balance by {balance_diff}", 2)
+                    self.output(f"Шаг {self.step} - Получение награды увеличило баланс на {balance_diff}", 2)
             except Exception as e:
                 pass
-            self.output(f"Step {self.step} - Main reward claimed.", 1)
+            self.output(f"Шаг {self.step} - Основная награда получена.", 1)
         self.increase_step()
     
-        # Retrieve profit per hour for logging (if needed)
+        # Получить прибыль в час для логирования (если нужно)
         self.get_profit_hour(True)
     
         try:
-            # Get the wait time in minutes directly from the new function.
+            # Получить время ожидания в минутах напрямую из новой функции.
             wait_time_minutes = self.get_wait_time(self.step, "post-claim")
             
-            # Try the slots game.
+            # Попробовать игру в слоты.
             self.play_spins()
             balance = self.get_balance(True)
             try:
                 balance_diff = float(balance) - float(old_balance)
                 if balance_diff > 0:
-                    self.output(f"Step {self.step} - Playing slots increased the balance by {balance_diff}", 2)
+                    self.output(f"Шаг {self.step} - Игра в слоты увеличила баланс на {balance_diff}", 2)
             except Exception as e:
                 pass
     
-            # Go back to the home page.
+            # Вернуться на главную страницу.
             xpath = "(//div[normalize-space(.) = 'Shiro'])[1]"
-            self.move_and_click(xpath, 10, True, "click the 'Home' tab", self.step, "clickable")
+            self.move_and_click(xpath, 10, True, "нажать вкладку 'Главная'", self.step, "clickable")
     
-            # Try to upgrade the level if auto-upgrade is enabled.
+            # Попытаться повысить уровень, если включено автообновление.
             self.attempt_upgrade(balance)
     
             if wait_time_minutes:
                 wait_time_minutes = self.apply_random_offset(wait_time_minutes)
-                self.output(f"STATUS: We'll go back to sleep for {wait_time_minutes:.2f} minutes.", 1)
+                self.output(f"СТАТУС: Мы собираемся снова уснуть на {wait_time_minutes:.2f} минут.", 1)
                 return wait_time_minutes
     
         except Exception as e:
-            self.output(f"Step {self.step} - An unexpected error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла непредвиденная ошибка: {e}", 1)
             return 60
     
-        self.output(f"STATUS: We seemed to have reached the end without confirming the action!", 1)
+        self.output(f"СТАТУС: Похоже, мы дошли до конца без подтверждения действия!", 1)
         return 60
 
     def play_spins(self):
@@ -142,94 +142,94 @@ class TabizooClaimer(Claimer):
         xpath_spin_tab = "(//div[normalize-space(.) = 'Spin'])[1]"
         xpath_spin_button = "//img[contains(@src, 'spin_btn')]"
 
-        # Attempt to click the 'Spin' tab
-        success = self.move_and_click(xpath_spin_tab, 10, True, "click the 'Spin' tab", self.step, "clickable")
+        # Попытка нажать вкладку 'Spin'
+        success = self.move_and_click(xpath_spin_tab, 10, True, "нажать вкладку 'Spin'", self.step, "clickable")
         if not success:
             self.quit_driver()
             self.launch_iframe()
-            success = self.brute_click(xpath_spin_tab, 10, "click the 'Spin' tab")
+            success = self.brute_click(xpath_spin_tab, 10, "нажать вкладку 'Spin'")
             if not success:
-                self.output(f"Step {self.step} - It seems the sequence to play the slot machine failed.", 2)
+                self.output(f"Шаг {self.step} - Похоже, последовательность для игры в слот не удалась.", 2)
                 return
 
-        self.brute_click(xpath_spin_button, 60, "spin the reels")
+        self.brute_click(xpath_spin_button, 60, "крутить барабаны")
         
     def click_daily_reward(self):
-        # Check the Daily rewards.
+        # Проверить ежедневные награды.
         xpath = "//div[contains(@class, 'bg-[#FF5C01]') and contains(@class, 'rounded-full') and contains(@class, 'w-[8px]') and contains(@class, 'h-[8px]')]"
-        success = self.move_and_click(xpath, 10, False, "check if the daily reward can be claimed (may not be present)", self.step, "clickable")
+        success = self.move_and_click(xpath, 10, False, "проверить, можно ли получить ежедневную награду (может отсутствовать)", self.step, "clickable")
         if not success:
-            self.output(f"Step {self.step} - The daily reward appears to have already been claimed.", 2)
+            self.output(f"Шаг {self.step} - Похоже, ежедневная награда уже была получена.", 2)
             self.increase_step()
             return
         xpath = "//img[contains(@src, 'task_icon')]"
-        success = self.brute_click(xpath, 10, "click the 'Check Login' tab")
+        success = self.brute_click(xpath, 10, "нажать вкладку 'Проверить вход'")
         self.increase_step()
 
-        xpath = "//h4[contains(text(), 'Daily Reward')]"
-        success = self.brute_click(xpath, 10, "click the 'Daily Reward' button")
+        xpath = "//h4[contains(text(), 'Ежедневная награда')]"
+        success = self.brute_click(xpath, 10, "нажать кнопку 'Ежедневная награда'")
         self.increase_step()
 
-        xpath = "//div[contains(text(), 'Claim')]"
-        success = self.brute_click(xpath, 10, "claim the 'Daily Reward'")
+        xpath = "//div[contains(text(), 'Получить')]"
+        success = self.brute_click(xpath, 10, "получить 'Ежедневную награду'")
         self.increase_step()
 
-        xpath = "//div[contains(text(), 'Come Back Tomorrow')]"
-        success = self.move_and_click(xpath, 10, False, "check for 'Come Back Tomorrow'", self.step, "visible")
+        xpath = "//div[contains(text(), 'Приходите завтра')]"
+        success = self.move_and_click(xpath, 10, False, "проверить наличие 'Приходите завтра'", self.step, "visible")
         self.increase_step()
 
         if not success:
-            self.output(f"Step {self.step}: It seems the sequence to claim the daily reward failed.", 2)
+            self.output(f"Шаг {self.step}: Похоже, последовательность получения ежедневной награды не удалась.", 2)
             return
 
-        self.output(f"STATUS: Successfully claimed the daily reward.", 2)
+        self.output(f"СТАТУС: Ежедневная награда успешно получена.", 2)
 
         self.quit_driver()
         self.launch_iframe()
 
     def check_initial_screens(self):
-        # First 'Next Step' button
+        # Первая кнопка 'Следующий шаг'
         xpath = "//div[normalize-space(text())='Go']"
-        self.move_and_click(xpath, 10, True, "click the 'Go' button", self.step, "clickable")
-        self.output(f"Step {self.step} - You have already cleared the initial screens.", 2)
+        self.move_and_click(xpath, 10, True, "нажать кнопку 'Go'", self.step, "clickable")
+        self.output(f"Шаг {self.step} - Вы уже прошли начальные экраны.", 2)
         self.increase_step()
         
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
     
         priority = max(self.settings['verboseLevel'], default_priority)
     
-        balance_text = f'{prefix} BALANCE:' if claimed else f'{prefix} BALANCE:'
-        # Updated xpath: select the <div> that is a following-sibling of the <img> with 'coin_icon' in its src.
+        balance_text = f'{prefix} БАЛАНС:' if claimed else f'{prefix} БАЛАНС:'
+        # Обновленный xpath: выбрать <div>, следующий за <img> с 'coin_icon' в src.
         balance_xpath = "//img[contains(@src, 'coin_icon')]/following-sibling::div"
     
         try:
-            element = self.monitor_element(balance_xpath, 15, "get balance")
+            element = self.monitor_element(balance_xpath, 15, "получить баланс")
             if element:
                 balance_part = element.strip()
-                multiplier = 1  # Default multiplier
+                multiplier = 1  # Стандартный множитель
     
-                # Check for 'K' or 'M' and adjust the multiplier
+                # Проверить наличие 'K' или 'M' и скорректировать множитель
                 if balance_part.endswith('K'):
                     multiplier = 1_000
-                    balance_part = balance_part[:-1]  # Remove the 'K'
+                    balance_part = balance_part[:-1]  # Удалить 'K'
                 elif balance_part.endswith('M'):
                     multiplier = 1_000_000
-                    balance_part = balance_part[:-1]  # Remove the 'M'
+                    balance_part = balance_part[:-1]  # Удалить 'M'
     
                 try:
                     balance_value = float(balance_part) * multiplier
-                    self.output(f"Step {self.step} - {balance_text} {balance_value}", priority)
+                    self.output(f"Шаг {self.step} - {balance_text} {balance_value}", priority)
                     return balance_value
                 except ValueError:
-                    self.output(f"Step {self.step} - Could not convert balance '{balance_part}' to a number.", priority)
+                    self.output(f"Шаг {self.step} - Не удалось преобразовать баланс '{balance_part}' в число.", priority)
                     return None
     
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Баланс:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)
     
         self.increase_step()
 
@@ -238,27 +238,27 @@ class TabizooClaimer(Claimer):
 
     def get_profit_hour(self, claimed=False):
         """
-        Retrieves the profit per hour as a float by extracting the value from the profit element.
+        Получает прибыль в час в виде числа с плавающей точкой, извлекая значение из элемента прибыли.
         """
         import re
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
         priority = max(self.settings['verboseLevel'], default_priority)
     
-        # Updated XPath: locate the span with a leading '+' following the Mining Rate label.
+        # Обновленный XPath: найти span с ведущим '+' после метки Mining Rate.
         profit_xpath = "//label[normalize-space(text())='Mining Rate']/following-sibling::div//span[starts-with(normalize-space(text()), '+')]"
         try:
-            profit_text = self.monitor_element(profit_xpath, 15, "profit per hour")
+            profit_text = self.monitor_element(profit_xpath, 15, "прибыль в час")
             if profit_text:
-                # Remove any non-numeric characters (like the '+' sign)
+                # Удалить все нечисловые символы (например, знак '+')
                 profit_clean = re.sub(r"[^\d.]", "", profit_text)
                 profit_value = float(profit_clean)
-                self.output(f"Step {self.step} - {prefix} PROFIT/HOUR: {profit_value}", priority)
+                self.output(f"Шаг {self.step} - {prefix} ПРИБЫЛЬ/ЧАС: {profit_value}", priority)
                 return profit_value
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Profit/Hour:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Прибыль/Час:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)
         
         self.increase_step()
         return None

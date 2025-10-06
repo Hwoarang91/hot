@@ -65,10 +65,10 @@ class SideKickClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
         self.step = "100"
@@ -76,66 +76,66 @@ class SideKickClaimer(Claimer):
         self.launch_iframe()
 
         xpath = "//button[contains(text(), 'START')]"
-        success = self.move_and_click(xpath, 25, True, "click the 'START' button", self.step, "clickable")
+        success = self.move_and_click(xpath, 25, True, "нажать кнопку 'START'", self.step, "clickable")
         self.increase_step()
 
         if success:
             xpath = "//button[contains(text(), 'Awesome!')]"
-            next_button = self.move_and_click(xpath, 25, True, "click the 'Awesome!' button", self.step, "clickable")
+            next_button = self.move_and_click(xpath, 25, True, "нажать кнопку 'Awesome!'", self.step, "clickable")
             self.increase_step()
 
             xpath = "//button[contains(text(), 'CLAIM')]"
-            next_button = self.move_and_click(xpath, 25, True, 'click the "CLAIM" button', self.step, "clickable")
+            next_button = self.move_and_click(xpath, 25, True, 'нажать кнопку "CLAIM"', self.step, "clickable")
             self.increase_step()
 
-        # Get the original balance before the claim
+        # Получить исходный баланс до запроса
         original_balance = self.get_balance(False)
         self.increase_step()
 
         xpath = "//div[normalize-space(text()) = 'Pass']"
-        self.move_and_click(xpath, 25, True, "click on the 'Pass' tab", self.step, "visible")
+        self.move_and_click(xpath, 25, True, "нажать вкладку 'Pass'", self.step, "visible")
         self.increase_step()
 
         xpath = "//div[div[text()='Daily check-in']]/following-sibling::div//div[text()='GO']"
-        self.move_and_click(xpath, 25, True, "click the 'GO' button on daily checkin task", self.step, "visible")
+        self.move_and_click(xpath, 25, True, "нажать кнопку 'GO' для ежедневной проверки", self.step, "visible")
         self.increase_step()
 
         xpath = "//button[contains(text(), 'See you tomorrow')]"
-        already_claimed = self.move_and_click(xpath, 10, False, "check if already claimed", self.step, "visible")
+        already_claimed = self.move_and_click(xpath, 10, False, "проверить, был ли уже получен запрос", self.step, "visible")
         if already_claimed:
-            self.output("STATUS: The daily reward has already been claimed", 1)
+            self.output("СТАТУС: Ежедневная награда уже получена", 1)
             return self.get_wait_time()
         self.increase_step()
 
         xpath = "//button[contains(text(), 'Claim')]"
-        self.move_and_click(xpath, 25, True, "click the 'Claim' button", self.step, "clickable")
+        self.move_and_click(xpath, 25, True, "нажать кнопку 'Claim'", self.step, "clickable")
         self.increase_step()
 
         self.quit_driver()
         self.launch_iframe()
 
-        # Get the new balance after claiming
+        # Получить новый баланс после запроса
         new_balance = self.get_balance(True)
         self.increase_step()
 
-        balance_diff = None  # Default in case balance difference can't be determined
+        balance_diff = None  # По умолчанию, если не удается определить разницу баланса
         if new_balance:
             try:
-                # Calculate the balance difference
+                # Вычислить разницу баланса
                 balance_diff = float(new_balance) - float(original_balance)
                 if balance_diff > 0:
-                    self.output(f"STATUS: Making a claim increased the balance by {balance_diff}", 1)
+                    self.output(f"СТАТУС: Запрос увеличил баланс на {balance_diff}", 1)
                     return self.get_wait_time()
             except Exception as e:
-                self.output(f"Step {self.step} - Error calculating balance difference: {e}", 2)
-        self.output(f"STATUS: Unable to confirm balance increased after claim, let's double check in 2 hours.", 1)
+                self.output(f"Шаг {self.step} - Ошибка при вычислении разницы баланса: {e}", 2)
+        self.output(f"СТАТУС: Не удалось подтвердить увеличение баланса после запроса, проверим снова через 2 часа.", 1)
         return 120
 
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
-        priority = 2  # Always set to 2
+        prefix = "После" if claimed else "До"
+        priority = 2  # Всегда устанавливать 2
 
-        balance_text = f"{prefix} BALANCE:"
+        balance_text = f"{prefix} БАЛАНС:"
         balance_xpath = "//div[text()='DIAMONDS']/preceding-sibling::span"
 
         attempts = 0
@@ -143,53 +143,53 @@ class SideKickClaimer(Claimer):
 
         while attempts < max_attempts:
             try:
-                # Monitor element with the new XPath
-                element = self.monitor_element(balance_xpath, 10, "get balance")
+                # Отслеживать элемент с новым XPath
+                element = self.monitor_element(balance_xpath, 10, "получить баланс")
                 if element:
                     balance_value = self.strip_html_and_non_numeric(element)
 
                     try:
-                        # Convert to float directly as it's just a number
+                        # Преобразовать в float напрямую, так как это просто число
                         balance_value = float(balance_value)
-                        self.output(f"Step {self.step} - {balance_text} {balance_value}", priority)
+                        self.output(f"Шаг {self.step} - {balance_text} {balance_value}", priority)
 
-                        # Check if the balance is 0, if so, retry up to max_attempts
+                        # Проверить, равен ли баланс 0, если да, повторить попытку до max_attempts
                         if balance_value == 0.0:
                             attempts += 1
-                            self.output(f"Step {self.step} - Balance is 0.0, retrying {attempts}/{max_attempts}", priority)
-                            continue  # Retry if balance is 0.0
+                            self.output(f"Шаг {self.step} - Баланс равен 0.0, повторная попытка {attempts}/{max_attempts}", priority)
+                            continue  # Повторить, если баланс 0.0
                         return balance_value
                     except ValueError:
-                        self.output(f"Step {self.step} - Could not convert balance '{balance_value}' to a number.", priority)
+                        self.output(f"Шаг {self.step} - Не удалось преобразовать баланс '{balance_value}' в число.", priority)
                         return None
                 else:
-                    self.output(f"Step {self.step} - Balance element not found.", priority)
+                    self.output(f"Шаг {self.step} - Элемент баланса не найден.", priority)
                     return None
             except Exception as e:
-                self.output(f"Step {self.step} - An error occurred: {e}", priority)
+                self.output(f"Шаг {self.step} - Произошла ошибка: {e}", priority)
                 return None
 
-        # If balance was 0.0 after all attempts
-        self.output(f"Step {self.step} - Balance remained 0.0 after {max_attempts} attempts.", priority)
+        # Если баланс оставался 0.0 после всех попыток
+        self.output(f"Шаг {self.step} - Баланс оставался 0.0 после {max_attempts} попыток.", priority)
         return 0.0
 
     def get_wait_time(self, step_number="108", beforeAfter="pre-claim", max_attempts=1):
         current_time_utc = datetime.now(timezone.utc)
 
-        # Calculate the start and end times for the next day (08:00 to 16:00)
+        # Рассчитать время начала и конца следующего дня (08:00 до 16:00)
         next_day_8am = (current_time_utc + timedelta(days=1)).replace(hour=8, minute=0, second=0, microsecond=0)
         next_day_4pm = (current_time_utc + timedelta(days=1)).replace(hour=16, minute=0, second=0, microsecond=0)
 
-        # Get the total minutes between 08:00 and 16:00
+        # Получить общее количество минут между 08:00 и 16:00
         minutes_range = int((next_day_4pm - next_day_8am).total_seconds() / 60)
 
-        # Pick a random number of minutes within this range
+        # Выбрать случайное количество минут в этом диапазоне
         random_minutes = random.randint(0, minutes_range)
 
-        # Calculate the random time between 08:00 and 16:00
+        # Рассчитать случайное время между 08:00 и 16:00
         random_time = next_day_8am + timedelta(minutes=random_minutes)
 
-        # Calculate the number of minutes from the current time to the random time
+        # Рассчитать количество минут от текущего времени до случайного времени
         time_to_random_time = int((random_time - current_time_utc).total_seconds() / 60)
 
         return time_to_random_time

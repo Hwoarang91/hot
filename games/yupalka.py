@@ -33,9 +33,9 @@ class YupalkaClaimer(Claimer):
         self.script = "games/yupalka.py"
         self.prefix = "Yupalka:"
         self.url = "https://web.telegram.org/k/#@YupLand_bot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
-        self.box_claim = "Never."
+        self.pot_full = "Заполнено"
+        self.pot_filling = "заполняется"
+        self.box_claim = "Никогда."
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
@@ -47,7 +47,7 @@ class YupalkaClaimer(Claimer):
         self.settings_file = "variables.txt"
         self.status_file_path = "status.txt"
         self.wallet_id = ""
-        self.load_settings()  # Load settings before initializing other attributes
+        self.load_settings()  # Загрузить настройки перед инициализацией других атрибутов
         self.random_offset = random.randint(self.settings['lowestClaimOffset'], self.settings['highestClaimOffset'])
         super().__init__()
 
@@ -63,23 +63,23 @@ class YupalkaClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
         self.step = "100"
 
-        # Open the driver and proceed to the game.
+        # Открыть драйвер и перейти к игре.
         self.launch_iframe()
         self.increase_step()
 
-        # Get the original balance before the claim
+        # Получить исходный баланс до запроса
         original_balance = self.get_balance(True)
         self.increase_step()
 
-        # Check if there is a wait time
+        # Проверить, есть ли время ожидания
         remaining_wait_time = self.get_wait_time(self.step, False)
         self.increase_step()
         
@@ -87,121 +87,121 @@ class YupalkaClaimer(Claimer):
             original_wait_time = remaining_wait_time
             modified_wait_time = self.apply_random_offset(original_wait_time)
             self.output(
-                f"Step {self.step} - STATUS: Considering a wait time of {original_wait_time} minutes and applying an offset, we'll sleep for {modified_wait_time} minutes.", 
+                f"Шаг {self.step} - СТАТУС: Учитывая время ожидания {original_wait_time} минут и применяя смещение, мы будем спать {modified_wait_time} минут.", 
                 1
             )
             return modified_wait_time
 
-        # Claim the card
+        # Запросить карту
         self.click_random_card()
         self.increase_step()
 
-        # Get the new balance after claiming
+        # Получить новый баланс после запроса
         new_balance = self.get_balance(True)
         self.increase_step()
 
-        balance_diff = None  # Default in case balance difference can't be determined
+        balance_diff = None  # По умолчанию, если разницу баланса определить не удалось
         if new_balance:
             try:
-                # Calculate the balance difference
+                # Рассчитать разницу баланса
                 balance_diff = float(new_balance) - float(original_balance)
                 if balance_diff > 0:
-                    self.output(f"Step {self.step} - Making a claim increased the balance by {balance_diff}", 2)
+                    self.output(f"Шаг {self.step} - Запрос увеличил баланс на {balance_diff}", 2)
             except Exception as e:
-                self.output(f"Step {self.step} - Error calculating balance difference: {e}", 2)
-            self.output(f"Step {self.step} - Main reward claimed.", 1)
+                self.output(f"Шаг {self.step} - Ошибка при расчёте разницы баланса: {e}", 2)
+            self.output(f"Шаг {self.step} - Основная награда получена.", 1)
         else:
-            self.output(f"Step {self.step} - Claim appeared correct, but balance could not be validated.", 2)
+            self.output(f"Шаг {self.step} - Запрос выглядел корректным, но баланс не удалось проверить.", 2)
         self.increase_step()
 
-        # Check if there is a wait time (second wait)
+        # Проверить, есть ли время ожидания (второе ожидание)
         remaining_wait_time = self.get_wait_time(self.step, False)
         self.increase_step()
 
         self.attempt_upgrade()
 
-        # Handle second wait time and output based on whether balance_diff was calculated
+        # Обработка второго времени ожидания и вывод в зависимости от того, была ли рассчитана разница баланса
         if remaining_wait_time:
             original_wait_time = remaining_wait_time
             modified_wait_time = self.apply_random_offset(original_wait_time)
 
             if balance_diff is not None:
-                # Balance difference was successfully calculated
+                # Разница баланса успешно рассчитана
                 self.output(
-                    f"STATUS: Claim successful, balance increased by {balance_diff}. We'll sleep for {modified_wait_time} minutes.", 
+                    f"СТАТУС: Запрос успешен, баланс увеличился на {balance_diff}. Мы будем спать {modified_wait_time} минут.", 
                     1
                 )
             else:
-                # Balance difference could not be validated
+                # Разницу баланса подтвердить не удалось
                 self.output(
-                    f"STATUS: Claim appeared correct, but we couldn't confirm the balance change. We'll sleep for {modified_wait_time} minutes.", 
+                    f"СТАТУС: Запрос выглядел корректным, но мы не смогли подтвердить изменение баланса. Мы будем спать {modified_wait_time} минут.", 
                     1
                 )
             return modified_wait_time
 
-        # If no wait time, default to sleep for 60 minutes
-        self.output(f"STATUS: We couldn't confirm the claim. Let's sleep for 60 minutes.", 1)
+        # Если времени ожидания нет, по умолчанию спать 60 минут
+        self.output(f"СТАТУС: Мы не смогли подтвердить запрос. Давайте поспим 60 минут.", 1)
         return 60
         
     def click_random_card(self):
-        # Define the base XPath for card fronts
+        # Определить базовый XPath для лицевой стороны карты
         card_front_xpath = "//div[@class='c-home__card-front']"
 
-        # Use WebDriverWait to wait until card elements are present
+        # Использовать WebDriverWait для ожидания наличия элементов карт
         wait = WebDriverWait(self.driver, 15)
 
         try:
-            # Wait until the elements matching the XPath are located
+            # Ожидать, пока элементы, соответствующие XPath, не будут найдены
             card_elements = wait.until(EC.presence_of_all_elements_located((By.XPATH, card_front_xpath)))
 
-            # Check if we have card elements
+            # Проверить, есть ли элементы карт
             if card_elements:
-                # Count the number of card fronts (total number of elements)
+                # Подсчитать количество лицевых сторон карт (общее количество элементов)
                 total_cards = len(card_elements)
 
-                # Randomly choose a card (0-based index for Selenium)
+                # Случайно выбрать карту (индекс с 0 для Selenium)
                 chosen_card_index = random.randint(0, total_cards - 1)
 
-                # Log the selected card and attempt to click on it
-                self.output(f"Step {self.step} - Clicking on card {chosen_card_index + 1} of {total_cards}.", 2)
+                # Записать выбранную карту и попытаться кликнуть по ней
+                self.output(f"Шаг {self.step} - Кликаем по карте {chosen_card_index + 1} из {total_cards}.", 2)
 
-                # Perform the click action on the chosen card
+                # Выполнить клик по выбранной карте
                 card_elements[chosen_card_index].click()
 
-                return chosen_card_index + 1  # Returning 1-based index for consistency in logging
+                return chosen_card_index + 1  # Возвращаем индекс с 1 для удобства логирования
             else:
-                self.output(f"Step {self.step} - No card fronts found.", 2)
+                self.output(f"Шаг {self.step} - Лицевые стороны карт не найдены.", 2)
                 return None
 
         except TimeoutException:
-            # Handle timeout if no card fronts are found within the time limit
-            self.output(f"Step {self.step} - No card fronts found within the timeout period.", 2)
+            # Обработать таймаут, если лицевые стороны карт не найдены в течение времени ожидания
+            self.output(f"Шаг {self.step} - Лицевые стороны карт не найдены в течение времени ожидания.", 2)
             return None
 
         except Exception as e:
-            # Catch any other exceptions
-            self.output(f"Step {self.step} - An error occurred while waiting for card fronts.", 2)
+            # Обработать любые другие исключения
+            self.output(f"Шаг {self.step} - Произошла ошибка при ожидании лицевых сторон карт.", 2)
             return None
 
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
         priority = max(self.settings['verboseLevel'], default_priority)
         
-        balance_text = f"{prefix} BALANCE:"
-        balance_xpath = "//div[@class='c-home__header-item-text']"  # Updated XPath
+        balance_text = f"{prefix} БАЛАНС:"
+        balance_xpath = "//div[@class='c-home__header-item-text']"  # Обновлённый XPath
     
         try:
-            # Monitor element with the new XPath
-            element = self.monitor_element(balance_xpath, 15, "get balance")
+            # Отслеживать элемент с новым XPath
+            element = self.monitor_element(balance_xpath, 15, "получить баланс")
             if element:
                 balance_str = element.strip()
                 multiplier = 1
     
-                # Replace comma with dot for proper float conversion
+                # Заменить запятую на точку для правильного преобразования в float
                 balance_str = balance_str.replace(',', '.')
     
-                # Check for abbreviations and set multiplier accordingly
+                # Проверить сокращения и установить множитель соответственно
                 if balance_str.endswith('K'):
                     multiplier = 1_000
                     balance_str = balance_str[:-1].strip()
@@ -214,39 +214,39 @@ class YupalkaClaimer(Claimer):
     
                 try:
                     balance_value = float(balance_str) * multiplier
-                    self.output(f"Step {self.step} - {balance_text} {balance_value}", priority)
+                    self.output(f"Шаг {self.step} - {balance_text} {balance_value}", priority)
                     return balance_value
                 except ValueError:
-                    self.output(f"Step {self.step} - Could not convert balance '{balance_str}' to a number.", priority)
+                    self.output(f"Шаг {self.step} - Не удалось преобразовать баланс '{balance_str}' в число.", priority)
                     return None
             else:
-                self.output(f"Step {self.step} - Balance element not found.", priority)
+                self.output(f"Шаг {self.step} - Элемент баланса не найден.", priority)
                 return None
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", priority)
             return None
 
     def get_wait_time(self, step_number="108", beforeAfter="pre-claim", max_attempts=1):
         for attempt in range(1, max_attempts + 1):
             try:
-                self.output(f"Step {self.step} - Get the wait time...", 3)
-                # Updated XPath to match the <p> tag containing the time
+                self.output(f"Шаг {self.step} - Получаем время ожидания...", 3)
+                # Обновлённый XPath для тега <p>, содержащего время
                 xpath = "//div[@class='c-home__timer']/p"
-                element = self.monitor_element(xpath, 10, "get claim timer")
+                element = self.monitor_element(xpath, 10, "получить таймер запроса")
                 
                 if element:
-                    time_text = element.strip()  # Extract the time text (e.g., "19:42:26")
-                    hh, mm, ss = map(int, time_text.split(':'))  # Split the time and convert to integers
+                    time_text = element.strip()  # Извлечь текст времени (например, "19:42:26")
+                    hh, mm, ss = map(int, time_text.split(':'))  # Разделить время и преобразовать в целые числа
                     
-                    # Convert to total minutes
+                    # Преобразовать в общее количество минут
                     total_minutes = hh * 60 + mm + ss / 60
                     
-                    self.output(f"Step {self.step} - Wait time is {total_minutes:.2f} minutes", 3)
+                    self.output(f"Шаг {self.step} - Время ожидания {total_minutes:.2f} минут", 3)
                     return int(total_minutes)+1
                 
                 return False
             except Exception as e:
-                self.output(f"Step {self.step} - An error occurred on attempt {attempt}: {e}", 3)
+                self.output(f"Шаг {self.step} - Произошла ошибка при попытке {attempt}: {e}", 3)
                 return False
 
         return False

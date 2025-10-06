@@ -50,17 +50,17 @@ class OTPFinder(Claimer):
 
 
     def next_steps(self):
-        # Initialise Chrome/Chromium & load the login notification service user (ID 777000)
+        # Инициализация Chrome/Chromium и загрузка сервиса уведомлений о входе пользователя (ID 777000)
         self.step = "01"
         self.driver = self.get_driver()
         self.driver.get(self.url)
-        # Check for the last OTP & Print it
+        # Проверка последнего OTP и вывод его
         xpath = "(//span[@class='translatable-message'])[last()]"
-        self.target_element = self.move_and_click(xpath,10, False, "read the last OTP code ", "08", "visible")
-        OTP = self.monitor_element(xpath, 10, "grab the last OTP")
+        self.target_element = self.move_and_click(xpath,10, False, "прочитать последний OTP код ", "08", "visible")
+        OTP = self.monitor_element(xpath, 10, "получить последний OTP")
         OTP = self.strip_html_and_non_numeric(OTP)
-        print(f"The most recent OTP was: {OTP}")
-        # Close the session
+        print(f"Последний OTP был: {OTP}")
+        # Закрыть сессию
         self.quit_driver()
 
 def main():

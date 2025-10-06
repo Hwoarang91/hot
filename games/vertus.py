@@ -48,13 +48,13 @@ class VertusClaimer(Claimer):
         self.wallet_id = ""
         self.load_settings()
         self.random_offset = random.randint(self.settings['lowestClaimOffset'], self.settings['highestClaimOffset'])
-        self.driver = None  # Initialize the driver to None
+        self.driver = None  # Инициализируем драйвер как None
         super().__init__()
 
     def cipher_daily(self):
         return
         cipher_xpath = "//div[contains(@class, 'btnLeft')]"
-        self.move_and_click(cipher_xpath, 10, True, "move to the Cipher island link", self.step, "clickable")
+        self.move_and_click(cipher_xpath, 10, True, "перейти по ссылке на остров Cipher", self.step, "clickable")
         self.increase_step()
         
         xpaths = {
@@ -66,11 +66,11 @@ class VertusClaimer(Claimer):
         
         empty_slots_xpaths = "(//img[contains(@class, 'itemEmpty')])"
         
-        if not self.move_and_click(empty_slots_xpaths, 10, False, "look for the first empty slot", self.step, "visible"):
-            self.output(f"Step {self.step} - The daily puzzle is already completed.", 2)
+        if not self.move_and_click(empty_slots_xpaths, 10, False, "поиск первого пустого слота", self.step, "visible"):
+            self.output(f"Шаг {self.step} - Ежедневная головоломка уже решена.", 2)
             return
         else:
-            self.output(f"Step {self.step} - Attempting to solve the daily puzzle.", 2)
+            self.output(f"Шаг {self.step} - Попытка решить ежедневную головоломку.", 2)
             self.increase_step()
             
             try:
@@ -78,7 +78,7 @@ class VertusClaimer(Claimer):
                 response.raise_for_status()
                 sequence = response.text.strip()
             except requests.exceptions.RequestException as e:
-                self.output(f"Error fetching the sequence: {e}", 2)
+                self.output(f"Ошибка при получении последовательности: {e}", 2)
                 return
 
             for i, digit in enumerate(sequence):
@@ -87,34 +87,34 @@ class VertusClaimer(Claimer):
                 check_xpath = f"{empty_slots_xpaths}[{n}]"
 
                 if xpath:
-                    # Move and click the element
-                    self.move_and_click(xpath, 10, False, f"put digit {digit} in slot {n}", self.step, "visible")
+                    # Переместиться и кликнуть по элементу
+                    self.move_and_click(xpath, 10, False, f"поставить цифру {digit} в слот {n}", self.step, "visible")
                     
-                    # Find the element and click it using JS
+                    # Найти элемент и кликнуть по нему через JS
                     element = self.driver.find_element(By.XPATH, xpath)
                     self.driver.execute_script("arguments[0].click();", element)
                 else:
-                    self.output(f"Step {self.step} - No XPath found for digit {digit}", 2)
+                    self.output(f"Шаг {self.step} - XPath для цифры {digit} не найден", 2)
 
-                # Increase the step counter
+                # Увеличить счетчик шага
                 self.increase_step()
 
-        if not self.move_and_click(empty_slots_xpaths, 10, False, "double-check for puzzle completion", self.step, "visible"):
-            self.output(f"Step {self.step} - The daily puzzle has been completed.", 2)
+        if not self.move_and_click(empty_slots_xpaths, 10, False, "повторная проверка завершения головоломки", self.step, "visible"):
+            self.output(f"Шаг {self.step} - Ежедневная головоломка решена.", 2)
         else:
-            self.output(f"Step {self.step} - The daily puzzle hasn't been solved, maybe we're waiting for a new solution.", 2)
+            self.output(f"Шаг {self.step} - Ежедневная головоломка не решена, возможно, ждем новое решение.", 2)
             self.increase_step()
 
     def is_slot_filled(self, check_xpath):
         time.sleep(2)
         try:
-            # Check if the element corresponding to check_xpath is no longer empty
+            # Проверяем, что элемент по check_xpath больше не пустой
             filled_element = self.driver.find_element(By.XPATH, check_xpath)
             if filled_element.is_displayed():
-                self.output(f"Step {self.step} - Slot filled as expected for XPath: {check_xpath}", 3)
+                self.output(f"Шаг {self.step} - Слот заполнен как ожидалось для XPath: {check_xpath}", 3)
                 return True
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Slot not filled, or element not found: {check_xpath}", 3)
+            self.output(f"Шаг {self.step} - Слот не заполнен или элемент не найден: {check_xpath}", 3)
             return False
 
         return False
@@ -131,49 +131,49 @@ class VertusClaimer(Claimer):
             self.increase_step()
             self.set_cookies()
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def check_daily_reward(self):
         action = ActionChains(self.driver)
         mission_xpath = "//p[contains(text(), 'Missions')]"
-        self.move_and_click(mission_xpath, 10, False, "move to the missions link", self.step, "visible")
+        self.move_and_click(mission_xpath, 10, False, "перейти по ссылке миссий", self.step, "visible")
         success = self.click_element(mission_xpath)
         if success:
-            self.output(f"Step {self.step} - Successfully able to click the 'Missions' link.", 3)
+            self.output(f"Шаг {self.step} - Успешно кликнули по ссылке 'Миссии'.", 3)
         else:
-            self.output(f"Step {self.step} - Failed to click the 'Missions' link.", 3)
+            self.output(f"Шаг {self.step} - Не удалось кликнуть по ссылке 'Миссии'.", 3)
         self.increase_step()
         
 
         daily_xpath = "//p[contains(text(), 'Daily')]"
-        self.move_and_click(daily_xpath, 10, False, "move to the daily missions link", self.step, "visible")
+        self.move_and_click(daily_xpath, 10, False, "перейти по ссылке ежедневных миссий", self.step, "visible")
         success = self.click_element(daily_xpath)
         if success:
-            self.output(f"Step {self.step} - Successfully able to click the 'Daily Missions' link.", 3)
+            self.output(f"Шаг {self.step} - Успешно кликнули по ссылке 'Ежедневные миссии'.", 3)
         else:
-            self.output(f"Step {self.step} - Failed to click the 'Daily Missions' link.", 2)
+            self.output(f"Шаг {self.step} - Не удалось кликнуть по ссылке 'Ежедневные миссии'.", 2)
         self.increase_step()
 
         claim_xpath = "//p[contains(text(), 'Claim')]"
-        button = self.move_and_click(claim_xpath, 10, False, "move to the claim daily missions link", self.step, "visible")
+        button = self.move_and_click(claim_xpath, 10, False, "перейти по ссылке получения ежедневной награды", self.step, "visible")
         if button:
             self.driver.execute_script("arguments[0].click();", button)
         success = self.click_element(claim_xpath)
         if success:
             self.increase_step()
-            self.output(f"Step {self.step} - Successfully able to click the 'Claim Daily' link.", 3)
-            return "Daily bonus claimed."
+            self.output(f"Шаг {self.step} - Успешно кликнули по ссылке 'Получить ежедневное'.", 3)
+            return "Ежедневный бонус получен."
 
         come_back_tomorrow_xpath = "//p[contains(text(), 'Come back tomorrow')]"
-        come_back_tomorrow_msg = self.move_and_click(come_back_tomorrow_xpath, 10, False, "check if the bonus is for tomorrow", self.step, "visible")
+        come_back_tomorrow_msg = self.move_and_click(come_back_tomorrow_xpath, 10, False, "проверка, что бонус будет доступен завтра", self.step, "visible")
         if come_back_tomorrow_msg:
             self.increase_step()
-            return "The daily bonus will be available tomorrow."
+            return "Ежедневный бонус будет доступен завтра."
 
         self.increase_step()
-        return "Daily bonus status unknown."
+        return "Статус ежедневного бонуса неизвестен."
 
     def full_claim(self):
         self.step = "100"
@@ -181,14 +181,14 @@ class VertusClaimer(Claimer):
 
         xpath = "//p[text()='Collect']"
         island_text = ""
-        button = self.move_and_click(xpath, 10, False, "collect the Island bonus (may not be present)", self.step, "visible")
+        button = self.move_and_click(xpath, 10, False, "собрать бонус острова (может отсутствовать)", self.step, "visible")
         if button:
             self.driver.execute_script("arguments[0].click();", button)
-            island_text = "Island bonus claimed."
+            island_text = "Бонус острова получен."
         self.increase_step()    
 
         xpath = "//p[text()='Mining']"
-        button = self.move_and_click(xpath, 10, False, "collect the Storage link", self.step, "visible")
+        button = self.move_and_click(xpath, 10, False, "собрать ссылку на хранилище", self.step, "visible")
         if button:
             self.driver.execute_script("arguments[0].click();", button)
         self.increase_step()
@@ -198,7 +198,7 @@ class VertusClaimer(Claimer):
         self.get_profit_hour(False)
 
         wait_time_text = self.get_wait_time(self.step, "pre-claim")
-        self.output(f"Step {self.step} - Pre-Claim raw wait time text: {wait_time_text}", 3)
+        self.output(f"Шаг {self.step} - Исходный текст времени ожидания перед получением: {wait_time_text}", 3)
 
         if wait_time_text != "Ready to collect":
             matches = re.findall(r'(\d+)([hm])', wait_time_text)
@@ -206,39 +206,39 @@ class VertusClaimer(Claimer):
                 remaining_wait_time = (sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches)) + self.random_offset
                 if remaining_wait_time < 5:
                     self.settings['forceClaim'] = True
-                    self.output(f"Step {self.step} - the remaining time to claim is less than the random offset, so applying: settings['forceClaim'] = True", 3)
+                    self.output(f"Шаг {self.step} - оставшееся время до получения меньше случайного смещения, применяем: settings['forceClaim'] = True", 3)
                 if not self.settings["forceClaim"]:
                     remaining_wait_time = min(180, remaining_wait_time)
-                    self.output(f"STATUS: {island_text}We'll go back to sleep for {remaining_wait_time} minutes.", 1)
+                    self.output(f"СТАТУС: {island_text} Мы снова ляжем спать на {remaining_wait_time} минут.", 1)
                     return remaining_wait_time
             else:
-                self.output("No matches found in wait_time_text, assigning a default wait time.", 2)
-                return 60  # Default return if no matches found
+                self.output("В wait_time_text не найдено совпадений, назначаем время ожидания по умолчанию.", 2)
+                return 60  # Значение по умолчанию, если совпадений нет
                 
         if not wait_time_text:
             return 60
 
         try:
-            self.output(f"Step {self.step} - The pre-claim wait time is : {wait_time_text} and random offset is {self.random_offset} minutes.", 1)
+            self.output(f"Шаг {self.step} - Время ожидания перед получением: {wait_time_text} и случайное смещение {self.random_offset} минут.", 1)
             self.increase_step()
 
             if wait_time_text == "Ready to collect" or self.settings['forceClaim']:
                 try:
                     xpath = "//div[p[text()='Collect']]"
-                    self.move_and_click(xpath, 10, True, "collect the main reward", self.step, "clickable")
+                    self.move_and_click(xpath, 10, True, "собрать основной приз", self.step, "clickable")
                     self.increase_step()
 
                     xpath = "//div[div/p[text()='Claim']]/div/p"
-                    self.move_and_click(xpath, 10, True, "claim without connecting wallet (may not present)", self.step, "clickable")
+                    self.move_and_click(xpath, 10, True, "получить без подключения кошелька (может отсутствовать)", self.step, "clickable")
                     self.increase_step()
 
                     # xpath = "//p[contains(@class, '_text_16x1w_17') and text()='Claim']"
                     # success = self.click_element(xpath)
-                    # self.move_and_click(xpath, 10, True, "collect the 'splash' reward", self.step, "clickable")
+                    # self.move_and_click(xpath, 10, True, "собрать награду 'splash'", self.step, "clickable")
                     # self.increase_step()
 
                     wait_time_text = self.get_wait_time(self.step, "post-claim")
-                    self.output(f"Step {self.step} - Post-Claim raw wait time text: {wait_time_text}", 3)
+                    self.output(f"Шаг {self.step} - Исходный текст времени ожидания после получения: {wait_time_text}", 3)
                     matches = re.findall(r'(\d+)([hm])', wait_time_text)
                     total_wait_time = self.apply_random_offset(sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches))
                     self.increase_step()
@@ -251,18 +251,18 @@ class VertusClaimer(Claimer):
                     self.increase_step()
 
                     if wait_time_text == "Ready to collect":
-                        self.output(f"STATUS: The wait timer is still showing: Filled.", 1)
-                        self.output(f"Step {self.step} - This means either the claim failed, or there is >4 minutes lag in the game.", 1)
-                        self.output(f"Step {self.step} - We'll check back in 1 hour to see if the claim processed and if not try again.", 2)
+                        self.output(f"СТАТУС: Таймер ожидания все еще показывает: Filled.", 1)
+                        self.output(f"Шаг {self.step} - Это значит, что либо получение не удалось, либо в игре задержка >4 минут.", 1)
+                        self.output(f"Шаг {self.step} - Проверим снова через 1 час, если получение не прошло, попробуем снова.", 2)
                     else:
-                        self.output(f"STATUS: {island_text}. Successful Claim & {daily_reward_text}", 1)
+                        self.output(f"СТАТУС: {island_text}. Успешное получение & {daily_reward_text}", 1)
                     return min(180, total_wait_time)
 
                 except TimeoutException:
-                    self.output(f"STATUS: The claim process timed out: Maybe the site has lag? Will retry after one hour.", 1)
+                    self.output(f"СТАТУС: Время ожидания получения истекло: Возможно, сайт завис? Попробуем снова через час.", 1)
                     return 60
                 except Exception as e:
-                    self.output(f"STATUS: An error occurred while trying to claim: {e}\nLet's wait an hour and try again", 1)
+                    self.output(f"СТАТУС: Произошла ошибка при попытке получить: {e}\nПодождем час и попробуем снова", 1)
                     return 60
 
             else:
@@ -271,59 +271,59 @@ class VertusClaimer(Claimer):
                     total_time = sum(int(value) * (60 if unit == 'h' else 1) for value, unit in matches)
                     total_time += 1
                     total_time = max(5, total_time)
-                    self.output(f"Step {self.step} - Not Time to claim this wallet yet. Wait for {total_time} minutes until the storage is filled.", 2)
+                    self.output(f"Шаг {self.step} - Еще не время получать для этого кошелька. Ждем {total_time} минут, пока хранилище не заполнится.", 2)
                     return total_time
                 else:
-                    self.output(f"Step {self.step} - No wait time data found? Let's check again in one hour.", 2)
+                    self.output(f"Шаг {self.step} - Нет данных о времени ожидания? Проверим снова через час.", 2)
                     return 60
         except Exception as e:
-            self.output(f"Step {self.step} - An unexpected error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла непредвиденная ошибка: {e}", 1)
             return 60
 
     def get_profit_hour(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct the specific profit XPath
-        profit_text = f'{prefix} PROFIT/HOUR:'
+        # Формируем XPath для прибыли
+        profit_text = f'{prefix} ПРИБЫЛЬ/ЧАС:'
         profit_xpath = "(//p[@class='_descInfo_19xzr_38'])[last()]"
 
         try:
-            element = self.strip_non_numeric(self.monitor_element(profit_xpath, 15, "profit per hour"))
-            # Check if element is not None and process the profit
+            element = self.strip_non_numeric(self.monitor_element(profit_xpath, 15, "прибыль в час"))
+            # Проверяем, что элемент не None и выводим прибыль
             if element:
-                self.output(f"Step {self.step} - {profit_text} {element}", priority)
+                self.output(f"Шаг {self.step} - {profit_text} {element}", priority)
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Profit/Hour:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Прибыль/Час:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Ошибка в виде строки для логирования
         
         self.increase_step()
 
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
-        # Dynamically adjust the log priority
+        # Динамически регулируем приоритет лога
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        balance_text = f'{prefix} BALANCE:'
+        balance_text = f'{prefix} БАЛАНС:'
         balance_xpath = "//div[p[contains(text(), 'Vert balance')]]/div/p"
 
         try:
-            balance_part = self.monitor_element(balance_xpath, 15, "balance")
+            balance_part = self.monitor_element(balance_xpath, 15, "баланс")
 
             if balance_part:
-                self.output(f"Step {self.step} - {balance_text} {balance_part}", priority)
+                self.output(f"Шаг {self.step} - {balance_text} {balance_part}", priority)
                 return balance_part
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Баланс:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)
 
         self.increase_step()
 
@@ -331,27 +331,27 @@ class VertusClaimer(Claimer):
         for attempt in range(1, max_attempts + 1):
             try:
                 xpath = "//p[contains(@class, 'descInfo') and contains(text(), 'to')]"
-                self.move_and_click(xpath, 10, False, f"get the {beforeAfter} wait timer", self.step, "visible")
-                wait_time_element = self.monitor_element(xpath, 10, "claim timer")
+                self.move_and_click(xpath, 10, False, f"получить таймер ожидания {beforeAfter}", self.step, "visible")
+                wait_time_element = self.monitor_element(xpath, 10, "таймер получения")
                 
                 if wait_time_element is not None:
                     return wait_time_element
                 else:
-                    self.output(f"Step {step_number} - Attempt {attempt}: Wait time element not found. Clicking the 'Storage' link and retrying...", 3)
+                    self.output(f"Шаг {step_number} - Попытка {attempt}: Элемент времени ожидания не найден. Кликаем по ссылке 'Хранилище' и повторяем попытку...", 3)
                     storage_xpath = "//h4[text()='Storage']"
-                    self.move_and_click(storage_xpath, 30, True, "click the 'storage' link", f"{step_number} recheck", "clickable")
-                    self.output(f"Step {step_number} - Attempted to select storage again...", 3)
+                    self.move_and_click(storage_xpath, 30, True, "клик по ссылке 'хранилище'", f"{step_number} повторная проверка", "clickable")
+                    self.output(f"Шаг {step_number} - Попытка повторного выбора хранилища...", 3)
 
             except TimeoutException:
                 if attempt < max_attempts:
-                    self.output(f"Step {step_number} - Attempt {attempt}: Wait time element not found. Clicking the 'Storage' link and retrying...", 3)
+                    self.output(f"Шаг {step_number} - Попытка {attempt}: Элемент времени ожидания не найден. Кликаем по ссылке 'Хранилище' и повторяем попытку...", 3)
                     storage_xpath = "//h4[text()='Storage']"
-                    self.move_and_click(storage_xpath, 30, True, "click the 'storage' link", f"{step_number} recheck", "clickable")
+                    self.move_and_click(storage_xpath, 30, True, "клик по ссылке 'хранилище'", f"{step_number} повторная проверка", "clickable")
                 else:
-                    self.output(f"Step {step_number} - Attempt {attempt}: Wait time element not found.", 3)
+                    self.output(f"Шаг {step_number} - Попытка {attempt}: Элемент времени ожидания не найден.", 3)
 
             except Exception as e:
-                self.output(f"Step {step_number} - An error occurred on attempt {attempt}: {e}", 3)
+                self.output(f"Шаг {step_number} - Произошла ошибка при попытке {attempt}: {e}", 3)
 
         return False
 

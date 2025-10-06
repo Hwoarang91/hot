@@ -5,7 +5,7 @@ import time
 
 PROXY_DIR = os.path.abspath("./proxy")
 
-log_to_file = False  # Set this to False to log to /dev/null
+log_to_file = False  # Установите в False для записи логов в /dev/null
 
 def get_log_file_path():
     return os.path.join(PROXY_DIR, 'mitmproxy.log') if log_to_file else '/dev/null'
@@ -15,14 +15,14 @@ def check_pm2_process_exists(process_name):
         result = subprocess.run(['pm2', 'list'], capture_output=True, text=True)
         return process_name in result.stdout
     except Exception as e:
-        print(f"An error occurred while checking PM2 process: {e}")
+        print(f"Произошла ошибка при проверке процесса PM2: {e}")
         return False
 
 def install_wheel_if_missing():
     try:
         __import__('wheel')
     except ImportError:
-        print("Installing missing wheel package...")
+        print("Устанавливается отсутствующий пакет wheel...")
         subprocess.run(['pip3', 'install', 'wheel'], check=True)
 
 def install_mitmproxy():
@@ -41,7 +41,7 @@ def copy_certificates():
         subprocess.run(command1, shell=True, check=True)
         subprocess.run(command2, shell=True, check=True)
     else:
-        print(f"Certificate not found at {mitmproxy_cert_path}")
+        print(f"Сертификат не найден по пути {mitmproxy_cert_path}")
 
 def write_modify_requests_responses_script():
     script_content = """
@@ -51,36 +51,36 @@ import zlib
 import brotli
 
 def load(l):
-    ctx.log.info("modify_requests_responses.py script has started.")
+    ctx.log.info("Скрипт modify_requests_responses.py запущен.")
 
-# Modify outgoing requests (client to server)
+# Изменение исходящих запросов (клиент -> сервер)
 def request(flow: http.HTTPFlow) -> None:
     try:
         if flow.request:
-            # Replace 'tgWebAppPlatform=web' with 'tgWebAppPlatform=ios' in all URLs
+            # Заменить 'tgWebAppPlatform=web' на 'tgWebAppPlatform=ios' во всех URL
             if "tgWebAppPlatform=web" in flow.request.url:
-                ctx.log.info(f"Modifying outgoing URL: {flow.request.url}")
+                ctx.log.info(f"Изменение исходящего URL: {flow.request.url}")
                 flow.request.url = flow.request.url.replace("tgWebAppPlatform=web", "tgWebAppPlatform=ios")
-                ctx.log.info(f"Modified outgoing URL to: {flow.request.url}")
+                ctx.log.info(f"Исходящий URL изменён на: {flow.request.url}")
                 
-            # Detect platform via User-Agent and redirect 'telegram-web-app.js'
+            # Определение платформы по User-Agent и перенаправление 'telegram-web-app.js'
             user_agent = flow.request.headers.get('User-Agent', '')
             if 'telegram-web-app.js' in flow.request.pretty_url:
                 if any(keyword in user_agent for keyword in ['iPhone', 'iPad', 'iOS', 'iPhone OS']):
-                    # Redirect for iOS
+                    # Перенаправление для iOS
                     flow.request.path = flow.request.path.replace('telegram-web-app.js', 'games/utils/ios-60-telegram-web-app.js')
-                    ctx.log.info("Redirected to iOS-specific JavaScript for iOS platform.")
+                    ctx.log.info("Перенаправлено на JavaScript для iOS.")
                 elif 'Android' in user_agent:
-                    # Redirect for Android
+                    # Перенаправление для Android
                     flow.request.path = flow.request.path.replace('telegram-web-app.js', 'games/utils/android-60-telegram-web-app.js')
-                    ctx.log.info("Redirected to Android-specific JavaScript for Android platform.")
+                    ctx.log.info("Перенаправлено на JavaScript для Android.")
     except Exception as e:
-        ctx.log.error(f"Error modifying outgoing request for URL {flow.request.url}: {e}")
+        ctx.log.error(f"Ошибка при изменении исходящего запроса для URL {flow.request.url}: {e}")
 
-# Modify incoming responses (server to client)
+# Изменение входящих ответов (сервер -> клиент)
 def response(flow: http.HTTPFlow) -> None:
     try:
-        # Remove specific headers
+        # Удаление определённых заголовков
         headers_to_remove = ['Content-Security-Policy', 'X-Frame-Options']
         removed_headers = []
         for header in headers_to_remove:
@@ -89,16 +89,16 @@ def response(flow: http.HTTPFlow) -> None:
                 removed_headers.append(header)
 
         if removed_headers:
-            ctx.log.info(f"Removed headers from URL: {flow.request.url}")
-            ctx.log.debug(f"Removed Headers: {removed_headers}")
+            ctx.log.info(f"Удалены заголовки из ответа для URL: {flow.request.url}")
+            ctx.log.debug(f"Удалённые заголовки: {removed_headers}")
 
-        # Modify content if necessary
+        # Изменение содержимого при необходимости
         content_type = flow.response.headers.get("content-type", "").lower()
         content_encoding = flow.response.headers.get("content-encoding", "").lower()
 
-        # Check if content is of type HTML, JavaScript, or JSON
+        # Проверка типа содержимого: HTML, JavaScript или JSON
         if any(ct in content_type for ct in ["text/html", "application/javascript", "application/json", "text/javascript"]):
-            # Decompress if content is compressed
+            # Распаковка, если содержимое сжато
             if "gzip" in content_encoding:
                 decoded_content = zlib.decompress(flow.response.content, zlib.MAX_WBITS | 16).decode('utf-8', errors='replace')
                 compressed = 'gzip'
@@ -109,29 +109,29 @@ def response(flow: http.HTTPFlow) -> None:
                 decoded_content = flow.response.text
                 compressed = None
 
-            # Replace 'tgWebAppPlatform=web' with 'tgWebAppPlatform=ios' in content
+            # Замена 'tgWebAppPlatform=web' на 'tgWebAppPlatform=ios' в содержимом
             if "tgWebAppPlatform=web" in decoded_content:
-                ctx.log.info(f"'tgWebAppPlatform=web' found in response for URL: {flow.request.url}")
+                ctx.log.info(f"'tgWebAppPlatform=web' найдено в ответе для URL: {flow.request.url}")
                 modified_content = decoded_content.replace("tgWebAppPlatform=web", "tgWebAppPlatform=ios")
 
-                # Re-encode and compress if necessary
+                # Повторное сжатие, если необходимо
                 if compressed == 'gzip':
                     flow.response.content = zlib.compress(modified_content.encode('utf-8'))
-                    ctx.log.info("Content recompressed with gzip.")
+                    ctx.log.info("Содержимое повторно сжато gzip.")
                 elif compressed == 'br':
                     flow.response.content = brotli.compress(modified_content.encode('utf-8'))
-                    ctx.log.info("Content recompressed with Brotli.")
+                    ctx.log.info("Содержимое повторно сжато Brotli.")
                 else:
                     flow.response.text = modified_content
 
-                ctx.log.info(f"Modified content in response for URL: {flow.request.url}")
+                ctx.log.info(f"Содержимое ответа изменено для URL: {flow.request.url}")
 
-            # Update content length if necessary
+            # Обновление длины содержимого, если необходимо
             if 'content-length' in flow.response.headers:
                 flow.response.headers['content-length'] = str(len(flow.response.content))
 
     except Exception as e:
-        ctx.log.error(f"Error processing response for URL {flow.request.url}: {e}")
+        ctx.log.error(f"Ошибка обработки ответа для URL {flow.request.url}: {e}")
 """
 
     os.makedirs(PROXY_DIR, exist_ok=True)
@@ -154,37 +154,37 @@ def start_pm2_app(script_path, app_name):
 def main():
     process_name = "http-proxy"
 
-    # Check if the PM2 process exists
+    # Проверяем, существует ли процесс PM2
     pm2_process_exists = check_pm2_process_exists(process_name)
 
-    # If the PM2 process doesn't exist, proceed with setup
+    # Если процесс PM2 не существует, продолжаем настройку
     if not pm2_process_exists:
         install_wheel_if_missing()
 
-        print("Installing mitmproxy...")
+        print("Устанавливается mitmproxy...")
         install_mitmproxy()
 
-        print("Copying certificates...")
+        print("Копирование сертификатов...")
         copy_certificates()
 
-        print("Writing modify_requests_responses.py...")
+        print("Запись modify_requests_responses.py...")
         write_modify_requests_responses_script()
 
-        print("Writing start_mitmproxy.sh...")
+        print("Запись start_mitmproxy.sh...")
         write_start_script()
 
-        print("Creating PM2 process...")
+        print("Создание процесса PM2...")
         start_pm2_app(os.path.join(PROXY_DIR, 'start_mitmproxy.sh'), 'http-proxy')
 
-        print("Saving PM2 process list...")
+        print("Сохранение списка процессов PM2...")
         subprocess.run(['pm2', 'save'], check=True)
 
-        print("Setup complete. The http-proxy process is now running.")
+        print("Настройка завершена. Процесс http-proxy запущен.")
 
         time.sleep(5)
 
     else:
-        print("The PM2 process is running. Skipping setup.")
+        print("Процесс PM2 запущен. Настройка пропущена.")
 
 if __name__ == "__main__":
     main()

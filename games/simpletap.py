@@ -33,8 +33,8 @@ class SimpleTapClaimer(Claimer):
         self.script = "games/simpletap.py"
         self.prefix = "SimpleTap:"
         self.url = "https://web.telegram.org/k/#@Simple_Tap_Bot"
-        self.pot_full = "Filled"
-        self.pot_filling = "Mining"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "Добыча"
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
@@ -52,20 +52,20 @@ class SimpleTapClaimer(Claimer):
     def launch_iframe(self):
         super().launch_iframe()
 
-        # Open tab in main window
+        # Открыть вкладку в главном окне
         self.driver.switch_to.default_content()
 
         iframe = self.driver.find_element(By.TAG_NAME, "iframe")
         iframe_url = iframe.get_attribute("src")
         
-        # Check if 'tgWebAppPlatform=' exists in the iframe URL before replacing
+        # Проверить, существует ли 'tgWebAppPlatform=' в URL iframe перед заменой
         if "tgWebAppPlatform=" in iframe_url:
-            # Replace both 'web' and 'weba' with the dynamic platform
+            # Заменить 'web' и 'weba' на динамическую платформу
             iframe_url = iframe_url.replace("tgWebAppPlatform=web", f"tgWebAppPlatform={self.default_platform}")
             iframe_url = iframe_url.replace("tgWebAppPlatform=weba", f"tgWebAppPlatform={self.default_platform}")
-            self.output(f"Platform found and replaced with '{self.default_platform}'.", 2)
+            self.output(f"Платформа найдена и заменена на '{self.default_platform}'.", 2)
         else:
-            self.output("No tgWebAppPlatform parameter found in the iframe URL.", 2)
+            self.output("Параметр tgWebAppPlatform не найден в URL iframe.", 2)
 
         self.driver.execute_script(f"location.href = '{iframe_url}'")
 
@@ -82,148 +82,148 @@ class SimpleTapClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.",1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.",1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}",1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}",1)
 
     def full_claim(self):
         self.step = "100"
         self.launch_iframe()
 
-        status_text = None  # Initialize status_text early
+        status_text = None  # Инициализировать status_text заранее
 
         try:
-            # New button to join "Bump"
+            # Новая кнопка для присоединения к "Bump"
             original_window = self.driver.current_window_handle
             xpath = "//*[text()='Start']"
-            self.move_and_click(xpath, 8, True, "click the 'Start' button (may not be present)", self.step, "clickable")
+            self.move_and_click(xpath, 8, True, "нажать кнопку 'Start' (может отсутствовать)", self.step, "clickable")
 
-            # Switch back to the original window if a new one is opened
+            # Вернуться к исходному окну, если открылось новое
             new_window = [window for window in self.driver.window_handles if window != original_window]
             if new_window:
                 self.driver.switch_to.window(original_window)
         except TimeoutException:
             if self.settings['debugIsOn']:
-                self.output(f"Step {self.step} - 'Start' button not found or no new window opened.", 3)
+                self.output(f"Шаг {self.step} - Кнопка 'Start' не найдена или новое окно не открыто.", 3)
         self.increase_step()
 
-        opening_balance = self.get_balance(False)  # Capture starting balance
+        opening_balance = self.get_balance(False)  # Запомнить начальный баланс
 
-        # Collect the reward.
+        # Собрать награду.
         xpath = "//div[contains(text(), 'Collect')]"
-        self.move_and_click(xpath, 8, True, "click the 'Collect' button (may not be present)", self.step, "clickable")
+        self.move_and_click(xpath, 8, True, "нажать кнопку 'Collect' (может отсутствовать)", self.step, "clickable")
 
-        # Farming
+        # Фермерство
         xpath = "//div[contains(text(), 'Start farming')]"
-        button = self.move_and_click(xpath, 8, False, "click the 'Start farming' button", self.step, "clickable")
+        button = self.move_and_click(xpath, 8, False, "нажать кнопку 'Start farming'", self.step, "clickable")
         if button: 
             button.click()
-            status_text = "STATUS: Starting to farm now"
+            status_text = "СТАТУС: Начинаем фермерство"
         else:
-            status_text = "STATUS: Already farming"
+            status_text = "СТАТУС: Уже фермерство"
 
         self.increase_step()
 
-        closing_balance = self.get_balance(True)  # Capture closing balance
+        closing_balance = self.get_balance(True)  # Запомнить конечный баланс
 
         try:
-            # Convert both balances to float and calculate the balance change
+            # Преобразовать оба баланса в float и вычислить изменение баланса
             opening_balance = float(opening_balance)
             closing_balance = float(closing_balance)
             balance_increase = closing_balance - opening_balance
 
-            # Update status_text based on balance change
+            # Обновить status_text в зависимости от изменения баланса
             if balance_increase > 0:
-                status_text += f". Balance increased by {balance_increase:.2f}"
+                status_text += f". Баланс увеличился на {balance_increase:.2f}"
             else:
-                status_text += ". No balance increase"
+                status_text += ". Увеличения баланса нет"
         except ValueError:
-            # Handle conversion errors
-            self.output("Error converting balances to float", 3)
+            # Обработка ошибок преобразования
+            self.output("Ошибка при преобразовании балансов в число с плавающей точкой", 3)
 
         wait_time = self.get_wait_time(self.step, "pre-claim") 
 
-        # Take friends points
+        # Взять очки друзей
         xpath = "(//div[@class='appbar-tab'])[last()]"
-        button = self.move_and_click(xpath, 8, False, "open 'Friends' tab", self.step, "clickable")
+        button = self.move_and_click(xpath, 8, False, "открыть вкладку 'Друзья'", self.step, "clickable")
         if button: button.click()
 
         xpath = "//div[contains(@class, 'claim-button')]"
-        button = self.move_and_click(xpath, 8, False, "click the 'Take Friends Points' button", self.step, "clickable")
+        button = self.move_and_click(xpath, 8, False, "нажать кнопку 'Взять очки друзей'", self.step, "clickable")
         if button: 
             button.click()
 
-            # Close the congratulations popup
+            # Закрыть всплывающее окно поздравления
             xpath = "//div[contains(@class, 'invite_claimed-button')]"
-            button = self.move_and_click(xpath, 8, False, "exit the 'Congratulations' popup", self.step, "clickable")
+            button = self.move_and_click(xpath, 8, False, "закрыть всплывающее окно 'Поздравляем'", self.step, "clickable")
             if button: button.click()
                 
         self.increase_step()
 
         if wait_time is None:
-            self.output(f"{status_text} - Failed to get wait time. Next try in 60 minutes", 3)
+            self.output(f"{status_text} - Не удалось получить время ожидания. Следующая попытка через 60 минут", 3)
             return 60
         else:
-            self.output(f"{status_text} - Next try in {self.show_time(wait_time)}.", 2)
+            self.output(f"{status_text} - Следующая попытка через {self.show_time(wait_time)}.", 2)
             return max(wait_time, 60)
 
     def get_balance(self, claimed=False):
 
         def strip_html_and_non_numeric(text):
-            """Remove HTML tags and keep only numeric characters and decimal points."""
-            # Remove HTML tags
+            """Удалить HTML теги и оставить только цифры и десятичные точки."""
+            # Удалить HTML теги
             clean = re.compile('<.*?>')
             text_without_html = clean.sub('', text)
-            # Keep only numeric characters and decimal points
+            # Оставить только цифры и десятичные точки
             numeric_text = re.sub(r'[^0-9.]', '', text_without_html)
             return numeric_text
 
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
-        # Dynamically adjust the log priority
+        # Динамически настроить приоритет логирования
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct the specific balance XPath
-        balance_text = f'{prefix} BALANCE:' if claimed else f'{prefix} BALANCE:'
+        # Сформировать XPath для баланса
+        balance_text = f'{prefix} БАЛАНС:' if claimed else f'{prefix} БАЛАНС:'
         balance_xpath = "//div[contains(@class, 'home_balance')]"
 
         try:
             element = self.monitor_element(balance_xpath)
 
-            # Check if element is not None and process the balance
+            # Проверить, что элемент не None и обработать баланс
             if element:
-                cleaned_balance = strip_html_and_non_numeric(element)  # Ensure we get the text of the element
-                self.output(f"Step {self.step} - {balance_text} {cleaned_balance}", priority)
+                cleaned_balance = strip_html_and_non_numeric(element)  # Убедиться, что получаем текст элемента
+                self.output(f"Шаг {self.step} - {balance_text} {cleaned_balance}", priority)
                 return cleaned_balance
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с '{prefix} Баланс:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Вывести ошибку как строку для логирования
 
-        # Increment step function, assumed to handle next step logic
+        # Функция увеличения шага, предполагается, что обрабатывает логику следующего шага
         self.increase_step()
 
     def get_wait_time(self, step_number="108", beforeAfter="pre-claim"):
         try:
 
-            self.output(f"Step {self.step} - check if the timer is elapsing...", 3)
+            self.output(f"Шаг {self.step} - проверка истечения таймера...", 3)
 
             xpath = "//div[contains(@class, 'header_timer')]"
             wait_time = self.extract_time(self.strip_html_tags(self.monitor_element(xpath, 15)))
 
-            self.output(f"Step {self.step} - The wait time is {wait_time} minutes.")
+            self.output(f"Шаг {self.step} - Время ожидания {wait_time} минут.")
 
             return wait_time          
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 3)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 3)
             if self.settings['debugIsOn']:
                 screenshot_path = f"{self.screenshots_path}/{self.step}_get_wait_time_error.png"
                 self.driver.save_screenshot(screenshot_path)
-                self.output(f"Screenshot saved to {screenshot_path}", 3)
+                self.output(f"Скриншот сохранён в {screenshot_path}", 3)
 
             return None
 
@@ -248,8 +248,8 @@ class SimpleTapClaimer(Claimer):
         hours = int(time / 60)
         minutes = time % 60
         if hours > 0:
-            return f"{hours} hours and {minutes} minutes"
-        return f"{minutes} minutes"
+            return f"{hours} часов и {minutes} минут"
+        return f"{minutes} минут"
 
 def main():
     claimer = SimpleTapClaimer()

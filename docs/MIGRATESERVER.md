@@ -27,8 +27,7 @@
 6. Скопируйте `compressed_files.tar.gz` в директорию `HotWalletBot` и распакуйте его:
    ```bash
    cp /path/to/compressed_files.tar.gz /path/to/HotWalletBot
-   ```
-   ```bash
+   bash
    cd HotWalletBot
    tar -xzvf compressed_files.tar.gz
    ```

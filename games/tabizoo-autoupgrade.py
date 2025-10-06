@@ -39,47 +39,47 @@ class TabizooAUClaimer(TabizooClaimer):
         try:
             start_lvl = None
             end_lvl = None
-            # attempts one upgrade per claim session
+            # пытается выполнить одно улучшение за сессию получения награды
             xpath = "//span[contains(text(), 'Lv')]"
-            current_level = self.monitor_element(xpath, 15, "current level")
+            current_level = self.monitor_element(xpath, 15, "текущий уровень")
             original_balance = balance
             self.increase_step()
             if current_level:
-                self.output(f"Step {self.step} - Current level is: {current_level}", 2)
+                self.output(f"Шаг {self.step} - Текущий уровень: {current_level}", 2)
 
             xpath = "//img[contains(@src, 'level_icon')]"
-            if self.brute_click(xpath, 10, "click the 'Upgrade' tab"):
+            if self.brute_click(xpath, 10, "нажать на вкладку 'Улучшение'"):
                 self.increase_step()
 
                 xpath = "//label[text()='Consume']/following-sibling::p//span"
                 upgrade_cost = None
-                upgrade_cost = self.monitor_element(xpath, 15, "upgrade cost")
+                upgrade_cost = self.monitor_element(xpath, 15, "стоимость улучшения")
                 self.increase_step()
                 if upgrade_cost:
-                    self.output(f"Step {self.step} - Upgrade cost is: {upgrade_cost}", 3)
+                    self.output(f"Шаг {self.step} - Стоимость улучшения: {upgrade_cost}", 3)
 
                 xpath = "//div[text()='Insufficient Balance']"
-                no_money = self.move_and_click(xpath, 10, False, "check if we have enough funds (timeout means we have enough!)", self.step, "clickable")
+                no_money = self.move_and_click(xpath, 10, False, "проверить, достаточно ли средств (таймаут означает, что средств достаточно!)", self.step, "доступно для клика")
                 self.increase_step()
                 if no_money:
-                    self.output(f"Step {self.step} - Upgrade costs {upgrade_cost} but you only have {balance}.", 3)
+                    self.output(f"Шаг {self.step} - Улучшение стоит {upgrade_cost}, но у вас только {balance}.", 3)
                     return
 
                 for attempt in range(3):
                     xpath = "//div[text()='Upgrade']"
-                    self.brute_click(xpath, 10, f"attempt {attempt+1} to click the 'Upgrade' button")
+                    self.brute_click(xpath, 10, f"попытка {attempt+1} нажать кнопку 'Улучшить'")
                     self.increase_step()
                     
-                    # Check if the upgrade cost increased
-                    new_upgrade_cost = self.monitor_element("//label[text()='Consume']/following-sibling::p//span", 10, "upgrade cost after click")
+                    # Проверяем, увеличилась ли стоимость улучшения
+                    new_upgrade_cost = self.monitor_element("//label[text()='Consume']/following-sibling::p//span", 10, "стоимость улучшения после нажатия")
                     
                     if new_upgrade_cost and new_upgrade_cost != upgrade_cost:
-                        break  # Exit the loop if the cost changed, meaning the upgrade likely went through
+                        break  # Выход из цикла, если стоимость изменилась, значит улучшение, вероятно, прошло
 
                 self.quit_driver()
                 self.launch_iframe()
                 xpath = "//span[contains(text(), 'Lv')]"
-                new_level = self.monitor_element(xpath, 15, "current level")
+                new_level = self.monitor_element(xpath, 15, "текущий уровень")
                 self.increase_step()
 
                 if current_level:
@@ -89,20 +89,20 @@ class TabizooAUClaimer(TabizooClaimer):
 
                 if start_lvl and new_level:
                     if end_lvl > start_lvl:
-                        self.output(f"STATUS: Upgraded from {current_level} to {new_level} at a cost of {upgrade_cost}.", 2)
+                        self.output(f"СТАТУС: Улучшено с {current_level} до {new_level} за {upgrade_cost}.", 2)
                     else:
-                        self.output(f"Step {self.step} - Looks like the upgrade sequence failed.", 2)
+                        self.output(f"Шаг {self.step} - Похоже, последовательность улучшения не удалась.", 2)
                 else:
-                    self.output(f"Step {self.step} - We failed to read some of the levels.", 2)
+                    self.output(f"Шаг {self.step} - Не удалось прочитать некоторые уровни.", 2)
 
         except NoSuchElementException as e:
-            self.output(f"Step {self.step} - Element not found: {str(e)}", 1)
+            self.output(f"Шаг {self.step} - Элемент не найден: {str(e)}", 1)
         except TimeoutException as e:
-            self.output(f"Step {self.step} - Timeout occurred: {str(e)}", 1)
+            self.output(f"Шаг {self.step} - Произошло превышение времени ожидания: {str(e)}", 1)
         except ElementClickInterceptedException as e:
-            self.output(f"Step {self.step} - Click was intercepted: {str(e)}", 1)
+            self.output(f"Шаг {self.step} - Клик был перехвачен: {str(e)}", 1)
         except Exception as e:
-            self.output(f"Step {self.step} - An unexpected error occurred: {str(e)}", 1)
+            self.output(f"Шаг {self.step} - Произошла неожиданная ошибка: {str(e)}", 1)
 
 def main():
     claimer = TabizooAUClaimer()

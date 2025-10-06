@@ -63,9 +63,9 @@ class UXUYlaimer(Claimer):
             self.increase_step()
             self.set_cookies()
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение установленного времени ожидания.", 1)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
 
@@ -74,25 +74,25 @@ class UXUYlaimer(Claimer):
         self.launch_iframe()
         
         xpath = "//div/span[contains(normalize-space(.), 'Claim')]"
-        success = self.move_and_click(xpath, 15, True, "check if the claim is ready", self.step, "clickable")
+        success = self.move_and_click(xpath, 15, True, "проверить, готов ли клик для получения награды", self.step, "clickable")
         self.increase_step()
         if success:
             xpath = "//div/span[contains(normalize-space(.), 'Claim')]"
-            self.move_and_click(xpath, 15, True, "check if the claim is ready", self.step, "clickable")
+            self.move_and_click(xpath, 15, True, "проверить, готов ли клик для получения награды", self.step, "clickable")
             self.increase_step()
         
         xpath = "//div[normalize-space(text())='UXUY Point']/following-sibling::div[1]"
-        self.move_and_click(xpath, 15, True, "move to the farming page", self.step, "clickable")
+        self.move_and_click(xpath, 15, True, "перейти на страницу фарминга", self.step, "clickable")
         self.increase_step()
               
         claim_status = "pre-claim"
         
         if success:
             claim_status = "post-claim"
-            update_text = "Claim successful"
+            update_text = "Получение награды прошло успешно"
             bal_status = True
         else:
-            update_text = "No claim made"
+            update_text = "Награда не получена"
             bal_status = False
 
         self.get_balance(self.balance_xpath, bal_status)
@@ -102,12 +102,12 @@ class UXUYlaimer(Claimer):
 
         if remaining_wait_time:
             self.random_offset = self.apply_random_offset(remaining_wait_time)
-            self.output(f"STATUS: {update_text}. Wait time is {self.show_time(self.random_offset)}.", 1)
+            self.output(f"СТАТУС: {update_text}. Время ожидания {self.show_time(self.random_offset)}.", 1)
             return self.random_offset
         else:
             remaining_wait_time = 60
             self.random_offset = self.apply_random_offset(remaining_wait_time)
-            self.output(f"STATUS: Unable to determine the true wait time. Returning in {self.show_time(self.random_offset)}.", 1)
+            self.output(f"СТАТУС: Не удалось определить точное время ожидания. Возвращаемся через {self.show_time(self.random_offset)}.", 1)
             return self.random_offset
 
 def main():

@@ -28,7 +28,7 @@ from timefarm import TimeFarmClaimer
 
 class TimeFarmAUClaimer(TimeFarmClaimer):
 
-    last_success_timestamp = None  # Class variable to store the timestamp in memory
+    last_success_timestamp = None  # Переменная класса для хранения отметки времени в памяти
 
     def initialize_settings(self):
         super().initialize_settings()
@@ -46,91 +46,91 @@ class TimeFarmAUClaimer(TimeFarmClaimer):
         return TimeFarmAUClaimer.last_success_timestamp
 
     def stake_coins(self):
-        # Check if less than 24 hours have passed since the last successful operation
+        # Проверяем, прошло ли менее 24 часов с момента последней успешной операции
         last_success = self.load_timestamp()
         if last_success:
             elapsed_time = datetime.now() - last_success
             if elapsed_time < timedelta(hours=24):
-                print("Less than 24 hours have passed since the last successful operation.")
+                print("С момента последней успешной операции прошло менее 24 часов.")
                 return
         
-        # Move to the earn tab
+        # Переходим на вкладку заработка
         xpath = "//div[@class='tab-title' and contains(., 'Earn')]"
-        success = self.move_and_click(xpath, 20, True, "switch to the 'Earn' tab", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "переключиться на вкладку 'Заработок'", self.step, "clickable")
         if not success:
             return
         self.increase_step()
 
-        # Move to the staking tab
+        # Переходим на вкладку стейкинга
         xpath = "//div[@class='title' and contains(., 'Staking')]"
-        success = self.move_and_click(xpath, 20, True, "switch to the 'Staking' tab", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "переключиться на вкладку 'Стейкинг'", self.step, "clickable")
         if not success:
             return
         self.increase_step()
 
-        # Let's check if we have an existing claim
+        # Проверим, есть ли существующий клейм
         xpath = "(//div[not(contains(@class, 'disabled'))]/div[@class='btn-text' and text()='Claim'])[1]"
-        success = self.move_and_click(xpath, 20, True, "try to claim to oldest amount (if any)", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "попытаться получить самый старый клейм (если есть)", self.step, "clickable")
         if success:
-            self.output(f"Step {self.step} - We were able to collect the oldest amount.", 3)
+            self.output(f"Шаг {self.step} - Мы смогли собрать самый старый клейм.", 3)
         else:
-            self.output(f"Step {self.step} - It seems there were no old staking claims to collect.", 3)
+            self.output(f"Шаг {self.step} - Похоже, старых клеймов для стейкинга не было.", 3)
         self.increase_step()
 
-        # Click the staking button
+        # Нажимаем кнопку стейкинга
         xpath = "//div[@class='btn-text' and (contains(., 'Stake') or contains(., 'Start staking')) and not(ancestor::div[contains(@class, 'disabled')])]"
-        success = self.move_and_click(xpath, 20, True, "click the 'Stake' button'", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "нажать кнопку 'Стейк'", self.step, "clickable")
         if not success:
-            self.output(f"Step {self.step} - It appears that no further staking is currently available, restarting browser.", 2)
+            self.output(f"Шаг {self.step} - Похоже, что дальнейший стейкинг сейчас недоступен, перезапускаем браузер.", 2)
             self.quit_driver()
             self.launch_iframe()
             return
         self.increase_step()
 
-        # Choose the default (3 days) option by clicking continue
+        # Выбираем опцию по умолчанию (3 дня), нажав продолжить
         xpath = "(//div[@class='btn-text' and contains(., 'Continue')])[1]"
-        success = self.move_and_click(xpath, 20, True, "click the 'Continue' button'", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "нажать кнопку 'Продолжить'", self.step, "clickable")
         if not success:
             return
         self.increase_step()
 
-        # Select the Max option
+        # Выбираем опцию Макс
         xpath = "//div[@class='percent' and contains(., 'MAX')]"
-        success = self.move_and_click(xpath, 20, True, "click the 'MAX' option'", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "нажать опцию 'МАКС'", self.step, "clickable")
         if not success:
             return
         self.increase_step()
 
-        # Click the "Continue" button
+        # Нажимаем кнопку "Продолжить"
         xpath = "(//div[@class='btn-text' and contains(., 'Continue')])[2]"
-        success = self.move_and_click(xpath, 20, True, "click the 'Continue' button'", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "нажать кнопку 'Продолжить'", self.step, "clickable")
         if not success:
-            self.output(f"Step {self.step} - It appears that no further staking is currently available, restarting browser.", 2)
+            self.output(f"Шаг {self.step} - Похоже, что дальнейший стейкинг сейчас недоступен, перезапускаем браузер.", 2)
             self.quit_driver()
             self.launch_iframe()
             return
         self.increase_step()
 
-        # Click the "Stake" button
+        # Нажимаем кнопку "Стейк"
         xpath = "//div[@class='btn-text' and contains(., 'Stake')]"
-        success = self.move_and_click(xpath, 20, True, "click the 'Stake' button'", self.step, "clickable")
+        success = self.move_and_click(xpath, 20, True, "нажать кнопку 'Стейк'", self.step, "clickable")
         if not success:
-            self.output(f"Step {self.step} - It appears that no further staking is currently available, restarting browser.", 2)
+            self.output(f"Шаг {self.step} - Похоже, что дальнейший стейкинг сейчас недоступен, перезапускаем браузер.", 2)
             self.quit_driver()
             self.launch_iframe()
             return
         self.increase_step()
 
         xpath = "//*[contains(text(), \"You've successfully\")]"
-        if self.move_and_click(xpath, 5, False, "check for success", self.step, "visible"):
-            self.output(f"STATUS: We clicked the Staking link and it confirmed success.", 1)
+        if self.move_and_click(xpath, 5, False, "проверить успешность", self.step, "visible"):
+            self.output(f"СТАТУС: Мы нажали ссылку Стейкинга и получили подтверждение успеха.", 1)
             self.increase_step()
-            self.save_timestamp()  # Save the timestamp after success
-            return "3-day Stake Successful. "
+            self.save_timestamp()  # Сохраняем отметку времени после успеха
+            return "Стейкинг на 3 дня выполнен успешно. "
         else:
-            self.output(f"STATUS: We clicked the Staking link (3-day time/max available coins).", 1)
+            self.output(f"СТАТУС: Мы нажали ссылку Стейкинга (3-дневный срок/максимальное количество монет).", 1)
             self.increase_step()
-            return "Staking attempted. "
+            return "Попытка стейкинга выполнена. "
 
 def main():
     claimer = TimeFarmAUClaimer()

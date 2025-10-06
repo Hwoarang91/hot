@@ -33,12 +33,12 @@ class GameeClaimer(Claimer):
         self.script = "games/gamee.py"
         self.prefix = "Gamee:"
         self.url = "https://web.telegram.org/k/#@gamee"
-        self.pot_full = "Filled"
-        self.pot_filling = "Mining"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "Добыча"
         self.seed_phrase = None
         self.forceLocalProxy = True
         self.forceRequestUserAgent = False
-        self.start_app_xpath = "//div[text()='Open app']"
+        self.start_app_xpath = "//div[text()='Открыть приложение']"
 
     def __init__(self):
         self.settings_file = "variables.txt"
@@ -51,20 +51,20 @@ class GameeClaimer(Claimer):
     def launch_iframe(self):
         super().launch_iframe()
 
-        # Open tab in main window
+        # Открыть вкладку в главном окне
         self.driver.switch_to.default_content()
 
         iframe = self.driver.find_element(By.TAG_NAME, "iframe")
         iframe_url = iframe.get_attribute("src")
         
-        # Check if 'tgWebAppPlatform=' exists in the iframe URL before replacing
+        # Проверить, существует ли 'tgWebAppPlatform=' в URL iframe перед заменой
         if "tgWebAppPlatform=" in iframe_url:
-            # Replace both 'web' and 'weba' with the dynamic platform
+            # Заменить 'web' и 'weba' на динамическую платформу
             iframe_url = iframe_url.replace("tgWebAppPlatform=web", f"tgWebAppPlatform={self.default_platform}")
             iframe_url = iframe_url.replace("tgWebAppPlatform=weba", f"tgWebAppPlatform={self.default_platform}")
-            self.output(f"Platform found and replaced with '{self.default_platform}'.", 2)
+            self.output(f"Платформа найдена и заменена на '{self.default_platform}'.", 2)
         else:
-            self.output("No tgWebAppPlatform parameter found in the iframe URL.", 2)
+            self.output("Параметр tgWebAppPlatform не найден в URL iframe.", 2)
 
         self.driver.execute_script(f"location.href = '{iframe_url}'")
 
@@ -81,10 +81,10 @@ class GameeClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.",1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.",1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}",1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}",1)
 
     def full_claim(self):
         self.step = "100"
@@ -94,29 +94,29 @@ class GameeClaimer(Claimer):
 
         status_text = ""
 
-        # Attempt to click the 'Start mining' button
+        # Попытка нажать кнопку 'Начать добычу'
         xpath = "//button[span[contains(text(), 'Start mining')]]"
-        clicked = self.move_and_click(xpath, 8, True, "click the 'Start mining' button", self.step, "clickable")
+        clicked = self.move_and_click(xpath, 8, True, "нажать кнопку 'Начать добычу'", self.step, "clickable")
         if clicked:
-            self.output(f"Step {self.step} - Successfully clicked 'Start mining' button.", 3)
-            status_text = "Started MINING"
+            self.output(f"Шаг {self.step} - Успешно нажата кнопка 'Начать добычу'.", 3)
+            status_text = "Добыча начата"
         else:
-            # Attempt to click the 'Claim & start' button
+            # Попытка нажать кнопку 'Заявить и начать'
             xpath = "//button[span[contains(text(), 'Claim & start')]]"
-            clicked = self.move_and_click(xpath, 8, True, "click the 'Claim & start' button", self.step, "clickable")
+            clicked = self.move_and_click(xpath, 8, True, "нажать кнопку 'Заявить и начать'", self.step, "clickable")
             if clicked:
-                self.output(f"Step {self.step} - Successfully clicked 'Claim & Start' button.", 3)
-                status_text = "Started MINING"
+                self.output(f"Шаг {self.step} - Успешно нажата кнопка 'Заявить и начать'.", 3)
+                status_text = "Добыча начата"
             else:
-                # Check if currently mining
+                # Проверить, идет ли добыча
                 xpath = "//p[contains(text(), 'to claim')]"
-                element_present = self.move_and_click(xpath, 8, False, "check if currently mining", self.step, "clickable")
+                element_present = self.move_and_click(xpath, 8, False, "проверить, идет ли добыча", self.step, "clickable")
                 if element_present:
-                    self.output(f"Step {self.step} - Currently mining: YES.", 3)
-                    status_text = "Currently mining"
+                    self.output(f"Шаг {self.step} - Добыча идет: ДА.", 3)
+                    status_text = "Добыча идет"
                 else:
-                    self.output(f"Step {self.step} - MINING button NOT found.", 3)
-                    status_text = "MINING button NOT found"
+                    self.output(f"Шаг {self.step} - Кнопка 'Добыча' НЕ найдена.", 3)
+                    status_text = "Кнопка 'Добыча' НЕ найдена"
 
         self.increase_step()
 
@@ -125,95 +125,95 @@ class GameeClaimer(Claimer):
 
 
         xpath = "//div[contains(@href, 'wheel')]"
-        self.move_and_click(xpath, 10, True, "click the 'Spin TAB'", self.step, "clickable")
+        self.move_and_click(xpath, 10, True, "нажать вкладку 'Колесо'", self.step, "clickable")
         xpath = "//button[.//text()[contains(., 'available')]]"
-        success = self.move_and_click(xpath, 10, True, "spin the wheel", self.step, "clickable")
+        success = self.move_and_click(xpath, 10, True, "крутить колесо", self.step, "clickable")
         if success:
-            status_text += ". Wheel bonus collected"
+            status_text += ". Бонус колеса получен"
 
         if wait_time is None:
-            self.output(f"STATUS: {status_text} - Failed to get wait time. Next try in 60 minutes", 2)
+            self.output(f"СТАТУС: {status_text} - Не удалось получить время ожидания. Следующая попытка через 60 минут", 2)
             return 60
         else:
             remaining_time = self.apply_random_offset(wait_time)
-            self.output(f"STATUS: {status_text} - Next try in {self.show_time(remaining_time)}.", 1)
+            self.output(f"СТАТУС: {status_text} - Следующая попытка через {self.show_time(remaining_time)}.", 1)
             return wait_time
 
     def get_balance(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
-        # Dynamically adjust the log priority
+        # Динамически настроить приоритет логирования
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct text based on before/after
-        balance_text = f'{prefix} BALANCE:' if claimed else f'{prefix} BALANCE:'
+        # Сформировать текст на основе до/после
+        balance_text = f'{prefix} БАЛАНС:' if claimed else f'{prefix} БАЛАНС:'
         balance_xpath = "//p[@id='wat-racer-mining--bht-text']"
 
         try:
-            element = self.strip_html_and_non_numeric(self.monitor_element(balance_xpath, 15, "get balance"))
+            element = self.strip_html_and_non_numeric(self.monitor_element(balance_xpath, 15, "получить баланс"))
 
-            # Check if element is not None and process the balance
+            # Проверить, что элемент не None и обработать баланс
             if element:
                 balance_float = float(element)
-                self.output(f"Step {self.step} - {balance_text} {balance_float}", priority)
+                self.output(f"Шаг {self.step} - {balance_text} {balance_float}", priority)
                 return balance_float
             else:
-                self.output(f"Step {self.step} - {balance_text} not found or not numeric.", priority)
+                self.output(f"Шаг {self.step} - {balance_text} не найден или не числовой.", priority)
                 return None
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с '{prefix} Баланс:' не найден.", priority)
             return None
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Ошибка как строка для логирования
             return None
 
-        # Increment step function, assumed to handle next step logic
+        # Функция увеличения шага, предполагается, что обрабатывает логику следующего шага
         self.increase_step()
 
     def get_profit_hour(self, claimed=False):
 
         self.driver.execute_script("location.href = 'https://prizes.gamee.com/telegram/mining/26'")
 
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
-        # Dynamically adjust the log priority
+        # Динамически настроить приоритет логирования
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct the specific profit XPath
-        profit_text = f'{prefix} PROFIT/HOUR:'
+        # Сформировать XPath для прибыли
+        profit_text = f'{prefix} ПРИБЫЛЬ/ЧАС:'
         profit_xpath = "(//p[contains(@class, 'bXJWuE')])[1]"
 
         try:
             element = self.monitor_element(profit_xpath)
             if element:
                 profit_part = self.strip_html_and_non_numeric(element)
-                self.output(f"Step {self.step} - {profit_text} {profit_part}", priority)
+                self.output(f"Шаг {self.step} - {profit_text} {profit_part}", priority)
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Profit/Hour:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с '{prefix} Прибыль/Час:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Ошибка как строка для логирования
 
-        # Increment step function, assumed to handle next step logic
+        # Функция увеличения шага, предполагается, что обрабатывает логику следующего шага
         self.increase_step()
 
     def get_wait_time(self, step_number="108", beforeAfter="pre-claim"):
         try:
-            self.output(f"Step {self.step} - Get the wait time...", 3)
+            self.output(f"Шаг {self.step} - Получение времени ожидания...", 3)
 
-            # XPath to find the element containing the wait time
+            # XPath для поиска элемента с временем ожидания
             xpath = "//p[contains(text(), 'to claim')]"
-            wait_time_text = self.monitor_element(xpath, 10, "claim timer")
+            wait_time_text = self.monitor_element(xpath, 10, "таймер ожидания")
 
-            # Check if wait_time_text is not empty
+            # Проверить, что wait_time_text не пустой
             if wait_time_text:
                 wait_time_text = wait_time_text.strip()
-                self.output(f"Step {self.step} - Extracted wait time text: '{wait_time_text}'", 3)
+                self.output(f"Шаг {self.step} - Извлечён текст времени ожидания: '{wait_time_text}'", 3)
 
-                # Regular expression to find all numbers followed by 'h' or 'm', possibly with spaces
+                # Регулярное выражение для поиска чисел с 'h' или 'm', возможно с пробелами
                 pattern = r'(\d+)\s*([hH]|hours?|[mM]|minutes?)'
                 matches = re.findall(pattern, wait_time_text)
 
@@ -225,18 +225,18 @@ class GameeClaimer(Claimer):
                             total_minutes += int(value) * 60
                         elif unit.startswith('m'):
                             total_minutes += int(value)
-                    self.output(f"Step {self.step} - Total wait time in minutes: {total_minutes}", 3)
+                    self.output(f"Шаг {self.step} - Общее время ожидания в минутах: {total_minutes}", 3)
                     return total_minutes if total_minutes > 0 else False
                 else:
-                    # If the pattern doesn't match, return False
-                    self.output(f"Step {self.step} - Wait time pattern not matched in text: '{wait_time_text}'", 3)
+                    # Если шаблон не совпал, вернуть False
+                    self.output(f"Шаг {self.step} - Шаблон времени ожидания не совпал с текстом: '{wait_time_text}'", 3)
                     return False
             else:
-                # No text found in the element
-                self.output(f"Step {self.step} - No wait time text found.", 3)
+                # Текст не найден в элементе
+                self.output(f"Шаг {self.step} - Текст времени ожидания не найден.", 3)
                 return False
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 3)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 3)
             return False
 
 def main():

@@ -35,8 +35,8 @@ class SpellClaimer(Claimer):
         self.script = "games/spell.py"
         self.prefix = "Spell:"
         self.url = "https://web.telegram.org/k/#@spell_wallet_bot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "заполняется"
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
@@ -46,30 +46,30 @@ class SpellClaimer(Claimer):
 
     def charge_until_complete(self, max_seconds: float = 10.0, pause: float = 0.25) -> bool:
         """
-        Repeatedly click the 'Charging…' claim button for up to max_seconds.
-        Stops early if progress hits 100% or the 'Spin the Wheel' UI appears.
-        Returns True if we likely completed the charge, else False.
+        Многократно нажимает кнопку 'Зарядка…' в течение max_seconds.
+        Останавливается раньше, если прогресс достигает 100% или появляется интерфейс 'Крутить колесо'.
+        Возвращает True, если зарядка, вероятно, завершена, иначе False.
         """
         start = time.time()
     
-        # robust selectors for the same button/state
+        # надежные селекторы для той же кнопки/состояния
         charging_xpaths = [
-            # Button with explicit "Charging..."
+            # Кнопка с явным текстом "Зарядка..."
             "//button[.//p[normalize-space()='Charging...']]",
     
-            # Button that has a progressbar + a 'Charging' label
-            "//button[.//div[@role='progressbar'] and .//p[contains(normalize-space(),'Charging')]]",
+            # Кнопка с индикатором прогресса + меткой 'Charging'
+            "//button[.//div[@role='progressbar'] и .//p[contains(normalize-space(),'Charging')]]",
     
-            # Button that owns a progressbar with a numeric value (1..99)
-            "//div[@role='progressbar' and number(@aria-valuenow) >= 1 and number(@aria-valuenow) < 100]/ancestor::button[1]",
+            # Кнопка, владеющая индикатором прогресса с числовым значением (1..99)
+            "//div[@role='progressbar' и number(@aria-valuenow) >= 1 и number(@aria-valuenow) < 100]/ancestor::button[1]",
     
-            # Button showing a percent label (e.g. 20%)
-            "//button[.//div[@role='progressbar'] and .//div[contains(normalize-space(.), '%')]]",
+            # Кнопка с отображением процента (например, 20%)
+            "//button[.//div[@role='progressbar'] и .//div[contains(normalize-space(.), '%')]]",
         ]
     
-        # quick checks for "done" states
+        # быстрые проверки "завершения"
         spin_xpath   = "//p[contains(normalize-space(.), 'Spin the Wheel')]"
-        percent_node = "//div[@role='progressbar' and @aria-valuenow]"
+        percent_node = "//div[@role='progressbar' и @aria-valuenow]"
     
         def read_progress() -> float | None:
             try:
@@ -80,25 +80,25 @@ class SpellClaimer(Claimer):
                 return None
     
         while time.time() - start < max_seconds:
-            # finished already?
+            # уже закончено?
             try:
                 if self.driver.find_elements(By.XPATH, spin_xpath):
-                    self.output(f"Step {self.step} - Wheel appeared; charging complete.", 3)
+                    self.output(f"Шаг {self.step} - Появилось колесо; зарядка завершена.", 3)
                     return True
             except Exception:
                 pass
     
             prog = read_progress()
             if prog is not None and prog >= 100:
-                self.output(f"Step {self.step} - Progress {prog:.0f}% reached; charging complete.", 3)
+                self.output(f"Шаг {self.step} - Прогресс {prog:.0f}% достигнут; зарядка завершена.", 3)
                 return True
     
-            # try each selector and click once
+            # пробуем каждый селектор и кликаем один раз
             clicked_this_cycle = False
             for xp in charging_xpaths:
                 try:
                     btn = self.driver.find_element(By.XPATH, xp)
-                    # keep it simple & fast: try native, then JS
+                    # делаем просто и быстро: сначала нативный клик, потом JS
                     try:
                         ActionChains(self.driver).move_to_element(btn).pause(0.02).click(btn).perform()
                         clicked_this_cycle = True
@@ -114,36 +114,36 @@ class SpellClaimer(Claimer):
                     continue
     
             if not clicked_this_cycle:
-                # small diagnostic (low noise)
+                # небольшая диагностика (низкий уровень шума)
                 if self.settings.get('debugIsOn'):
-                    self.debug_information("Charging button not found this tick", "warning")
+                    self.debug_information("Кнопка зарядки не найдена в этом цикле", "warning")
             time.sleep(pause)
     
-        self.output(f"Step {self.step} - Charging loop ended after {max_seconds}s without clear completion.", 2)
+        self.output(f"Шаг {self.step} - Цикл зарядки завершился после {max_seconds}с без явного завершения.", 2)
         return False
 
     def spell_accept_and_continue(self):
-        checkbox_xpath = "//span[@aria-hidden='true' and contains(@class,'chakra-checkbox__control')]"
-        btn_xpath      = "//button[contains(@class,'chakra-button') and normalize-space()='Get Started']"
+        checkbox_xpath = "//span[@aria-hidden='true' и содержит(@class,'chakra-checkbox__control')]"
+        btn_xpath      = "//button[contains(@class,'chakra-button') и normalize-space()='Начать']"
     
         try:
-            # Look for checkbox without throwing (0/1 elements)
+            # Ищем чекбокс без исключений (0/1 элементов)
             boxes = self.driver.find_elements(By.XPATH, checkbox_xpath)
             if not boxes:
-                # Checkbox already gone → proceed
-                self.output(f"Step {self.step} - Checkbox not present; assuming already accepted. Proceeding.", 2)
+                # Чекбокс уже отсутствует → продолжаем
+                self.output(f"Шаг {self.step} - Чекбокс отсутствует; предполагается, что уже принят. Продолжаем.", 2)
                 try:
                     btns = self.driver.find_elements(By.XPATH, btn_xpath)
                     if btns:
                         self.driver.execute_script("arguments[0].click();", btns[0])
-                        self.output(f"Step {self.step} - Clicked 'Get Started'.", 2)
+                        self.output(f"Шаг {self.step} - Нажата кнопка 'Начать'.", 2)
                 except Exception:
                     pass
                 return True
     
             checkbox = boxes[0]
     
-            # Scroll into view and synthesize a real click
+            # Прокрутка до видимости и имитация реального клика
             self.driver.execute_script("""
                 const el = arguments[0];
                 el.scrollIntoView({block:'center', inline:'center'});
@@ -155,27 +155,27 @@ class SpellClaimer(Claimer):
             """, checkbox)
             time.sleep(0.5)
     
-            # Verify toggle (or just continue if button becomes enabled)
+            # Проверяем переключение (или просто продолжаем, если кнопка стала активной)
             if checkbox.get_attribute("data-checked") is not None:
-                self.output(f"Step {self.step} - Checkbox ticked successfully.", 2)
+                self.output(f"Шаг {self.step} - Чекбокс успешно отмечен.", 2)
             else:
-                self.output(f"Step {self.step} - Checkbox did not report data-checked; proceeding anyway.", 2)
+                self.output(f"Шаг {self.step} - Чекбокс не сообщил data-checked; продолжаем в любом случае.", 2)
     
-            # Try to click "Get Started" if present
+            # Пытаемся нажать "Начать", если есть
             btns = self.driver.find_elements(By.XPATH, btn_xpath)
             if btns:
                 self.driver.execute_script("arguments[0].click();", btns[0])
-                self.output(f"Step {self.step} - Clicked 'Get Started'.", 2)
+                self.output(f"Шаг {self.step} - Нажата кнопка 'Начать'.", 2)
             else:
-                self.output(f"Step {self.step} - 'Get Started' button not present (ok).", 3)
+                self.output(f"Шаг {self.step} - Кнопка 'Начать' отсутствует (нормально).", 3)
     
             return True
     
         except Exception as e:
-            # Graceful fallback: don't fail the flow if this UI already passed
-            self.output(f"Step {self.step} - Checkbox/continue sequence: {type(e).__name__}: {e}. Proceeding.", 2)
+            # Плавное восстановление: не прерываем поток, если этот UI уже пройден
+            self.output(f"Шаг {self.step} - Последовательность чекбокса/продолжения: {type(e).__name__}: {e}. Продолжаем.", 2)
             if self.settings.get('debugIsOn'):
-                self.debug_information(f"Spell checkbox sequence (non-fatal): {e}")
+                self.debug_information(f"Последовательность чекбокса Spell (нефатальная ошибка): {e}")
             return True
 
     def next_steps(self):
@@ -190,193 +190,193 @@ class SpellClaimer(Claimer):
 
             self.spell_accept_and_continue()
             
-            # Get balance
+            # Получить баланс
             balance_xpath = "//h2[contains(@class, 'chakra-heading css-1ougcld')]"
             self.get_balance(balance_xpath, False)
 
-            # Final Housekeeping
+            # Финальная уборка
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
-        # Initialize status_text
+        # Инициализировать status_text
         status_text = ""
         balance_xpath = "//div[contains(@class, 'css-6e4jug')]"
 
-        # Launch iframe
+        # Запустить iframe
         self.step = "100"
         self.launch_iframe()
 
         self.spell_accept_and_continue()
 
-        # Capture the balance before the claim
+        # Захватить баланс до запроса
         before_balance = self.get_balance(balance_xpath, False)
 
-        # Get the wait timer if present
+        # Получить таймер ожидания, если есть
         self.increase_step()
         remaining_wait_time = self.get_wait_time(self.step, "post-claim")
             
-        # Get the wait timer if present
+        # Получить таймер ожидания, если есть
         self.increase_step()
         pre_wait_min = self.get_wait_time(before_after="pre-claim")
 
         if pre_wait_min > 0:
-            # Respect the timer and bail early
+            # Соблюдаем таймер и выходим раньше
             wait_with_jitter = self.apply_random_offset(pre_wait_min)
             self.output(
-                f"STATUS: Original wait time {pre_wait_min} minutes, we'll sleep for "
-                f"{wait_with_jitter} minutes after random offset.", 1
+                f"СТАТУС: Исходное время ожидания {pre_wait_min} минут, спим "
+                f"{wait_with_jitter} минут с учетом случайного смещения.", 1
             )
             return max(wait_with_jitter, 60)
             
-        # Pre-claim
-        pre_claim = "//button[contains(normalize-space(.), 'Tap to claim') and contains(normalize-space(.), 'MANA')]"
-        self.brute_click(pre_claim, 12, "click the pre 'Claim' button")
+        # Предварительный запрос
+        pre_claim = "//button[contains(normalize-space(.), 'Нажмите, чтобы получить') и содержит(normalize-space(.), 'MANA')]"
+        self.brute_click(pre_claim, 12, "нажать предварительную кнопку 'Получить'")
         self.increase_step()
         
-        # Rapid-charge for ~10s (clicks ~4 times per second)
+        # Быстрая зарядка около 10 секунд (клики около 4 раз в секунду)
         self.charge_until_complete(max_seconds=10, pause=0.25)
         self.increase_step()
         
-        # Reload the browser after claim
+        # Перезагрузить браузер после запроса
         self.quit_driver()
         self.launch_driver()
             
-        # Balance is not already taken due to output priority
+        # Баланс не получен ранее из-за приоритета вывода
         if not before_balance:
             after_balance = self.get_balance(balance_xpath, True)
         
-        # Get the wait timer if present
+        # Получить таймер ожидания, если есть
         self.increase_step()
-        post_wait_min = self.get_wait_time(before_after="post-claim")  # correct call
+        post_wait_min = self.get_wait_time(before_after="post-claim")  # правильный вызов
 
-        # Daily puzzle (optional)
+        # Ежедневная головоломка (опционально)
         if self.daily_reward():
-            status_text += "Daily Puzzle submitted"
+            status_text += "Ежедневная головоломка отправлена"
 
-        # If timer missing or zero, assume lag / retry later
+        # Если таймер отсутствует или равен нулю, предполагаем задержку / повтор позже
         if not post_wait_min:
-            self.output("STATUS: The wait timer is still showing: Filled.", 1)
-            self.output("Step {self.step} - This means either the claim failed, or there is lag in the game.", 1)
-            self.output("Step {self.step} - We'll check back in 1 hour to see if the claim processed and if not try again.", 2)
+            self.output("СТАТУС: Таймер ожидания все еще показывает: Заполнено.", 1)
+            self.output(f"Шаг {self.step} - Это означает, что либо запрос не удался, либо в игре задержка.", 1)
+            self.output(f"Шаг {self.step} - Проверим снова через 1 час, и если запрос не обработан, попробуем снова.", 2)
             return 60
 
         wait_with_jitter = self.apply_random_offset(post_wait_min)
         if status_text == "":
-            self.output("STATUS: No claim or Daily Puzzle this time", 3)
+            self.output("СТАТУС: Запрос или Ежедневная головоломка отсутствуют в этот раз", 3)
         else:
-            self.output(f"STATUS: {status_text}", 3)
+            self.output(f"СТАТУС: {status_text}", 3)
 
         self.output(
-            f"STATUS: Original wait time {post_wait_min} minutes, we'll sleep for "
-            f"{wait_with_jitter} minutes after random offset.", 1
+            f"СТАТУС: Исходное время ожидания {post_wait_min} минут, спим "
+            f"{wait_with_jitter} минут с учетом случайного смещения.", 1
         )
         return max(wait_with_jitter, 60)
 
     def daily_reward(self):
         return
-        # Switch to the Quests tab and check if Puzzle already solved
-        xpath = "//p[contains(., 'Quests')]"
-        success = self.move_and_click(xpath, 10, True, "click on 'Quests' tab", self.step, "clickable")
+        # Переключиться на вкладку Квесты и проверить, решена ли головоломка
+        xpath = "//p[contains(., 'Квесты')]"
+        success = self.move_and_click(xpath, 10, True, "нажать на вкладку 'Квесты'", self.step, "кликабельно")
         self.increase_step()
         
         if not success:
             self.quit_driver()
             self.launch_iframe()
-            self.move_and_click(xpath, 10, True, "click on 'Quests' tab", self.step, "clickable")
+            self.move_and_click(xpath, 10, True, "нажать на вкладку 'Квесты'", self.step, "кликабельно")
             self.increase_step()
 
-        xpath = "//div[contains(@class, 'css-ehjmbb')]//p[contains(text(), 'Done')]"
-        success = self.move_and_click(xpath, 10, True, "check if the puzzle has already been solved", self.step, "clickable")
+        xpath = "//div[contains(@class, 'css-ehjmbb')]//p[contains(text(), 'Выполнено')]"
+        success = self.move_and_click(xpath, 10, True, "проверить, решена ли головоломка", self.step, "кликабельно")
         self.increase_step()
         if success:
             return False
 
-        xpath = "//p[contains(., 'Daily Puzzle')]"
-        self.move_and_click(xpath, 10, True, "click on 'Daily Puzzle' link", self.step, "clickable")
+        xpath = "//p[contains(., 'Ежедневная головоломка')]"
+        self.move_and_click(xpath, 10, True, "нажать на ссылку 'Ежедневная головоломка'", self.step, "кликабельно")
         self.increase_step()
 
-        # Fetch the 4-digit code from the GitHub file using urllib
+        # Получить 4-значный код из файла на GitHub с помощью urllib
         url = "https://raw.githubusercontent.com/thebrumby/HotWalletClaimer/main/extras/rewardtest"
         try:
             with urllib.request.urlopen(url) as response:
                 content = response.read().decode('utf-8').strip()
-            self.output(f"Step {self.step} - Fetched code from GitHub: {content}", 3)
+            self.output(f"Шаг {self.step} - Получен код с GitHub: {content}", 3)
         except Exception as e:
-            # Handle failure to fetch code
-            self.output(f"Step {self.step} - Failed to fetch code from GitHub: {str(e)}", 2)
+            # Обработка ошибки получения кода
+            self.output(f"Шаг {self.step} - Не удалось получить код с GitHub: {str(e)}", 2)
             return False
 
         self.increase_step()
 
-        # Translate the numbers from GitHub to the symbols in the game
+        # Переводим цифры с GitHub в символы в игре
         for index, digit in enumerate(content):
             xpath = f"//div[@class='css-k0i5go'][{digit}]"
             
-            if self.move_and_click(xpath, 30, True, f"click on the path corresponding to digit {digit}", self.step, "clickable"):
-                self.output(f"Step {self.step} - Clicked on element corresponding to digit {digit}.", 2)
+            if self.move_and_click(xpath, 30, True, f"нажать на путь, соответствующий цифре {digit}", self.step, "кликабельно"):
+                self.output(f"Шаг {self.step} - Нажат элемент, соответствующий цифре {digit}.", 2)
             else:
-                # Handle failure to click on an element
-                self.output(f"Step {self.step} - Element corresponding to digit {digit} not found or not clickable.", 1)
+                # Обработка ошибки клика по элементу
+                self.output(f"Шаг {self.step} - Элемент, соответствующий цифре {digit}, не найден или не кликабелен.", 1)
 
         self.increase_step()
 
-        # Finish with some error checking
-        invalid_puzzle_xpath = "//div[contains(text(), 'Invalid puzzle code')]/ancestor::div[contains(@class, 'chakra-alert')]"
-        if self.move_and_click(invalid_puzzle_xpath, 30, True, "check if alert is present", self.step, "visible"):
-            # Alert for invalid puzzle code is present
-            self.output(f"Step {self.step} - Alert for invalid puzzle code is present.", 2)
+        # Завершаем с проверкой ошибок
+        invalid_puzzle_xpath = "//div[contains(text(), 'Неверный код головоломки')]/ancestor::div[contains(@class, 'chakra-alert')]"
+        if self.move_and_click(invalid_puzzle_xpath, 30, True, "проверить наличие предупреждения", self.step, "видимый"):
+            # Предупреждение о неверном коде головоломки присутствует
+            self.output(f"Шаг {self.step} - Предупреждение о неверном коде головоломки присутствует.", 2)
         else:
-            # Alert for invalid puzzle code is not present
-            self.output(f"Step {self.step} - Alert for invalid puzzle code is not present.", 1)
+            # Предупреждение о неверном коде головоломки отсутствует
+            self.output(f"Шаг {self.step} - Предупреждение о неверном коде головоломки отсутствует.", 1)
 
-        self.output(f"Step {self.step} - Completed daily reward sequence successfully.", 2)
+        self.output(f"Шаг {self.step} - Последовательность ежедневной награды успешно завершена.", 2)
         return True
 
     def get_wait_time(self, before_after="pre-claim", timeout=10):
         """
-        Reads a timer like '5h 47m' from the UI and returns total minutes (int).
-        If the element is missing or text doesn't match, returns 0.
+        Считывает таймер вида '5ч 47м' из интерфейса и возвращает общее количество минут (int).
+        Если элемент отсутствует или текст не соответствует формату, возвращает 0.
         """
         try:
-            self.output(f"Step {self.step} - Get the wait time ({before_after})...", 3)
+            self.output(f"Шаг {self.step} - Получение времени ожидания ({before_after})...", 3)
 
-            # coerce timeout safely
+            # безопасное преобразование timeout
             try:
                 to = float(timeout)
             except Exception:
-                to = 10.0  # sensible default
+                to = 10.0  # разумное значение по умолчанию
 
             xpath = "//div[contains(@class,'css-lwfv40')]"
-            wait_time_text = self.monitor_element(xpath, to, "claim timer")
+            wait_time_text = self.monitor_element(xpath, to, "таймер запроса")
 
             if not wait_time_text or isinstance(wait_time_text, bool):
-                self.output(f"Step {self.step} - No wait time element/text found; assuming 0m.", 3)
+                self.output(f"Шаг {self.step} - Элемент/текст времени ожидания не найден; предполагается 0м.", 3)
                 return 0
 
             raw = str(wait_time_text).strip()
-            self.output(f"Step {self.step} - Extracted wait time text: '{raw}'", 3)
+            self.output(f"Шаг {self.step} - Извлечён текст времени ожидания: '{raw}'", 3)
 
-            # Accept '5h 47m', '5h', '47m', allowing extra spaces/case
-            m = re.fullmatch(r'\s*(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?\s*', raw, flags=re.I)
+            # Принимаем '5ч 47м', '5ч', '47м', допускаем лишние пробелы/регистр
+            m = re.fullmatch(r'\s*(?:(\d+)\s*ч)?\s*(?:(\d+)\s*м)?\s*', raw, flags=re.I)
             if not m:
-                self.output(f"Step {self.step} - Wait time pattern not matched in text: '{raw}'. Assuming 0m.", 3)
+                self.output(f"Шаг {self.step} - Шаблон времени ожидания не совпал с текстом: '{raw}'. Предполагается 0м.", 3)
                 return 0
 
             hours = int(m.group(1) or 0)
             minutes = int(m.group(2) or 0)
             total_minutes = hours * 60 + minutes
 
-            self.output(f"Step {self.step} - Total wait time in minutes: {total_minutes}", 3)
+            self.output(f"Шаг {self.step} - Общее время ожидания в минутах: {total_minutes}", 3)
             return total_minutes
 
         except Exception as e:
-            self.output(f"Step {self.step} - Error while parsing wait time: {e}. Assuming 0m.", 3)
+            self.output(f"Шаг {self.step} - Ошибка при разборе времени ожидания: {e}. Предполагается 0м.", 3)
             return 0
 
 def main():
@@ -385,34 +385,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

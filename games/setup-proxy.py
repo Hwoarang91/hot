@@ -4,16 +4,16 @@ import subprocess
 import sys
 import time
 
-# Attempt to import httpx, install if necessary
+# Попытка импортировать httpx, установка при необходимости
 try:
     import httpx
 except ImportError:
-    print("httpx is not installed. Installing now...")
+    print("httpx не установлен. Выполняется установка...")
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "httpx"])
         import httpx
     except Exception as e:
-        print(f"Failed to install httpx: {e}")
+        print(f"Не удалось установить httpx: {e}")
         sys.exit(1)
 
 PROXY_DIR = os.path.abspath("./proxy")
@@ -23,7 +23,7 @@ PM2_PROCESS_NAME = "http-proxy"
 
 def read_start_script():
     if not os.path.exists(START_SCRIPT_PATH):
-        print(f"{START_SCRIPT_PATH} does not exist.")
+        print(f"{START_SCRIPT_PATH} не существует.")
         return None
 
     with open(START_SCRIPT_PATH, 'r') as file:
@@ -47,21 +47,21 @@ def check_upstream_proxy(script_content):
     return None
 
 def prompt_user_for_proxy_details():
-    host = input("Enter upstream proxy host (IP or URL): ").strip()
-    port = input("Enter upstream proxy port: ").strip()
-    username = input("Enter upstream proxy username (leave blank if not required): ").strip()
-    password = input("Enter upstream proxy password (leave blank if not required): ").strip()
+    host = input("Введите хост upstream прокси (IP или URL): ").strip()
+    port = input("Введите порт upstream прокси: ").strip()
+    username = input("Введите имя пользователя upstream прокси (оставьте пустым, если не требуется): ").strip()
+    password = input("Введите пароль upstream прокси (оставьте пустым, если не требуется): ").strip()
 
     if not (host and port):
-        print("Host and port are required.")
+        print("Требуется указать хост и порт.")
         return None
 
     return host, port, username or None, password or None
 
 def prompt_insecure_credential_validation():
-    allow_insecure = input("Allow insecure VPN credential validation (y/N): ").strip().lower()
+    allow_insecure = input("Разрешить небезопасную проверку учетных данных VPN (y/N): ").strip().lower()
     if allow_insecure == 'y':
-        confirm = input("This will allow your credentials to be viewed by others and should only be done as a last resort - continue (y/N): ").strip().lower()
+        confirm = input("Это позволит другим видеть ваши учетные данные и должно использоваться только в крайнем случае - продолжить (y/N): ").strip().lower()
         return confirm == 'y'
     return False
 
@@ -74,7 +74,7 @@ def test_proxy_connection(host, port, username, password, use_https):
     test_url = 'https://web.telegram.org'
     test_proxy_anonymity(proxy_url)
     expected_word_count = 3
-    print(f"Testing the proxy credentials with {scheme.upper()}...")
+    print(f"Проверка учетных данных прокси с использованием {scheme.upper()}...")
 
     proxies = {
         'http://': proxy_url,
@@ -87,17 +87,17 @@ def test_proxy_connection(host, port, username, password, use_https):
             if result.status_code == 200:
                 telegram_count = result.text.count("Telegram")
                 if telegram_count > expected_word_count:
-                    print("Proxy connection successful.")
-                    print(f"Response: 200, Telegram word count: {telegram_count}")
+                    print("Подключение к прокси успешно.")
+                    print(f"Ответ: 200, количество слов 'Telegram': {telegram_count}")
                     return True
                 else:
-                    print(f"Proxy connection failed: Unexpected content. 'Telegram' count is {telegram_count}.")
+                    print(f"Подключение к прокси не удалось: неожиданный контент. Количество 'Telegram' равно {telegram_count}.")
                     return False
             else:
-                print(f"Proxy connection failed with status code: {result.status_code}")
+                print(f"Подключение к прокси не удалось с кодом статуса: {result.status_code}")
                 return False
     except httpx.RequestError as e:
-        print(f"Proxy connection failed: {e}")
+        print(f"Подключение к прокси не удалось: {e}")
         return False
 
 def update_start_script(host, port, username, password, use_https):
@@ -114,13 +114,13 @@ def stop_and_delete_pm2_process():
     try:
         subprocess.run(['pm2', 'stop', PM2_PROCESS_NAME], check=True)
         subprocess.run(['pm2', 'delete', PM2_PROCESS_NAME], check=True)
-        subprocess.run(['pm2', 'save'], check=True)  # Save the PM2 state after deleting the process
+        subprocess.run(['pm2', 'save'], check=True)  # Сохранить состояние PM2 после удаления процесса
     except subprocess.CalledProcessError as e:
-        print(f"Error stopping/deleting PM2 process: {e}")
+        print(f"Ошибка при остановке/удалении процесса PM2: {e}")
 
 def lock_file():
     with open(PROXY_LOCK_FILE, "w") as lock_file:
-        lock_file.write(f"Proxy setup in progress: {time.ctime()}\n")
+        lock_file.write(f"Настройка прокси в процессе: {time.ctime()}\n")
 
 def unlock_file():
     if os.path.exists(PROXY_LOCK_FILE):
@@ -130,14 +130,14 @@ def restart_proxy():
     try:
         subprocess.run(['pm2', 'start', START_SCRIPT_PATH, '--name', PM2_PROCESS_NAME], check=True)
         subprocess.run(['pm2', 'save'], check=True)
-        print("http-proxy restarted successfully.")
+        print("http-proxy успешно перезапущен.")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to restart http-proxy: {e}")
+        print(f"Не удалось перезапустить http-proxy: {e}")
 
 def test_proxy_anonymity(proxy_url):
     test_url = 'https://httpbin.org/get'
     try:
-        # First, get the client's real IP address by making a direct request
+        # Сначала получить реальный IP клиента, сделав прямой запрос
         real_ip = None
         try:
             with httpx.Client(timeout=10) as client:
@@ -145,10 +145,10 @@ def test_proxy_anonymity(proxy_url):
                 data = response.json()
                 real_ip = data.get('origin', '')
         except Exception as e:
-            print(f"Failed to get real IP address: {e}")
+            print(f"Не удалось получить реальный IP-адрес: {e}")
             return None
 
-        # Now, make a request through the proxy
+        # Теперь сделать запрос через прокси
         proxies = {
             'http://': proxy_url,
             'https://': proxy_url,
@@ -159,21 +159,21 @@ def test_proxy_anonymity(proxy_url):
             headers = data.get('headers', {})
             origin = data.get('origin', '')
 
-            # Check for anonymity
+            # Проверка анонимности
             if origin == real_ip:
-                print("Proxy is Transparent (NOA)")
-                print("Explanation: The proxy passes your real IP address to the server. Your IP is exposed.")
+                print("Прокси является прозрачным (NOA)")
+                print("Объяснение: Прокси передает ваш реальный IP-адрес серверу. Ваш IP раскрыт.")
                 return 'NOA'
             elif 'X-Forwarded-For' in headers or 'Via' in headers:
-                print("Proxy is Anonymous (ANM)")
-                print("Explanation: The proxy hides your IP address but reveals that you're using a proxy.")
+                print("Прокси является анонимным (ANM)")
+                print("Объяснение: Прокси скрывает ваш IP-адрес, но раскрывает факт использования прокси.")
                 return 'ANM'
             else:
-                print("Proxy is Elite (HIA)")
-                print("Explanation: The proxy hides your IP address and does not disclose proxy usage.")
+                print("Прокси является элитным (HIA)")
+                print("Объяснение: Прокси скрывает ваш IP-адрес и не раскрывает использование прокси.")
                 return 'HIA'
     except Exception as e:
-        print(f"Failed to test proxy anonymity: {e}")
+        print(f"Не удалось проверить анонимность прокси: {e}")
         return None
 
 def main():
@@ -181,28 +181,28 @@ def main():
     if script_content is None:
         return
 
-    print("You can obtain a free account with limited data at https://www.webshare.io/?referral_code=yat0oxfcqbpd")
+    print("Вы можете получить бесплатный аккаунт с ограниченным трафиком на https://www.webshare.io/?referral_code=yat0oxfcqbpd")
 
     upstream_proxy = check_upstream_proxy(script_content)
     if upstream_proxy:
-        print("Current upstream proxy configuration:")
-        print(f"Scheme: {upstream_proxy['scheme']}")
-        print(f"Host: {upstream_proxy['host']}")
-        print(f"Port: {upstream_proxy['port']}")
-        print(f"Username: {upstream_proxy['username']}")
-        print(f"Password: {upstream_proxy['password']}")
+        print("Текущая конфигурация upstream прокси:")
+        print(f"Схема: {upstream_proxy['scheme']}")
+        print(f"Хост: {upstream_proxy['host']}")
+        print(f"Порт: {upstream_proxy['port']}")
+        print(f"Имя пользователя: {upstream_proxy['username']}")
+        print(f"Пароль: {upstream_proxy['password']}")
     else:
-        print("No upstream proxy configuration is currently set.")
+        print("Конфигурация upstream прокси в данный момент не установлена.")
 
     if upstream_proxy:
-        choice = input("An upstream proxy is already configured. Enter 'y' to remove it, or press Enter to enter new credentials: ").strip().lower()
+        choice = input("Upstream прокси уже настроен. Введите 'y' для удаления или нажмите Enter для ввода новых данных: ").strip().lower()
         if choice == 'y':
             lock_file()
             stop_and_delete_pm2_process()
-            update_start_script("", "", "", "", True)  # Remove upstream configuration
-            subprocess.run(['pm2', 'save'], check=True)  # Save the PM2 state after removing the configuration
+            update_start_script("", "", "", "", True)  # Удалить конфигурацию upstream
+            subprocess.run(['pm2', 'save'], check=True)  # Сохранить состояние PM2 после удаления конфигурации
             unlock_file()
-            print("Upstream proxy removed.")
+            print("Upstream прокси удален.")
             return
 
     while True:
@@ -218,9 +218,9 @@ def main():
                 unlock_file()
                 break
             else:
-                print("Proxy test failed. Please re-enter the proxy details.")
+                print("Проверка прокси не удалась. Пожалуйста, введите данные прокси заново.")
         else:
-            print("Invalid input. Please provide all the necessary details.")
+            print("Неверный ввод. Пожалуйста, предоставьте все необходимые данные.")
 
 if __name__ == "__main__":
     main()

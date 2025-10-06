@@ -1,4 +1,3 @@
-
 import os
 import shutil
 import sys
@@ -34,12 +33,12 @@ class MDAOClaimer(Claimer):
         self.script = "games/mdao.py"
         self.prefix = "MDAO:"
         self.url = "https://web.telegram.org/k/#@Mdaowalletbot"
-        self.pot_full = "Filled"
-        self.pot_filling = "to fill"
+        self.pot_full = "Заполнено"
+        self.pot_filling = "заполняется"
         self.seed_phrase = None
         self.forceLocalProxy = False
         self.forceRequestUserAgent = False
-        self.start_app_xpath = "//div[contains(@class, 'new-message-bot-commands') and .//div[text()='Launch app']]"
+        self.start_app_xpath = "//div[contains(@class, 'new-message-bot-commands') and .//div[text()='Запустить приложение']]"
         self.start_app_menu_item = "//a[.//span[contains(@class,'peer-title')][normalize-space(.)='ZAVOD' or .//span[normalize-space(.)='ZAVOD']]]"
         self.balance_xpath = f"//div[@data-tooltip-id='balance']/div[1]"
 
@@ -62,9 +61,9 @@ class MDAOClaimer(Claimer):
             self.increase_step()
             self.set_cookies()
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение заданного времени ожидания.", 1)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
 
@@ -77,7 +76,7 @@ class MDAOClaimer(Claimer):
                 elif unit == 'm':
                     total_minutes += int(value)
                 elif unit == 's':
-                    total_minutes += int(value) / 60  # Convert seconds to minutes
+                    total_minutes += int(value) / 60  # Конвертировать секунды в минуты
             remaining_wait_time = total_minutes
             return int(remaining_wait_time)
 
@@ -86,84 +85,84 @@ class MDAOClaimer(Claimer):
         self.launch_iframe()
         
         xpath = "(//div[contains(normalize-space(.), 'CLAIM') and contains(@class,'sc-gtLWhw sc-egkSDF sc-iqyJx kvyHci jpUGsD jzBzGm')] )[1]"
-        button = self.move_and_click(xpath, 20, True, "claim the spot prize (may not be present)", self.step, "clickable")
+        button = self.move_and_click(xpath, 20, True, "запросить приз (может отсутствовать)", self.step, "clickable")
         self.increase_step()
 
         self.get_balance(self.balance_xpath, False)
 
-        remaining_wait_time = self.get_wait_time(self.step, "pre-claim")
+        remaining_wait_time = self.get_wait_time(self.step, "до запроса")
 
-        if remaining_wait_time == "Filled":
+        if remaining_wait_time == "Заполнено":
             self.settings['forceClaim'] = True
             remaining_wait_time = 0
         elif not remaining_wait_time:
             return 30
         else:
             remaining_wait_time = return_minutes(remaining_wait_time)
-            self.output(f"STATUS: Pot not yet full, let's sleep for {remaining_wait_time} minutes.", 1)
+            self.output(f"СТАТУС: Котел еще не заполнен, подождем {remaining_wait_time} минут.", 1)
             return remaining_wait_time
 
         self.increase_step()
 
         if int(remaining_wait_time) < 5 or self.settings["forceClaim"]:
             self.settings['forceClaim'] = True
-            self.output(f"Step {self.step} - the remaining time to claim is less than the random offset, so applying: settings['forceClaim'] = True", 3)
+            self.output(f"Шаг {self.step} - оставшееся время до запроса меньше случайного смещения, применяем: settings['forceClaim'] = True", 3)
         else:
-            self.output(f"STATUS: Wait time is {remaining_wait_time} minutes and off-set of {self.random_offset}.", 1)
+            self.output(f"СТАТУС: Время ожидания {remaining_wait_time} минут и смещение {self.random_offset}.", 1)
             return remaining_wait_time + self.random_offset
 
         xpath = "//div[text()='CLAIM']/ancestor::div[@bgcolor]"
-        button = self.move_and_click(xpath, 20, True, "move to the claim button", self.step, "clickable")
+        button = self.move_and_click(xpath, 20, True, "перейти к кнопке запроса", self.step, "clickable")
         self.increase_step()
         xpath = "(//div[normalize-space()='CLAIM WITHOUT BONUS'])[last()]"
-        button = self.move_and_click(xpath, 20, True, "confirm claim without watching video", self.step, "clickable")
+        button = self.move_and_click(xpath, 20, True, "подтвердить запрос без просмотра видео", self.step, "clickable")
         self.increase_step()
 
         self.get_balance(self.balance_xpath, True)
         self.get_profit_hour(True)
 
-        remaining_wait_time = return_minutes(self.get_wait_time(self.step, "post-claim"))
+        remaining_wait_time = return_minutes(self.get_wait_time(self.step, "после запроса"))
         self.increase_step()
         self.attempt_upgrade()
         self.random_offset = random.randint(max(self.settings['lowestClaimOffset'], 0), max(self.settings['highestClaimOffset'], 0))
-        self.output(f"STATUS: Wait time is {remaining_wait_time} minutes and off-set of {self.random_offset}.", 1)
+        self.output(f"СТАТУС: Время ожидания {remaining_wait_time} минут и смещение {self.random_offset}.", 1)
         return remaining_wait_time + self.random_offset
 
-    def get_wait_time(self, step_number="108", beforeAfter="pre-claim", max_attempts=1):
+    def get_wait_time(self, step_number="108", beforeAfter="до запроса", max_attempts=1):
         for attempt in range(1, max_attempts + 1):
             try:
-                self.output(f"Step {self.step} - check if the timer is elapsing...", 3)
+                self.output(f"Шаг {self.step} - проверяем, идет ли отсчет таймера...", 3)
                 xpath = "//div[contains(text(),'h ') and contains(text(),'m ') and contains(text(),'s')]"
-                pot_full_value = self.monitor_element(xpath, 15, "claim timer")
+                pot_full_value = self.monitor_element(xpath, 15, "таймер запроса")
                 if pot_full_value:
                     return pot_full_value
                 else:
-                    return "Filled"
+                    return "Заполнено"
             except Exception as e:
-                self.output(f"Step {self.step} - An error occurred on attempt {attempt}: {e}", 3)
+                self.output(f"Шаг {self.step} - Произошла ошибка при попытке {attempt}: {e}", 3)
                 return False
         return False
 
     def get_profit_hour(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct the specific profit XPath
-        profit_text = f'{prefix} PROFIT/HOUR:'
-        profit_xpath = "//div[contains(text(), 'per hour')]"
+        # Формируем XPath для прибыли
+        profit_text = f'{prefix} ПРИБЫЛЬ/ЧАС:'
+        profit_xpath = "//div[contains(text(), 'в час')]"
 
         try:
-            element = self.strip_non_numeric(self.monitor_element(profit_xpath,15,"profit per hour"))
-            # Check if element is not None and process the profit
+            element = self.strip_non_numeric(self.monitor_element(profit_xpath,15,"прибыль в час"))
+            # Проверяем, что элемент не None и обрабатываем прибыль
             if element:
-                self.output(f"Step {self.step} - {profit_text} {element}", priority)
+                self.output(f"Шаг {self.step} - {profit_text} {element}", priority)
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Profit/Hour:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Прибыль/Час:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Ошибка для логирования
         
         self.increase_step()
 

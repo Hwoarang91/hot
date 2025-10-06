@@ -20,7 +20,7 @@ def parse_time_from_log(line):
             parsed_time = datetime.strptime(time_str, "%H:%M")
         return parsed_time
     except Exception as e:
-        print(f"Failed to parse time from line: {line}. Error: {e}")
+        print(f"Не удалось извлечь время из строки: {line}. Ошибка: {e}")
         return None
 
 def truncate_and_pad(string, length):
@@ -35,7 +35,7 @@ def fetch_and_process_logs(process_name):
     log_file = os.path.expanduser(f"~/.pm2/logs/{sanitized_process_name}-out.log")
 
     if not os.path.exists(log_file):
-        return process_name, "None", "None", "None", "Log file missing"
+        return process_name, "None", "None", "None", "Файл журнала отсутствует"
 
     logs = run_command(f"tail -n 200 {log_file}")
 
@@ -68,9 +68,9 @@ def display_processes(processes, status, sort_by="time", start_index=1):
     status_width = 80
     total_width = name_width + balance_width + profit_hour_width + claim_width + status_width + 18
 
-    print(f"{status} Wallet Processes:\n")
+    print(f"{status} процессы кошельков:\n")
     print("|-" + "-" * total_width + "-|")
-    print(f"| {'ID'.ljust(3)} | {'Wallet Name'.ljust(name_width)} | {'Balance'.ljust(balance_width)} | {'Profit/Hour'.ljust(profit_hour_width)} | {'Next Claim'.ljust(claim_width)} | {'Status'.ljust(status_width)} |")
+    print(f"| {'ID'.ljust(3)} | {'Имя кошелька'.ljust(name_width)} | {'Баланс'.ljust(balance_width)} | {'Прибыль/час'.ljust(profit_hour_width)} | {'Следующий сбор'.ljust(claim_width)} | {'Статус'.ljust(status_width)} |")
     print("|-" + "-" * total_width + "-|")
 
     process_list = []
@@ -97,11 +97,11 @@ def display_processes(processes, status, sort_by="time", start_index=1):
     return process_list
 
 def remove_directories(dir_name):
-    print(f"Removing directories for {dir_name}...")
+    print(f"Удаление каталогов для {dir_name}...")
     run_command(f"rm -rf ./selenium/{dir_name}")
     run_command(f"rm -rf ./backups/{dir_name}")
     run_command(f"rm -rf ./screenshots/{dir_name}")
-    print(f"Removed directories for {dir_name}")
+    print(f"Каталоги для {dir_name} удалены")
 
 def list_all_pm2_processes():
     return run_command("pm2 list --no-color | awk '{{print $4}}'").splitlines()
@@ -128,10 +128,10 @@ def delete_process_by_id(process_id, process_list):
         run_command(f"pm2 delete {process_name}")
         run_command(f"pm2 save")
         remove_directories(process_name)
-        print(f"Stopped and deleted process {process_name} from PM2.")
+        print(f"Процесс {process_name} остановлен и удалён из PM2.")
         process_list.pop(process_id - 1)
     else:
-        print("Invalid process ID.")
+        print("Неверный ID процесса.")
 
 def delete_processes_by_ids(ids, process_list):
     for process_id in sorted(ids, reverse=True):
@@ -144,16 +144,16 @@ def delete_process_by_pattern(pattern, process_list):
             run_command(f"pm2 delete {process[0]}")
             run_command(f"pm2 save")
             remove_directories(process[0])
-            print(f"Stopped and deleted process {process[0]} from PM2.")
+            print(f"Процесс {process[0]} остановлен и удалён из PM2.")
             process_list.remove(process)
 
 def show_logs(process_id, process_list, lines=30):
     print(get_logs(process_id, process_list, lines))
-    input("Press enter to continue...")
+    input("Нажмите Enter, чтобы продолжить...")
 
 def get_logs(process_id, process_list, lines=30):
     if process_id > len(process_list):
-        return "Invalid process ID."
+        return "Неверный ID процесса."
     
     return get_logs_by_process_name(process_list[process_id - 1][0], lines)
 
@@ -166,51 +166,51 @@ def get_logs_by_process_name(process_name, lines=30):
 
 def show_status_logs(process_id, process_list):
     status_logs = get_status_logs(process_id, process_list)
-    print("\nStatus Logs:\n")
+    print("\nЖурналы статуса:\n")
     print(status_logs)
-    input("Press enter to continue...")
+    input("Нажмите Enter, чтобы продолжить...")
 
 def get_status_logs(process_id, process_list):
     if process_id > len(process_list) or process_id < 1:
-        return "Invalid process ID."
+        return "Неверный ID процесса."
     
     process_name = process_list[process_id - 1][0]
     return get_status_logs_by_process_name(process_name)
 
 def get_status_logs_by_process_name(process_name, lines=30):
-    """Fetch the last few status lines from the log file for the given process."""
-    # Sanitize the process name to match the log file naming convention
+    """Получить последние несколько строк статуса из файла журнала для данного процесса."""
+    # Очистить имя процесса для соответствия имени файла журнала
     process_name = process_name.strip().replace('_', '-')
     sanitized_process_name = process_name.replace(':', '-')
     
-    # Construct the log file path
+    # Сформировать путь к файлу журнала
     log_file = os.path.expanduser(f"~/.pm2/logs/{sanitized_process_name}-out.log")
     
-    # Check if the log file exists
+    # Проверить, существует ли файл журнала
     if not os.path.exists(log_file):
-        return f"No log file found for process: {process_name}"
+        return f"Файл журнала не найден для процесса: {process_name}"
 
     status_lines = []
     try:
         with open(log_file, 'r') as file:
-            # Read all lines from the log file
+            # Прочитать все строки из файла журнала
             logs = file.readlines()
-            # Filter for "STATUS:" and balance updates
+            # Фильтровать строки с "STATUS:" и обновлениями баланса
             for line in reversed(logs):
-                # Check for relevant keywords in each log line
+                # Проверить наличие ключевых слов в каждой строке журнала
                 if "STATUS:" in line or "Balance:" in line:
                     status_lines.append(line)
-                    # Limit the number of lines to the specified amount
+                    # Ограничить количество строк указанным числом
                     if len(status_lines) >= lines:
                         break
     except Exception as e:
-        return f"Error reading log file for process {process_name}: {e}"
+        return f"Ошибка при чтении файла журнала для процесса {process_name}: {e}"
 
-    # If no relevant logs were found, return an appropriate message
+    # Если релевантные логи не найдены, вернуть соответствующее сообщение
     if not status_lines:
-        return f"No status found in logs for process: {process_name}"
+        return f"Статус не найден в журналах для процесса: {process_name}"
 
-    # Return the collected status lines in reverse order (most recent first)
+    # Вернуть собранные строки статуса в обратном порядке (сначала последние)
     return ''.join(reversed(status_lines))
 
 def parse_delete_ids(delete_ids_str):
@@ -225,35 +225,35 @@ def parse_delete_ids(delete_ids_str):
     return sorted(ids)
 
 def main():
-    print("Reading the data from PM2 - this may take some time if you have a lot of games.")
+    print("Чтение данных из PM2 - это может занять некоторое время, если у вас много игр.")
     while True:
         stopped_processes = list_pm2_processes("stopped")
         running_processes = list_pm2_processes("online")
         inactive_directories = get_inactive_directories()
 
-        print(f"Found {len(inactive_directories)} inactive directories in Selenium.")
+        print(f"Найдено {len(inactive_directories)} неактивных каталогов в Selenium.")
 
-        print("\nInactive Processes:")
+        print("\nНеактивные процессы:")
         combined_processes = list(set(p for p in (stopped_processes + inactive_directories) if not should_exclude_process(p)))
-        stopped_process_list = display_processes(combined_processes, "Stopped", sort_by="name", start_index=1)
-        print("\nActive Processes:")
+        stopped_process_list = display_processes(combined_processes, "Остановленные", sort_by="name", start_index=1)
+        print("\nАктивные процессы:")
         running_processes_filtered = [p for p in running_processes if not should_exclude_process(p)]
-        running_process_list = display_processes(running_processes_filtered, "Running", sort_by="name", start_index=len(stopped_process_list) + 1)
+        running_process_list = display_processes(running_processes_filtered, "Работающие", sort_by="name", start_index=len(stopped_process_list) + 1)
 
-        print("\nOptions:")
-        print("'t' - Sort by time of next claim")
-        print("'delete [ID]' - Delete process by number (e.g. single ID - '1', range '1-3' or multiple '1,3')")
-        print("'delete [pattern]' - Delete all processes matching the pattern (e.g. HOT, Blum, Wave)")
-        print("'status [ID]' - Show the last 20 balances and status of the selected process")
-        print("'logs [ID] [lines]' - Show the last 'n' lines of PM2 logs for the process (default: 30)")
-        print("'exit' or hit enter - Exit the program")
+        print("\nОпции:")
+        print("'t' - Сортировать по времени следующего сбора")
+        print("'delete [ID]' - Удалить процесс по номеру (например, один ID - '1', диапазон '1-3' или несколько '1,3')")
+        print("'delete [pattern]' - Удалить все процессы, соответствующие шаблону (например, HOT, Blum, Wave)")
+        print("'status [ID]' - Показать последние 20 балансов и статус выбранного процесса")
+        print("'logs [ID] [lines]' - Показать последние 'n' строк журналов PM2 для процесса (по умолчанию: 30)")
+        print("'exit' или нажмите Enter - Выйти из программы")
 
-        user_input = input("\nEnter your choice: ").strip()
+        user_input = input("\nВведите ваш выбор: ").strip()
 
         if user_input == 't':
-            display_processes(stopped_processes + inactive_directories, "Stopped", sort_by="time", start_index=1)
-            display_processes(running_processes, "Running", sort_by="time", start_index=len(stopped_process_list) + 1)
-            input("Press enter to continue...")
+            display_processes(stopped_processes + inactive_directories, "Остановленные", sort_by="time", start_index=1)
+            display_processes(running_processes, "Работающие", sort_by="time", start_index=len(stopped_process_list) + 1)
+            input("Нажмите Enter, чтобы продолжить...")
         elif user_input.startswith("delete "):
             try:
                 delete_ids_str = user_input.split()[1]
@@ -270,7 +270,7 @@ def main():
                 else:
                     show_status_logs(status_id - len(stopped_process_list), running_process_list)
             except ValueError:
-                print("Invalid ID.")
+                print("Неверный ID.")
         elif user_input.startswith("logs "):
             try:
                 logs_id = int(user_input.split()[1])
@@ -280,11 +280,11 @@ def main():
                 else:
                     show_logs(logs_id - len(stopped_process_list), running_process_list, lines)
             except ValueError:
-                print("Invalid input.")
+                print("Неверный ввод.")
         elif user_input == "exit" or user_input == "":
             break
         else:
-            print("Invalid option. Please try again.")
+            print("Неверный вариант. Пожалуйста, попробуйте снова.")
 
 if __name__ == "__main__":
     main()

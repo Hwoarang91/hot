@@ -27,7 +27,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 
 from xnode import XNodeClaimer
 
-# ---------- module-level constants ----------
+# ---------- константы уровня модуля ----------
 MAX_ROI_DAYS = 7
 MAX_ROI_SEC  = MAX_ROI_DAYS * 24 * 3600
 ULTIMATE_ROI_DAY = 21
@@ -61,31 +61,31 @@ class XNodeAUClaimer(XNodeClaimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.",1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.",1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}",1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}",1)
 
     def attempt_upgrade(self):
-        self.output(f"Step {self.step} - Preparing to run the upgrader script - this may take some time.", 2)
+        self.output(f"Шаг {self.step} - Подготовка к запуску скрипта обновления - это может занять некоторое время.", 2)
     
         total_clicked = 0
-        max_iterations = 20          # safety cap so we don't loop forever
-        per_iter_pause = 0.6         # brief pause so the UI can settle
+        max_iterations = 20          # ограничение безопасности, чтобы не зациклиться
+        per_iter_pause = 0.6         # короткая пауза, чтобы интерфейс успел обновиться
     
         for _ in range(max_iterations):
-            # one_per_pass=True means: evaluate + try to buy exactly one best upgrade
+            # one_per_pass=True означает: оценить и попытаться купить ровно одно лучшее улучшение
             clicked = self.upgrade_all(one_per_pass=True, per_row_wait=6)
             if clicked <= 0:
-                break  # either WAIT is better, or nothing affordable/sensible
+                break  # либо лучше ждать, либо ничего доступного/разумного
             total_clicked += clicked
-            time.sleep(per_iter_pause)  # let DOM update (levels, prices, balance)
+            time.sleep(per_iter_pause)  # дать DOM обновиться (уровни, цены, баланс)
     
-        self.output(f"Step {self.step} - Upgrader session finished. Total upgrades this run: {total_clicked}", 2)
-        # Keep your original semantics: return False if we clicked something; True if we didn't
+        self.output(f"Шаг {self.step} - Сессия обновления завершена. Всего улучшений за этот запуск: {total_clicked}", 2)
+        # Сохраняем исходную логику: возвращаем False, если что-то кликнули; True, если нет
         return (total_clicked == 0)
         
-    # ---- tiny helpers (put these inside your class, above upgrade_all) ----
+    # ---- небольшие вспомогательные функции (поместите их в ваш класс, выше upgrade_all) ----
     def _in_game_dom(self) -> bool:
         try:
             if self.driver.find_elements(By.XPATH, "//div[contains(@class,'Upgrader')]"):
@@ -98,36 +98,36 @@ class XNodeAUClaimer(XNodeClaimer):
     
     def _hrs_str(self, seconds):
         import math
-        return "∞h" if not math.isfinite(seconds) else f"{seconds/3600.0:.2f}h"
+        return "∞ч" if not math.isfinite(seconds) else f"{seconds/3600.0:.2f}ч"
     
-    # ---- drop-in replacement for upgrade_all ----
+    # ---- замена upgrade_all ----
     def upgrade_all(self, one_per_pass=False, max_passes=2, per_row_wait=4):
-        """Scan upgrades, compute ROI/TTA/ETA, and upgrade in best-first order.
-           Uses persisted self.profit_per_sec from Step 114 when available.
+        """Сканирует улучшения, вычисляет ROI/TTA/ETA и улучшает в порядке лучшего сначала.
+           Использует сохранённый self.profit_per_sec из Шага 114, если доступен.
         """
     
-        # ---------- Tunables ----------
-        USE_ETA_PLANNING = True           # True = choose best ETA (wait allowed); False = pure ROI-first now
-        ETA_DECISION_MARGIN_SEC = 0       # Require disabled best ETA to beat best affordable ROI by this many seconds
+        # ---------- Настраиваемые параметры ----------
+        USE_ETA_PLANNING = True           # True = выбирать лучший ETA (ожидание разрешено); False = чисто ROI-сначала сейчас
+        ETA_DECISION_MARGIN_SEC = 0       # Требовать, чтобы отключённый лучший ETA был лучше лучшего доступного ROI на это количество секунд
         # -------------------------------
     
         import math, re, time
         from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
     
         if ULTIMATE_ROI_DAY < MAX_ROI_DAYS:
-            self.output("Config warning: ULTIMATE_ROI_DAY < MAX_ROI_DAYS; using MAX_ROI_DAYS.", 3)
+            self.output("Предупреждение конфигурации: ULTIMATE_ROI_DAY < MAX_ROI_DAYS; используется MAX_ROI_DAYS.", 3)
             roi_cap_days = MAX_ROI_DAYS
             roi_cap_sec = MAX_ROI_SEC
         
-        # --- 0) Enter iframe only if not already in game DOM ---
+        # --- 0) Войти в iframe только если ещё не в DOM игры ---
         if not self._in_game_dom():
-            self.output(f"Step {self.step} - Not in game DOM; attempting to enter iframe…", 3)
+            self.output(f"Шаг {self.step} - Не в DOM игры; пытаемся войти в iframe…", 3)
             try:
                 self.launch_iframe()
             except Exception as e:
-                self.output(f"Step {self.step} - launch_iframe() failed: {e}", 2)
+                self.output(f"Шаг {self.step} - launch_iframe() не удался: {e}", 2)
     
-        # --- helpers local to this method ---
+        # --- вспомогательные функции локально для этого метода ---
         def _norm(s: str) -> str:
             return (s or "").replace("\xa0", " ").strip()
     
@@ -216,7 +216,7 @@ class XNodeAUClaimer(XNodeClaimer):
     
         def find_row_by_title_exact(title):
             try:
-                # Safe literal for XPath
+                # Безопасный литерал для XPath
                 if "'" in title and '"' in title:
                     parts = title.split("'")
                     xp_lit = "concat(" + ", \"'\", ".join([f"'{p}'" for p in parts]) + ")"
@@ -230,12 +230,12 @@ class XNodeAUClaimer(XNodeClaimer):
             except Exception:
                 return None
     
-        # --- 1) Wait & collect rows (lenient, with fallbacks) ---
+        # --- 1) Ожидание и сбор строк (с допусками, с запасными вариантами) ---
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//div[contains(@class,'UpgradesPage-items')]"
-                " | //div[contains(@class,'Upgrader') and .//h2[contains(@class,'Upgrader_text-title')]]"
+                " | //div[contains(@class,'Upgrader') и .//h2[contains(@class,'Upgrader_text-title')]]"
             ))
         )
     
@@ -244,15 +244,15 @@ class XNodeAUClaimer(XNodeClaimer):
         if not containers:
             containers = all_containers[:]
         if not containers:
-            containers = [self.driver]  # search whole document
+            containers = [self.driver]  # искать по всему документу
     
         row_xpath_core = (
-            ".//div[contains(@class,'Upgrader') and "
-            " .//h2[contains(@class,'Upgrader_text-title')] and "
+            ".//div[contains(@class,'Upgrader') и "
+            " .//h2[contains(@class,'Upgrader_text-title')] и "
             " .//div[contains(@class,'Upgrader_right-price_text')] ]"
         )
         row_xpath_fallback = (
-            ".//div[contains(@class,'Upgrader') and "
+            ".//div[contains(@class,'Upgrader') и "
             " .//h2[contains(@class,'Upgrader_text-title')] ]"
         )
     
@@ -271,12 +271,12 @@ class XNodeAUClaimer(XNodeClaimer):
     
         snapshot = rows
         self.output(
-            f"Step {self.step} - Upgrade Categories: {len(all_containers)} | Total Upgrades: {len(snapshot)}",
+            f"Шаг {self.step} - Категории улучшений: {len(all_containers)} | Всего улучшений: {len(snapshot)}",
             3
         )
        
         if not snapshot:
-            time.sleep(0.6)  # one-shot tiny retry
+            time.sleep(0.6)  # однократная небольшая повторная попытка
             rows = []
             for cont in containers:
                 try:
@@ -292,11 +292,11 @@ class XNodeAUClaimer(XNodeClaimer):
             snapshot = rows
     
         if not snapshot:
-            self.output(f"Step {self.step} - No Upgrader rows found (after fallback retry). Holding.", 2)
+            self.output(f"Шаг {self.step} - Не найдено строк улучшений (после повторной попытки). Ожидание.", 2)
             return 0
     
-        # --- 1a) Get profit/sec and balance ---
-        # Prefer persisted profit/sec from Step 114
+        # --- 1a) Получить прибыль в секунду и баланс ---
+        # Предпочитать сохранённую прибыль в секунду из Шага 114
         try:
             profit_per_sec = float(getattr(self, "profit_per_sec", 0.0))
         except Exception:
@@ -329,7 +329,7 @@ class XNodeAUClaimer(XNodeClaimer):
     
         current_balance = _parse_current_balance()
     
-        # --- 2) Scan → metrics (ROI/TTA/ETA), de-dup, partition ---
+        # --- 2) Сканирование → метрики (ROI/TTA/ETA), удаление дубликатов, разбиение ---
         seen = set()
         all_rows_metrics = []
         actionable_now = []
@@ -351,7 +351,7 @@ class XNodeAUClaimer(XNodeClaimer):
                         "title": "", "level": None, "disabled": True,
                         "cost": 0.0, "gain": 0.0, "roi_sec": float("inf"),
                         "time_to_afford": float("inf"), "eta_sec": float("inf"),
-                        "parse_ok": False, "skip_reason": "no-title"
+                        "parse_ok": False, "skip_reason": "нет названия"
                     }
                     all_rows_metrics.append(m)
                     continue
@@ -372,30 +372,30 @@ class XNodeAUClaimer(XNodeClaimer):
                         "title": title, "level": lvl, "disabled": True,
                         "cost": 0.0, "gain": 0.0, "roi_sec": float("inf"),
                         "time_to_afford": float("inf"), "eta_sec": float("inf"),
-                        "parse_ok": False, "skip_reason": "duplicate"
+                        "parse_ok": False, "skip_reason": "дубликат"
                     }
                     all_rows_metrics.append(m)
                     continue
                 seen.add(key)
         
-                # parse cost/gain → ROI
+                # разбор стоимости/прибыли → ROI
                 parse_ok, reason = True, ""
                 try:
                     cost, gain = self._extract_cost_and_gain(row)
                     cost = float(cost or 0.0)
                     gain = float(gain or 0.0)
                     if cost <= 0:
-                        raise ValueError("cost<=0")
+                        raise ValueError("стоимость<=0")
                     if gain <= 0:
-                        raise ValueError("gain<=0")
+                        raise ValueError("прибыль<=0")
                     roi_sec = self._roi_seconds(cost, gain)
                 except Exception as e:
                     cost = locals().get("cost", 0.0)
                     gain = locals().get("gain", 0.0)
                     roi_sec = float("inf")
-                    parse_ok, reason = False, f"parse-failed: {type(e).__name__}"
+                    parse_ok, reason = False, f"не удалось разобрать: {type(e).__name__}"
         
-                # TTA & ETA
+                # TTA и ETA
                 if disabled:
                     deficit = max(cost - current_balance, 0.0)
                     if deficit <= 0:
@@ -413,26 +413,26 @@ class XNodeAUClaimer(XNodeClaimer):
                     "parse_ok": parse_ok, "skip_reason": reason
                 }
         
-                # ALWAYS record to the master list so every row is printed
+                # ВСЕГДА записывать в основной список, чтобы каждая строка была выведена
                 all_rows_metrics.append(m)
         
-                # Partition for decision-making
+                # Разделение для принятия решений
                 if parse_ok and not disabled and roi_sec <= MAX_ROI_SEC:
                     actionable_now.append(m)
                 elif disabled and parse_ok:
                     disabled_considered.append(m)
-                # long-ROI or parse-failed are handled only for printing, not actionable
+                # долгий ROI или неудачный разбор обрабатываются только для вывода, не для действий
         
             except Exception as e:
                 all_rows_metrics.append({
-                    "title": title or "Unknown", "level": None, "disabled": True,
+                    "title": title or "Неизвестно", "level": None, "disabled": True,
                     "cost": 0.0, "gain": 0.0, "roi_sec": float("inf"),
                     "time_to_afford": float("inf"), "eta_sec": float("inf"),
-                    "parse_ok": False, "skip_reason": f"loop-failed: {type(e).__name__}"
+                    "parse_ok": False, "skip_reason": f"ошибка цикла: {type(e).__name__}"
                 })
                 continue
         
-        # --- Dynamic ROI cap widening (start at MAX_ROI_DAYS, grow to ULTIMATE_ROI_DAY) ---
+        # --- Динамическое расширение лимита ROI (начинается с MAX_ROI_DAYS, растёт до ULTIMATE_ROI_DAY) ---
         
         def _filter_actionable(rows, cap_sec):
             return [
@@ -446,7 +446,7 @@ class XNodeAUClaimer(XNodeClaimer):
         roi_cap_days = MAX_ROI_DAYS
         roi_cap_sec  = MAX_ROI_SEC
         
-        # If nothing affordable-now meets the base cap, gradually relax up to ULTIMATE_ROI_DAY
+        # Если ничего доступного сейчас не соответствует базовому лимиту, постепенно расширяем до ULTIMATE_ROI_DAY
         if not any(m.get("parse_ok", True)
                    and not m.get("disabled")
                    and math.isfinite(m.get("roi_sec", float('inf')))
@@ -463,35 +463,35 @@ class XNodeAUClaimer(XNodeClaimer):
                     roi_cap_sec  = cap_sec
                     break
         
-        self.output(f"Step {self.step} - ROI cap in effect: ≤ {roi_cap_days} day(s).", 3)
+        self.output(f"Шаг {self.step} - Введён лимит ROI: ≤ {roi_cap_days} день(ей).", 3)
         
-        # Recompute actionable_now with the (possibly) widened cap
+        # Пересчитать actionable_now с (возможно) расширенным лимитом
         actionable_now = [m for m in all_rows_metrics
                           if m.get("parse_ok", True)
                           and not m.get("disabled")
                           and math.isfinite(m.get("roi_sec", float('inf')))
                           and m["roi_sec"] <= roi_cap_sec]
 
-        # --- 4) Group for pretty printing (priority 3) ---
+        # --- 4) Группировка для красивого вывода (приоритет 3) ---
         def _row_line(m, include_eta_when_disabled=True):
-            title = m.get("title") or "Unknown"
+            title = m.get("title") or "Неизвестно"
             level = m.get("level")
             delta_str = self._human(m.get("gain", 0.0))
             cost_str  = self._human(m.get("cost", 0.0))
             roi_str   = f"ROI≈{self._hrs_str(m.get('roi_sec', float('inf')))}"
             tta_str   = f"TTA≈{self._hrs_str(m.get('time_to_afford', float('inf')))}"
-            line = f"{title} (Lvl {level}) → Δ/sec={delta_str}, Cost={cost_str}, {roi_str}, {tta_str}"
+            line = f"{title} (Уровень {level}) → Δ/сек={delta_str}, Стоимость={cost_str}, {roi_str}, {tta_str}"
 
             if include_eta_when_disabled and m.get("disabled"):
                 line += f", ETA≈{self._hrs_str(m.get('eta_sec', float('inf')))}"
 
             flags = []
             if m.get("disabled"):
-                flags.append("disabled")
+                flags.append("отключено")
             if not m.get("parse_ok", True):
-                flags.append(m.get("skip_reason") or "parse-failed")
+                flags.append(m.get("skip_reason") or "не удалось разобрать")
             if math.isfinite(m.get("roi_sec", float('inf'))) and m["roi_sec"] > roi_cap_sec:
-                flags.append(f"roi>{roi_cap_days}d")
+                flags.append(f"roi>{roi_cap_days}д")
             extra = m.get("skip_reason")
             if extra and extra not in flags:
                 flags.append(extra)
@@ -499,7 +499,7 @@ class XNodeAUClaimer(XNodeClaimer):
                 line += f" [{', '.join(flags)}]"
             return line
 
-        # Build sections using the dynamic cap
+        # Формируем секции с использованием динамического лимита
         ignored_long = [m for m in all_rows_metrics
                         if m.get("parse_ok", True)
                         and math.isfinite(m.get("roi_sec", float('inf')))
@@ -515,28 +515,28 @@ class XNodeAUClaimer(XNodeClaimer):
                              if m.get("parse_ok", True)
                              and m.get("disabled")]
 
-        # Sort inside each section (readability)
+        # Сортируем внутри каждой секции (для удобства чтения)
         available_now_print.sort(key=lambda m: (m["roi_sec"], m["cost"], -m["gain"], m["title"] or ""))
         not_yet_available.sort(key=lambda m: (m["eta_sec"], m["cost"], -m["gain"], m["title"] or ""))
         ignored_long.sort(key=lambda m: (m["roi_sec"], m["cost"], -m["gain"], m["title"] or ""))
 
-        # Print sections (priority 2 headers, priority 3 lines)
-        self.output(f"Step {self.step} - Upgrades affordable now with sensible Return On Investment time: {len(available_now_print)}", 2)
+        # Выводим секции (заголовки приоритет 2, строки приоритет 3)
+        self.output(f"Шаг {self.step} - Улучшения, доступные сейчас с разумным временем окупаемости: {len(available_now_print)}", 2)
         for m in available_now_print:
             self.output(_row_line(m, include_eta_when_disabled=False), 3)
 
-        self.output(f"Step {self.step} - Upgrades not yet affordable: {len(not_yet_available)}", 2)
+        self.output(f"Шаг {self.step} - Улучшения, пока недоступные: {len(not_yet_available)}", 2)
         for m in not_yet_available:
             self.output(_row_line(m, include_eta_when_disabled=True), 3)
 
         self.output(
-            f"Step {self.step} - Available upgrades ignored due to excessive time to repay investment (> {roi_cap_days}d): {len(ignored_long)}",
+            f"Шаг {self.step} - Доступные улучшения, игнорируемые из-за слишком долгого срока окупаемости (> {roi_cap_days}д): {len(ignored_long)}",
             2
         )
         for m in ignored_long:
             self.output(_row_line(m, include_eta_when_disabled=False), 3)
                       
-        # --- 4) Decision: WAIT vs BUY ---
+        # --- 4) Решение: ЖДАТЬ или ПОКУПАТЬ ---
         actionable_now.sort(key=lambda m: (m["roi_sec"], m["cost"], -m["gain"], m["title"] or ""))
         disabled_considered.sort(key=lambda m: (m["eta_sec"], m["cost"], -m["gain"], m["title"] or ""))
         
@@ -552,7 +552,7 @@ class XNodeAUClaimer(XNodeClaimer):
             else:
                 buy_now = True
         
-        # --- WAIT vs BUY strategy messaging (priority 2) ---
+        # --- Сообщения о стратегии ЖДАТЬ или ПОКУПАТЬ (приоритет 2) ---
         
         if not buy_now:
             bd = disabled_considered[0]
@@ -569,24 +569,24 @@ class XNodeAUClaimer(XNodeClaimer):
                 aff_cost  = self._human(aff['cost'])
                 aff_gain  = self._human(aff['gain'])
                 self.output(
-                    f"Step {self.step} - Best strategy = WAIT: "
-                    f"'{bd_title}' available in {bd_tta} & repays investment in {bd_eta} total. ",
+                    f"Шаг {self.step} - Лучшая стратегия = ЖДАТЬ: "
+                    f"'{bd_title}' будет доступно через {bd_tta} и окупится за {bd_eta} в сумме. ",
                     2
                 )
                 self.output(
-                    f"'{aff_title}' would only repay in {aff_roi}, so waiting.",
+                    f"'{aff_title}' окупится только за {aff_roi}, поэтому ждём.",
                     2
                 )
             else:
                 self.output(
-                            f"Step {self.step} - Best strategy = WAIT: "
-                            f"'{bd_title}' available in {bd_tta} & repays investment in {bd_eta} total. "
-                            f"No affordable upgrades now.",
+                            f"Шаг {self.step} - Лучшая стратегия = ЖДАТЬ: "
+                            f"'{bd_title}' будет доступно через {bd_tta} и окупится за {bd_eta} в сумме. "
+                            f"Сейчас нет доступных улучшений.",
                             2
                         )
             return 0
         
-        # --- BUY path (priority 2), then proceed to click loop ---
+        # --- Путь ПОКУПКИ (приоритет 2), затем переход к циклу кликов ---
         if actionable_now:
             aff = actionable_now[0]
             aff_title = aff['title']
@@ -601,27 +601,27 @@ class XNodeAUClaimer(XNodeClaimer):
                 bd_cost  = self._human(bd['cost'])
                 bd_gain  = self._human(bd['gain'])
                 self.output(
-                    f"Step {self.step} - Strategy: BUY ✅ "
-                    f"Choosing '{aff_title}' now "
-                    f"over waiting {bd_eta} for '{bd_title}'.",
+                    f"Шаг {self.step} - Стратегия: ПОКУПАТЬ ✅ "
+                    f"Выбираем '{aff_title}' сейчас "
+                    f"вместо ожидания {bd_eta} для '{bd_title}'.",
                     2
                 )
             else:
                 self.output(
-                    f"Step {self.step} - Strategy: BUY ✅ "
-                    f"Best affordable '{aff_title}' (Δ/sec={aff_gain}, Cost={aff_cost}, ROI≈{aff_roi}).",
+                    f"Шаг {self.step} - Стратегия: ПОКУПАТЬ ✅ "
+                    f"Лучшее доступное '{aff_title}' (Δ/сек={aff_gain}, Стоимость={aff_cost}, ROI≈{aff_roi}).",
                     2
                 )
         else:
-            # Shouldn't happen if buy_now is True, but keep a guard
+            # Не должно случаться, если buy_now == True, но оставим защиту
             self.output(
-                f"Step {self.step} - Strategy: BUY ✅ but no affordable rows present (unexpected).",
+                f"Шаг {self.step} - Стратегия: ПОКУПАТЬ ✅, но доступных строк нет (неожиданно).",
                 2
             )
     
-        # --- 4) Decide: buy now (ROI-first) or wait (ETA-first)? ---
+        # --- 4) Решение: покупать сейчас (ROI-сначала) или ждать (ETA-сначала)? ---
         if not actionable_now and not disabled_considered:
-            self.output(f"Step {self.step} - No actionable or considered rows.", 2)
+            self.output(f"Шаг {self.step} - Нет доступных или рассмотренных строк.", 2)
             return 0
     
         buy_now = True
@@ -651,21 +651,21 @@ class XNodeAUClaimer(XNodeClaimer):
                 aff_cost  = self._human(aff['cost'])
                 aff_gain  = self._human(aff['gain'])
                 self.output(
-                    f"Step {self.step} - Best strategy: WAIT "
-                    f"Disabled '{bd_title}' (Δ/sec={bd_gain}, Cost={bd_cost}, ETA≈{bd_eta}) "
-                    f"is better than affordable '{aff_title}' (Δ/sec={aff_gain}, Cost={aff_cost}, ROI≈{aff_roi}).",
+                    f"Шаг {self.step} - Лучшая стратегия: ЖДАТЬ "
+                    f"Отключённое '{bd_title}' (Δ/сек={bd_gain}, Стоимость={bd_cost}, ETA≈{bd_eta}) "
+                    f"лучше, чем доступное '{aff_title}' (Δ/сек={aff_gain}, Стоимость={aff_cost}, ROI≈{aff_roi}).",
                     2
                 )
             else:
                 self.output(
-                    f"Step {self.step} - Best strategy: WAIT "
-                    f"Best disabled '{bd_title}' (Δ/sec={bd_gain}, Cost={bd_cost}, ETA≈{bd_eta}) "
-                    f"— no affordable upgrades available.",
+                    f"Шаг {self.step} - Лучшая стратегия: ЖДАТЬ "
+                    f"Лучшее отключённое '{bd_title}' (Δ/сек={bd_gain}, Стоимость={bd_cost}, ETA≈{bd_eta}) "
+                    f"— доступных улучшений нет.",
                     2
                 )
             return 0
             
-        # --- BUY path (affordable ROI-first) ---
+        # --- Путь ПОКУПКИ (ROI-сначала, доступно) ---
         if actionable_now:
             aff = actionable_now[0]
             aff_title = aff['title']
@@ -673,7 +673,7 @@ class XNodeAUClaimer(XNodeClaimer):
             aff_cost  = self._human(aff['cost'])
             aff_gain  = self._human(aff['gain'])
         
-            # If there is a disabled candidate, explain why we didn't wait
+            # Если есть отключённый кандидат, объяснить, почему не ждём
             if disabled_considered:
                 bd = disabled_considered[0]
                 bd_title = bd['title']
@@ -681,25 +681,25 @@ class XNodeAUClaimer(XNodeClaimer):
                 bd_cost  = self._human(bd['cost'])
                 bd_gain  = self._human(bd['gain'])
                 self.output(
-                    f"Step {self.step} - Best strategy: BUY ✅ "
-                    f"Choosing affordable '{aff_title}' (Δ/sec={aff_gain}, Cost={aff_cost}, ROI≈{aff_roi}) "
-                    f"over disabled '{bd_title}' (Δ/sec={bd_gain}, Cost={bd_cost}, ETA≈{bd_eta}).",
+                    f"Шаг {self.step} - Лучшая стратегия: ПОКУПАТЬ ✅ "
+                    f"Выбираем доступное '{aff_title}' (Δ/сек={aff_gain}, Стоимость={aff_cost}, ROI≈{aff_roi}) "
+                    f"вместо отключённого '{bd_title}' (Δ/сек={bd_gain}, Стоимость={bd_cost}, ETA≈{bd_eta}).",
                     2
                 )
             else:
                 self.output(
-                    f"Step {self.step} - Strategy: BUY ✅ "
-                    f"Best affordable '{aff_title}' (Δ/sec={aff_gain}, Cost={aff_cost}, ROI≈{aff_roi}).",
+                    f"Шаг {self.step} - Стратегия: ПОКУПАТЬ ✅ "
+                    f"Лучшее доступное '{aff_title}' (Δ/сек={aff_gain}, Стоимость={aff_cost}, ROI≈{aff_roi}).",
                     2
                 )
         else:
-            # Shouldn't happen because buy_now implies actionable_now, but keep a guard
+            # Не должно случаться, так как buy_now подразумевает actionable_now, но оставим защиту
             self.output(
-                f"Step {self.step} - Strategy: BUY ✅ but no affordable rows present (unexpected).",
+                f"Шаг {self.step} - Стратегия: ПОКУПАТЬ ✅, но доступных строк нет (неожиданно).",
                 2
             )
     
-        # If we only want a single upgrade this pass, click just this one and return.
+        # Если хотим только одно улучшение за проход, кликнуть только по нему и вернуть результат.
         if one_per_pass:
             targets = [
                 ".//div[contains(@class,'Upgrader_right-wrap')]",
@@ -711,17 +711,17 @@ class XNodeAUClaimer(XNodeClaimer):
     
             row = find_row_by_title_exact(aff_title)
             if not row or row_is_effectively_disabled(row):
-                self.output(f"Step {self.step} - Chosen upgrade '{aff_title}' not clickable/visible anymore.", 2)
+                self.output(f"Шаг {self.step} - Выбранное улучшение '{aff_title}' больше не кликабельно/видимо.", 2)
                 return 0
     
             ctrl = find_one(row, targets)
             if not ctrl:
-                self.output(f"Step {self.step} - Could not locate clickable control for '{aff_title}'.", 2)
+                self.output(f"Шаг {self.step} - Не удалось найти кликабельный элемент для '{aff_title}'.", 2)
                 return 0
     
             lvl_before = get_level_num(row)
-            if not click_ctrl(ctrl, why="upgrade click (single)"):
-                self.output(f"Step {self.step} - Click failed on '{aff_title}'.", 3)
+            if not click_ctrl(ctrl, why="клик улучшения (одиночный)"):
+                self.output(f"Шаг {self.step} - Клик по '{aff_title}' не удался.", 3)
                 return 0
     
             time.sleep(0.3)
@@ -731,9 +731,9 @@ class XNodeAUClaimer(XNodeClaimer):
     
             success = False
             if (lvl_after is None or lvl_before is None or lvl_after == lvl_before) and not became_disabled:
-                # 2nd nudge
+                # Второй толчок
                 ctrl2 = find_one(row_fresh, targets) or find_one(row, targets)
-                if ctrl2 and click_ctrl(ctrl2, why="upgrade click (single, retry)"):
+                if ctrl2 and click_ctrl(ctrl2, why="клик улучшения (одиночный, повтор)"):
                     time.sleep(0.3)
                     row_fresh2 = find_row_by_title_exact(aff_title) or row_fresh
                     lvl_after2 = get_level_num(row_fresh2)
@@ -751,24 +751,24 @@ class XNodeAUClaimer(XNodeClaimer):
                     else (f"{lvl_after}" if isinstance(lvl_after, int)
                           else (f"{lvl_before}" if isinstance(lvl_before, int) else "?"))
                 )
-                self.output(f"Step {self.step} - Upgraded {aff_title} at level {lvl_print}", 3)
+                self.output(f"Шаг {self.step} - Улучшено {aff_title} до уровня {lvl_print}", 3)
                 return 1
     
-            self.output(f"Step {self.step} - Upgrade for '{aff_title}' did not confirm; will reassess next pass.", 2)
+            self.output(f"Шаг {self.step} - Улучшение для '{aff_title}' не подтверждено; будет переоценено в следующем проходе.", 2)
             return 0
         
-    # --- helpers (fixed) ---  
+    # --- вспомогательные функции (фиксированные) ---  
     def _parse_qty(self, text: str) -> float:
         """
-        Accepts: "400.6M", "1.2B", "+260", "897.2M tflops", etc.
-        Returns base units (float).
+        Принимает: "400.6M", "1.2B", "+260", "897.2M tflops" и т.п.
+        Возвращает базовые единицы (float).
         """
         if text is None:
             return 0.0
-        t = str(text).replace("\xa0", " ").strip()  # normalise NBSP -> space
+        t = str(text).replace("\xa0", " ").strip()  # нормализовать NBSP -> пробел
     
-        # Find the first number with an optional *single-letter* magnitude right after it.
-        # Examples matched: "1.2B", "400.6M", "+260", "897.2M tflops"
+        # Найти первое число с необязательным *однобуквенным* множителем сразу после него.
+        # Примеры совпадений: "1.2B", "400.6M", "+260", "897.2M tflops"
         m = re.search(r'([+-]?\d+(?:\.\d+)?)([KMBTP])?\b', t, re.IGNORECASE)
         if not m:
             return 0.0
@@ -780,21 +780,21 @@ class XNodeAUClaimer(XNodeClaimer):
         return num
     
     def _extract_cost_and_gain(self, row):
-        # ----- COST -----
+        # ----- СТОИМОСТЬ -----
         price_el = row.find_element(By.XPATH, ".//div[contains(@class,'Upgrader_right-price_text')]")
         price_txt = (price_el.text or "").strip()
         if not price_txt:
             price_txt = (self.driver.execute_script("return arguments[0].textContent;", price_el) or "").strip()
-        # helpful debug
-        # self.output(f"Step {self.step} - raw cost text: '{price_txt}'", 3)
+        # полезный отладочный вывод
+        # self.output(f"Шаг {self.step} - исходный текст стоимости: '{price_txt}'", 3)
         cost = self._parse_qty(price_txt)
     
-        # ----- GAIN (Income delta per sec) -----
+        # ----- ПРИБЫЛЬ (дельта дохода в секунду) -----
         gain_el = row.find_element(By.XPATH, ".//div[contains(@class,'Upgrader_income')]/span[2]")
         gain_txt = (gain_el.text or "").strip()
         if not gain_txt:
             gain_txt = (self.driver.execute_script("return arguments[0].textContent;", gain_el) or "").strip()
-        # self.output(f"Step {self.step} - raw gain text: '{gain_txt}'", 3)
+        # self.output(f"Шаг {self.step} - исходный текст прибыли: '{gain_txt}'", 3)
         gain = self._parse_qty(gain_txt)
     
         return cost, gain
@@ -805,7 +805,7 @@ class XNodeAUClaimer(XNodeClaimer):
         return cost / gain
 
     def _human(self, n):
-        """Format a number with K/M/B/T/P suffix like the UI."""
+        """Форматирует число с суффиксами K/M/B/T/P, как в интерфейсе."""
         try:
             n = float(n)
         except Exception:
@@ -817,32 +817,32 @@ class XNodeAUClaimer(XNodeClaimer):
         return f"{n:.3g}"
     
     def _hrs_str(self, seconds):
-        """Nice hours formatting with ∞h for non-finite."""
+        """Красивое форматирование часов с ∞ч для бесконечности."""
         import math
-        return "∞h" if not math.isfinite(seconds) else f"{seconds/3600.0:.2f}h"
+        return "∞ч" if not math.isfinite(seconds) else f"{seconds/3600.0:.2f}ч"
 
     def _time_human_sec(self, seconds: float) -> str:
-        """Like _time_human but input is seconds."""
+        """Как _time_human, но входные данные в секундах."""
         if not math.isfinite(seconds) or seconds == float("inf"):
             return "∞"
         return self._time_human(seconds / 3600.0)
         
     def _time_human(self, hours: float) -> str:
-        """Convert hours (float) into a human-friendly duration string."""
+        """Преобразует часы (float) в удобочитаемую строку длительности."""
         if not math.isfinite(hours) or hours == float("inf"):
             return "∞"
         total_minutes = int(round(hours * 60))
         if total_minutes < 1:
-            return "0m"
+            return "0м"
         days, rem_min = divmod(total_minutes, 1440)
         hrs, mins = divmod(rem_min, 60)
         parts = []
         if days > 0:
-            parts.append(f"{days}d")
+            parts.append(f"{days}д")
         if hrs > 0:
-            parts.append(f"{hrs}h")
+            parts.append(f"{hrs}ч")
         if mins > 0:
-            parts.append(f"{mins}m")
+            parts.append(f"{mins}м")
         return " ".join(parts)
         
 def main():

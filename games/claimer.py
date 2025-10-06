@@ -31,38 +31,38 @@ class Claimer:
         self.initialize_settings()
         self.load_settings()
         self.random_offset = random.randint(self.settings['lowestClaimOffset'], self.settings['highestClaimOffset'])
-        print(f"Initialising the {self.prefix} Wallet Auto-claim Python Script - Good Luck!")
+        print(f"Инициализация скрипта автоматического клэйма кошелька {self.prefix} на Python - Удачи!")
 
         self.imported_seedphrase = None
 
-        # Update the settings based on user input
+        # Обновить настройки на основе ввода пользователя
         if len(sys.argv) > 1:
-            user_input = sys.argv[1]  # Get session ID from command-line argument
+            user_input = sys.argv[1]  # Получить ID сессии из аргумента командной строки
             self.wallet_id = user_input
-            self.output(f"Session ID provided: {user_input}", 2)
+            self.output(f"ID сессии предоставлен: {user_input}", 2)
             
-            # Safely check for a second argument
+            # Безопасно проверить второй аргумент
             if len(sys.argv) > 2 and sys.argv[2] == "reset":
                 self.settings['forceNewSession'] = True
 
-            # Check for the --seed-phrase flag and validate it
+            # Проверить флаг --seed-phrase и валидировать его
             if '--seed-phrase' in sys.argv:
                 seed_index = sys.argv.index('--seed-phrase') + 1
                 if seed_index < len(sys.argv):
                     self.seed_phrase = ' '.join(sys.argv[seed_index:])
                     seed_words = self.seed_phrase.split()
                     if len(seed_words) == 12:
-                        self.output(f"Seed phrase accepted:", 2)
+                        self.output(f"Фраза восстановления принята:", 2)
                         self.imported_seedphrase = self.seed_phrase
                     else:
-                        self.output("Invalid seed phrase. Ignoring.", 2)
+                        self.output("Неверная фраза восстановления. Игнорируется.", 2)
                 else:
-                    self.output("No seed phrase provided after --seed-phrase flag. Ignoring.", 2)
+                    self.output("Фраза восстановления не предоставлена после флага --seed-phrase. Игнорируется.", 2)
         else:
-            self.output("\nCurrent settings:", 1)
+            self.output("\nТекущие настройки:", 1)
             for key, value in self.settings.items():
                 self.output(f"{key}: {value}", 1)
-            user_input = input("\nShould we update our settings? (Default:<enter> / Yes = y): ").strip().lower()
+            user_input = input("\nОбновить настройки? (По умолчанию:<enter> / Да = y): ").strip().lower()
             if user_input == "y":
                 self.update_settings()
             user_input = self.get_session_id()
@@ -76,16 +76,16 @@ class Claimer:
         os.makedirs(self.backup_path, exist_ok=True)
         self.step = "01"
 
-        # Define our base path for debugging screenshots
+        # Определяем базовый путь для отладочных скриншотов
         self.screenshot_base = os.path.join(self.screenshots_path, "screenshot")
 
         if self.settings["useProxy"] and self.settings["proxyAddress"] == "http://127.0.0.1:8080":
             self.run_http_proxy()
         elif self.forceLocalProxy:
             self.run_http_proxy()
-            self.output("Use of the built-in proxy is forced on for this game.", 2)
+            self.output("Использование встроенного прокси принудительно включено для этой игры.", 2)
         else:
-            self.output("Proxy disabled in settings.", 2)
+            self.output("Прокси отключен в настройках.", 2)
 
     def initialize_settings(self):
         self.settings_file = "variables.txt"
@@ -107,15 +107,15 @@ class Claimer:
             self.load_settings()
         cookies_path = os.path.join(self.session_path, 'cookies.json')
         if os.path.exists(cookies_path) and not self.settings['forceNewSession']:
-            self.output("Resuming the previous session...", 2)
+            self.output("Возобновление предыдущей сессии...", 2)
         else:
             telegram_backup_dirs = [d for d in os.listdir(os.path.dirname(self.session_path)) if d.startswith("Telegram")]
             if telegram_backup_dirs:
-                print("Previous Telegram login sessions found. Pressing <enter> will select the account numbered '1':")
+                print("Найдены предыдущие сессии входа в Telegram. Нажатие <enter> выберет аккаунт под номером '1':")
                 for i, dir_name in enumerate(telegram_backup_dirs):
                     print(f"{i + 1}. {dir_name}")
 
-                user_input = input("Enter the number of the session you want to restore, or 'n' to create a new session: ").strip().lower()
+                user_input = input("Введите номер сессии для восстановления или 'n' для создания новой сессии: ").strip().lower()
 
                 if user_input == 'n':
                     self.log_into_telegram(self.wallet_id)
@@ -124,7 +124,7 @@ class Claimer:
                 elif user_input.isdigit() and 0 < int(user_input) <= len(telegram_backup_dirs):
                     self.restore_from_backup(os.path.join(os.path.dirname(self.session_path), telegram_backup_dirs[int(user_input) - 1]))
                 else:
-                    self.restore_from_backup(os.path.join(os.path.dirname(self.session_path), telegram_backup_dirs[0]))  # Default to the first session
+                    self.restore_from_backup(os.path.join(os.path.dirname(self.session_path), telegram_backup_dirs[0]))  # По умолчанию первая сессия
 
             else:
                 self.log_into_telegram(self.wallet_id)
@@ -136,23 +136,23 @@ class Claimer:
 
             try:
                 shutil.copytree(self.session_path, self.backup_path, dirs_exist_ok=True)
-                self.output("We backed up the session data in case of a later crash!", 3)
+                self.output("Мы сделали резервную копию данных сессии на случай сбоя!", 3)
             except Exception as e:
-                self.output(f"Oops, we weren't able to make a backup of the session data! Error: {e}", 1)
+                self.output(f"Упс, не удалось сделать резервную копию данных сессии! Ошибка: {e}", 1)
 
             pm2_session = self.session_path.replace("./selenium/", "")
-            self.output(f"You could add the new/updated session to PM use: pm2 start {self.script} --interpreter venv/bin/python3 --name {pm2_session} -- {pm2_session}", 1)
-            user_choice = input("Enter 'y' to continue to 'claim' function, 'e' to exit, 'a' or <enter> to automatically add to PM2: ").lower()
+            self.output(f"Вы можете добавить новую/обновленную сессию в PM с помощью: pm2 start {self.script} --interpreter venv/bin/python3 --name {pm2_session} -- {pm2_session}", 1)
+            user_choice = input("Введите 'y' для продолжения к функции 'claim', 'e' для выхода, 'a' или <enter> для автоматического добавления в PM2: ").lower()
 
             if user_choice == "e":
-                self.output("Exiting script. You can resume the process later.", 1)
+                self.output("Выход из скрипта. Вы можете возобновить процесс позже.", 1)
                 sys.exit()
             elif user_choice == "a" or not user_choice:
                 self.start_pm2_app(self.script, pm2_session, pm2_session)
-                user_choice = input("Should we save your PM2 processes? (Y/n): ").lower()
+                user_choice = input("Сохранить ваши процессы PM2? (Y/n): ").lower()
                 if user_choice == "y" or not user_choice:
                     self.save_pm2()
-                self.output(f"You can now watch the session log into PM2 with: pm2 logs {pm2_session}", 2)
+                self.output(f"Теперь вы можете просматривать лог сессии в PM2 с помощью: pm2 logs {pm2_session}", 2)
                 sys.exit()
 
         while True:
@@ -167,18 +167,18 @@ class Claimer:
                         file.seek(0)
                         json.dump(status, file)
                         file.truncate()
-                        self.output(f"Session released: {self.session_path}", 3)
+                        self.output(f"Сессия освобождена: {self.session_path}", 3)
 
             self.quit_driver()
 
             now = datetime.now()
-            # Check if wait_time is not a number, assume 30
+            # Проверка, что wait_time число, иначе 30
             if not isinstance(wait_time, (int, float)):
                 wait_time = 30
             next_claim_time = now + timedelta(minutes=wait_time)
             this_claim_str = now.strftime("%d %B - %H:%M")
             next_claim_time_str = next_claim_time.strftime("%d %B - %H:%M")
-            self.output(f"{this_claim_str} | Need to wait until {next_claim_time_str} before the next claim attempt. Approximately {wait_time} minutes.", 1)
+            self.output(f"{this_claim_str} | Нужно ждать до {next_claim_time_str} перед следующей попыткой клэйма. Примерно {wait_time} минут.", 1)
             if self.settings["forceClaim"]:
                 self.settings["forceClaim"] = False
 
@@ -186,11 +186,11 @@ class Claimer:
                 this_wait = min(wait_time, 15)
                 now = datetime.now()
                 timestamp = now.strftime("%H:%M")
-                self.output(f"[{timestamp}] Waiting for {this_wait} more minutes...", 3)
-                time.sleep(this_wait * 60)  # Convert minutes to seconds
+                self.output(f"[{timestamp}] Ожидание еще {this_wait} минут...", 3)
+                time.sleep(this_wait * 60)  # Перевод минут в секунды
                 wait_time -= this_wait
                 if wait_time > 0:
-                    self.output(f"Updated wait time: {wait_time} minutes left.", 3)
+                    self.output(f"Обновленное время ожидания: осталось {wait_time} минут.", 3)
 
     def load_settings(self):
         default_settings = {
@@ -209,15 +209,15 @@ class Claimer:
             "requestUserAgent": False,
             "telegramBotToken": "", 
             "telegramBotChatId": "",
-            "enableCache": True  # New setting added here
+            "enableCache": True  # Новая настройка
         }
 
         if os.path.exists(self.settings_file):
             with open(self.settings_file, "r") as f:
                 loaded_settings = json.load(f)
-            # Filter out unused settings from previous versions
+            # Фильтрация неиспользуемых настроек из предыдущих версий
             self.settings = {k: loaded_settings.get(k, v) for k, v in default_settings.items()}
-            self.output("Settings loaded successfully.", 3)
+            self.output("Настройки успешно загружены.", 3)
         else:
             self.settings = default_settings
             self.save_settings()
@@ -225,90 +225,90 @@ class Claimer:
     def save_settings(self):
         with open(self.settings_file, "w") as f:
             json.dump(self.settings, f)
-        self.output("Settings saved successfully.", 3)
+        self.output("Настройки успешно сохранены.", 3)
 
     def update_settings(self):
         
         def update_setting(setting_key, message):
             current_value = self.settings.get(setting_key)
-            response = input(f"\n{message} (Y/N, press Enter to keep current [{current_value}]): ").strip().lower()
+            response = input(f"\n{message} (Y/N, нажмите Enter чтобы оставить текущее [{current_value}]): ").strip().lower()
             if response == "y":
                 self.settings[setting_key] = True
             elif response == "n":
                 self.settings[setting_key] = False
             else:
-                print(f"Keeping current setting: {current_value}")
+                print(f"Текущая настройка сохранена: {current_value}")
 
-        update_setting("forceClaim", "Shall we force a claim on first run? Does not wait for the timer to be filled")
-        update_setting("debugIsOn", "Should we enable debugging? This will save screenshots in your local drive")
-        update_setting("hideSensitiveInput", "Should we hide sensitive input? Your phone number and seed phrase will not be visible on the screen")
-        update_setting("screenshotQRCode", "Shall we allow log in by QR code? The alternative is by phone number and one-time password")
+        update_setting("forceClaim", "Принудительно выполнить клэйм при первом запуске? Не ждать заполнения таймера")
+        update_setting("debugIsOn", "Включить отладку? Будут сохраняться скриншоты на локальном диске")
+        update_setting("hideSensitiveInput", "Скрывать чувствительный ввод? Ваш номер телефона и фраза восстановления не будут видны на экране")
+        update_setting("screenshotQRCode", "Разрешить вход по QR-коду? Альтернатива - по номеру телефона и одноразовому паролю")
 
         try:
-            new_max_sessions = int(input(f"\nEnter the number of max concurrent claim sessions. Additional claims will queue until a session slot is free.\n(current: {self.settings['maxSessions']}): "))
+            new_max_sessions = int(input(f"\nВведите максимальное количество одновременных сессий клэйма. Дополнительные будут в очереди до освобождения слота.\n(текущее: {self.settings['maxSessions']}): "))
             self.settings["maxSessions"] = new_max_sessions
         except ValueError:
-            self.output("Number of sessions remains unchanged.", 1)
+            self.output("Количество сессий осталось без изменений.", 1)
 
         try:
-            new_verbose_level = int(input("\nEnter the number for how much information you want displaying in the console.\n 3 = all messages, 2 = claim steps, 1 = minimal steps\n(current: {}): ".format(self.settings['verboseLevel'])))
+            new_verbose_level = int(input("\nВведите уровень подробности вывода в консоль.\n 3 = все сообщения, 2 = шаги клэйма, 1 = минимальные шаги\n(текущее: {}): ".format(self.settings['verboseLevel'])))
             if 1 <= new_verbose_level <= 3:
                 self.settings["verboseLevel"] = new_verbose_level
-                self.output("Verbose level updated successfully.", 2)
+                self.output("Уровень подробности успешно обновлен.", 2)
             else:
-                self.output("Verbose level remains unchanged.", 2)
+                self.output("Уровень подробности остался без изменений.", 2)
         except ValueError:
-            self.output("Verbose level remains unchanged.", 2)
+            self.output("Уровень подробности остался без изменений.", 2)
 
         try:
-            new_telegram_verbose_level = int(input("\nEnter the Telegram verbose level (3 = all messages, 2 = claim steps, 1 = minimal steps)\n(current: {}): ".format(self.settings['telegramVerboseLevel'])))
+            new_telegram_verbose_level = int(input("\nВведите уровень подробности Telegram (3 = все сообщения, 2 = шаги клэйма, 1 = минимальные шаги)\n(текущее: {}): ".format(self.settings['telegramVerboseLevel'])))
             if 0 <= new_telegram_verbose_level <= 3:
                 self.settings["telegramVerboseLevel"] = new_telegram_verbose_level
-                self.output("Telegram verbose level updated successfully.", 2)
+                self.output("Уровень подробности Telegram успешно обновлен.", 2)
             else:
-                self.output("Telegram verbose level remains unchanged.", 2)
+                self.output("Уровень подробности Telegram остался без изменений.", 2)
         except ValueError:
-            self.output("Telegram verbose level remains unchanged.", 2)
+            self.output("Уровень подробности Telegram остался без изменений.", 2)
 
         try:
-            new_lowest_offset = int(input("\nEnter the lowest possible offset for the claim timer (valid values are -30 to +30 minutes)\n(current: {}): ".format(self.settings['lowestClaimOffset'])))
+            new_lowest_offset = int(input("\nВведите минимальное смещение таймера клэйма (допустимые значения от -30 до +30 минут)\n(текущее: {}): ".format(self.settings['lowestClaimOffset'])))
             if -30 <= new_lowest_offset <= 30:
                 self.settings["lowestClaimOffset"] = new_lowest_offset
-                self.output("Lowest claim offset updated successfully.", 2)
+                self.output("Минимальное смещение клэйма успешно обновлено.", 2)
             else:
-                self.output("Invalid range for lowest claim offset. Please enter a value between -30 and +30.", 2)
+                self.output("Недопустимый диапазон для минимального смещения клэйма. Введите значение от -30 до +30.", 2)
         except ValueError:
-            self.output("Lowest claim offset remains unchanged.", 2)
+            self.output("Минимальное смещение клэйма осталось без изменений.", 2)
 
         try:
-            new_highest_offset = int(input("\nEnter the highest possible offset for the claim timer (valid values are 0 to 60 minutes)\n(current: {}): ".format(self.settings['highestClaimOffset'])))
+            new_highest_offset = int(input("\nВведите максимальное смещение таймера клэйма (допустимые значения от 0 до 60 минут)\n(текущее: {}): ".format(self.settings['highestClaimOffset'])))
             if 0 <= new_highest_offset <= 60:
                 self.settings["highestClaimOffset"] = new_highest_offset
-                self.output("Highest claim offset updated successfully.", 2)
+                self.output("Максимальное смещение клэйма успешно обновлено.", 2)
             else:
-                self.output("Invalid range for highest claim offset. Please enter a value between 0 and 60.", 2)
+                self.output("Недопустимый диапазон для максимального смещения клэйма. Введите значение от 0 до 60.", 2)
         except ValueError:
-            self.output("Highest claim offset remains unchanged.", 2)
+            self.output("Максимальное смещение клэйма осталось без изменений.", 2)
 
         if self.settings["lowestClaimOffset"] > self.settings["highestClaimOffset"]:
             self.settings["lowestClaimOffset"] = self.settings["highestClaimOffset"]
-            self.output("Adjusted lowest claim offset to match the highest as it was greater.", 2)
+            self.output("Минимальное смещение клэйма скорректировано до максимального, так как было больше.", 2)
 
-        update_setting("useProxy", "Use Proxy?")
-        update_setting("requestUserAgent", "Shall we collect a User Agent during setup?")
+        update_setting("useProxy", "Использовать прокси?")
+        update_setting("requestUserAgent", "Собрать User Agent во время настройки?")
         
-        # Collect the Telegram Bot Token
-        new_telegram_bot_token = input(f"\nEnter the Telegram Bot Token (current: {self.settings['telegramBotToken']}): ").strip()
+        # Ввод токена Telegram бота
+        new_telegram_bot_token = input(f"\nВведите токен Telegram бота (текущее: {self.settings['telegramBotToken']}): ").strip()
         if new_telegram_bot_token:
             self.settings["telegramBotToken"] = new_telegram_bot_token
 
-        update_setting("enableCache", "Enable application cache?")
+        update_setting("enableCache", "Включить кэш приложения?")
 
         self.save_settings()
 
-        update_setting("forceNewSession", "Overwrite existing session and Force New Login? Use this if your saved session has crashed\nOne-Time only (setting not saved): ")
+        update_setting("forceNewSession", "Перезаписать существующую сессию и принудительно войти заново? Используйте, если сохраненная сессия сломалась\nОдноразово (настройка не сохраняется): ")
 
-        self.output("\nRevised settings:", 1)
+        self.output("\nОбновленные настройки:", 1)
         for key, value in self.settings.items():
             self.output(f"{key}: {value}", 1)
         self.output("", 1)
@@ -319,10 +319,10 @@ class Claimer:
         if self.settings['telegramBotToken'] and not self.settings['telegramBotChatId']:
             try:
                 self.settings['telegramBotChatId'] = self.get_telegram_bot_chat_id()
-                self.save_settings()  # Save the settings after getting the chat ID
+                self.save_settings()  # Сохраняем настройки после получения chat ID
             except ValueError as e:
                 pass
-                # print(f"Error fetching Telegram chat ID: {e}")
+                # print(f"Ошибка при получении Telegram chat ID: {e}")
         if self.settings['telegramBotChatId'] and self.wallet_id and self.settings['telegramVerboseLevel'] >= level:
             self.send_message(string)
 
@@ -330,23 +330,23 @@ class Claimer:
 
     def get_telegram_bot_chat_id(self):
         """
-        Fetches the most recent update and returns its chat_id and message_id.
-        Raises if no updates or no message object is found.
+        Получает последний апдейт и возвращает chat_id и message_id.
+        Выбрасывает исключение, если апдейтов или сообщений нет.
         """
         url = f"https://api.telegram.org/bot{self.settings['telegramBotToken']}/getUpdates"
         params = {
-            "limit": 1,    # only the latest update
-            "timeout": 0,  # no long-polling
+            "limit": 1,    # только последний апдейт
+            "timeout": 0,  # без долгого опроса
         }
         data = requests.get(url, params=params).json()
         updates = data.get("result", [])
         if not updates:
-            raise ValueError("No updates found. Ensure the bot has received at least one message.")
+            raise ValueError("Обновления не найдены. Убедитесь, что бот получил хотя бы одно сообщение.")
         
         latest = updates[-1]
         msg = latest.get("message") or latest.get("edited_message")
         if not msg:
-            raise ValueError("Latest update contains no message object.")
+            raise ValueError("Последний апдейт не содержит объект сообщения.")
         
         chat_id = msg["chat"]["id"]
         message_id = msg["message_id"]
@@ -360,56 +360,56 @@ class Claimer:
             message = f"{self.wallet_id}: {string}"
             url = f"https://api.telegram.org/bot{self.settings['telegramBotToken']}/sendMessage?chat_id={self.settings['telegramBotChatId']}&text={message}"
             response = requests.get(url).json()
-            # print(response)  # This sends the message and prints the response (Commented out for cleaner output)
+            # print(response)  # Отправляет сообщение и выводит ответ (закомментировано для чистоты вывода)
             if not response.get("ok"):
-                raise ValueError(f"Failed to send message: {response}")
+                raise ValueError(f"Не удалось отправить сообщение: {response}")
         except ValueError as e:
-            print(f"Error: {e}")
+            print(f"Ошибка: {e}")
 
     def increase_step(self):
         step_int = int(self.step) + 1
         self.step = f"{step_int:02}"
 
     def get_session_id(self):
-        """Prompts the user for a session ID or determines the next sequential ID based on a 'Wallet' prefix.
+        """Запрашивает у пользователя ID сессии или определяет следующий последовательный ID с префиксом 'Wallet'.
 
-        Returns:
-            str: The entered session ID or the automatically generated sequential ID.
+        Возвращает:
+            str: Введенный ID сессии или автоматически сгенерированный последовательный ID.
         """
-        self.output(f"Your session will be prefixed with: {self.prefix}", 1)
-        user_input = input("Enter your unique Session Name here, or hit <enter> for the next sequential wallet: ").strip()
+        self.output(f"Ваш префикс сессии будет: {self.prefix}", 1)
+        user_input = input("Введите уникальное имя сессии или нажмите <enter> для следующего последовательного кошелька: ").strip()
 
-        # Set the directory where session folders are stored
+        # Устанавливаем директорию с папками сессий
         screenshots_dir = "./screenshots/"
 
-        # Ensure the directory exists to avoid FileNotFoundError
+        # Убедимся, что директория существует, чтобы избежать ошибки FileNotFoundError
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
-        # List contents of the directory
+        # Список содержимого директории
         try:
             dir_contents = os.listdir(screenshots_dir)
         except Exception as e:
-            self.output(f"Error accessing the directory: {e}", 1)
-            return None  # or handle the error differently
+            self.output(f"Ошибка доступа к директории: {e}", 1)
+            return None  # или обработать ошибку иначе
 
-        # Filter directories with the 'Wallet' prefix and extract the numeric parts
+        # Фильтруем директории с префиксом 'Wallet' и извлекаем числовые части
         wallet_dirs = [int(dir_name.replace(self.prefix + 'Wallet', ''))
                     for dir_name in dir_contents
                     if dir_name.startswith(self.prefix + 'Wallet') and dir_name[len(self.prefix) + 6:].isdigit()]
 
-        # Calculate the next wallet ID
+        # Вычисляем следующий ID кошелька
         next_wallet_id = max(wallet_dirs) + 1 if wallet_dirs else 1
 
-        # Use the next sequential wallet ID if no user input was provided
+        # Используем следующий последовательный ID, если пользователь не ввел свой
         if not user_input:
-            user_input = f"Wallet{next_wallet_id}"  # Ensuring the full ID is prefixed correctly
+            user_input = f"Wallet{next_wallet_id}"  # Обеспечиваем правильный префикс
 
         return self.prefix+user_input
 
     def prompt_user_agent(self):
-        print (f"Step {self.step} - Please enter the User-Agent string you wish to use or press enter for default.")
-        user_agent = input(f"Step {self.step} - User-Agent: ").strip()
+        print (f"Шаг {self.step} - Пожалуйста, введите строку User-Agent или нажмите Enter для значения по умолчанию.")
+        user_agent = input(f"Шаг {self.step} - User-Agent: ").strip()
         return user_agent
 
     def set_cookies(self):
@@ -422,7 +422,7 @@ class Claimer:
             user_agent = self.prompt_user_agent()
             cookies_path = f"{self.session_path}/cookies.json"
             cookies = self.driver.get_cookies()
-            cookies.append({"name": "user_agent", "value": user_agent})  # Save user agent to cookies
+            cookies.append({"name": "user_agent", "value": user_agent})  # Сохраняем user agent в cookies
             with open(cookies_path, 'w') as file:
                 json.dump(cookies, file)
 
@@ -430,7 +430,7 @@ class Claimer:
         chrome_options = Options()
         chrome_options.add_argument(f"user-data-dir={self.session_path}")
         chrome_options.add_argument("--profile-directory=Default")
-        chrome_options.add_argument("--headless=new")  # Ensure headless is enabled
+        chrome_options.add_argument("--headless=new")  # Включаем headless
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -438,7 +438,7 @@ class Claimer:
         chrome_options.add_argument("--disable-background-networking")
         chrome_options.add_argument("--enable-automation")
 
-        # Attempt to load user agent from cookies
+        # Пытаемся загрузить user agent из cookies
         try:
             cookies_path = f"{self.session_path}/cookies.json"
             with open(cookies_path, 'r') as file:
@@ -446,24 +446,24 @@ class Claimer:
                 user_agent_cookie = next((cookie for cookie in cookies if cookie["name"] == "user_agent"), None)
                 if user_agent_cookie and user_agent_cookie["value"]:
                     user_agent = user_agent_cookie["value"]
-                    self.output(f"Using saved user agent: {user_agent}", 2)
+                    self.output(f"Используется сохраненный user agent: {user_agent}", 2)
                 else:
                     user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) EdgiOS/124.0.2478.50 Version/17.0 Mobile/15E148 Safari/604.1"
-                    self.output("No user agent found, using default.", 2)
+                    self.output("User agent не найден, используется значение по умолчанию.", 2)
         except FileNotFoundError:
             user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) EdgiOS/124.0.2478.50 Version/17.0 Mobile/15E148 Safari/604.1"
-            self.output("Cookies file not found, using default user agent.", 2)
+            self.output("Файл cookies не найден, используется user agent по умолчанию.", 2)
 
-        # Adjust the platform based on the user agent
+        # Корректируем платформу на основе user agent
         if any(keyword in user_agent for keyword in ['iPhone', 'iPad', 'iOS', 'iPhone OS']):
             self.default_platform = "ios"
-            self.output("Detected iOS platform from user agent. tgWebAppPlatform will be changed to 'ios' later.", 2)
+            self.output("Обнаружена платформа iOS по user agent. tgWebAppPlatform будет изменен на 'ios' позже.", 2)
         elif 'Android' in user_agent:
             self.default_platform = "android"
-            self.output("Detected Android platform from user agent. Set tgWebAppPlatform to 'android'.", 2)
+            self.output("Обнаружена платформа Android по user agent. Установлен tgWebAppPlatform в 'android'.", 2)
         else:
             self.default_platform = "web"
-            self.output("Default platform set to 'web'.", 3)
+            self.output("Платформа по умолчанию установлена в 'web'.", 3)
 
         chrome_options.add_argument(f"user-agent={user_agent}")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -483,7 +483,7 @@ class Claimer:
 
         chromedriver_path = shutil.which("chromedriver")
         if chromedriver_path is None:
-            self.output("ChromeDriver not found in PATH. Please ensure it is installed.", 1)
+            self.output("ChromeDriver не найден в PATH. Пожалуйста, убедитесь, что он установлен.", 1)
             exit(1)
 
         try:
@@ -491,50 +491,50 @@ class Claimer:
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             return self.driver
         except Exception as e:
-            self.output(f"Initial ChromeDriver setup may have failed: {e}", 1)
-            self.output("Please ensure you have the correct ChromeDriver version for your system.", 1)
+            self.output(f"Начальная настройка ChromeDriver могла не удаться: {e}", 1)
+            self.output("Пожалуйста, убедитесь, что у вас правильная версия ChromeDriver для вашей системы.", 1)
             exit(1)
 
     def run_http_proxy(self):
         proxy_lock_file = "./start_proxy.txt"
-        max_wait_time = 15 * 60  # 15 minutes
-        wait_interval = 5  # 5 seconds
+        max_wait_time = 15 * 60  # 15 минут
+        wait_interval = 5  # 5 секунд
         start_time = time.time()
         message_displayed = False
 
         while os.path.exists(proxy_lock_file) and (time.time() - start_time) < max_wait_time:
             if not message_displayed:
-                self.output("Proxy is already running. Waiting for it to free up...", 2)
+                self.output("Прокси уже запущен. Ожидание освобождения...", 2)
                 message_displayed = True
             time.sleep(wait_interval)
 
         if os.path.exists(proxy_lock_file):
-            self.output("Max wait time elapsed. Proceeding to run the proxy.", 2)
+            self.output("Максимальное время ожидания истекло. Продолжаем запуск прокси.", 2)
 
         with open(proxy_lock_file, "w") as lock_file:
-            lock_file.write(f"Proxy started at: {time.ctime()}\n")
+            lock_file.write(f"Прокси запущен в: {time.ctime()}\n")
 
         try:
             subprocess.run(['./launch.sh', 'enable-proxy'], check=True)
-            self.output("http-proxy started successfully.", 2)
+            self.output("http-прокси успешно запущен.", 2)
         except subprocess.CalledProcessError as e:
-            self.output(f"Failed to start http-proxy: {e}", 1)
+            self.output(f"Не удалось запустить http-прокси: {e}", 1)
         finally:
             os.remove(proxy_lock_file)
 
     def get_driver(self):
-        if self.driver is None:  # Check if driver needs to be initialized
-            self.manage_session()  # Ensure we can start a session
+        if self.driver is None:  # Проверяем, нужно ли инициализировать драйвер
+            self.manage_session()  # Убедимся, что можем начать сессию
             self.driver = self.setup_driver()
-            self.output("\nCHROME DRIVER INITIALISED: Try not to exit the script before it detaches.",2)
+            self.output("\nCHROME DRIVER ИНИЦИАЛИЗИРОВАН: Не выходите из скрипта до отсоединения.",2)
         return self.driver
 
     def quit_driver(self):
         if self.driver:
             self.driver.quit()
-            self.output("\nCHROME DRIVER DETACHED: It is now safe to exit the script.",2)
+            self.output("\nCHROME DRIVER ОТСОЕДИНЕН: Теперь безопасно выйти из скрипта.",2)
             self.driver = None
-            self.release_session()  # Mark the session as closed
+            self.release_session()  # Отмечаем сессию как закрытую
 
     def manage_session(self):
         current_session = self.session_path
@@ -549,27 +549,27 @@ class Claimer:
                     flock(file, LOCK_EX)
                     status = json.load(file)
 
-                    # Clean up expired sessions
+                    # Очистка просроченных сессий
                     for session_id, timestamp in list(status.items()):
-                        if current_timestamp - timestamp > 300:  # 5 minutes
+                        if current_timestamp - timestamp > 300:  # 5 минут
                             del status[session_id]
-                            self.output(f"Removed expired session: {session_id}", 3)
+                            self.output(f"Удалена просроченная сессия: {session_id}", 3)
 
-                    # Check for available slots, exclude current session from count
+                    # Проверка доступных слотов, исключая текущую сессию
                     active_sessions = {k: v for k, v in status.items() if k != current_session}
                     if len(active_sessions) < self.settings['maxSessions']:
                         status[current_session] = current_timestamp
                         file.seek(0)
                         json.dump(status, file)
                         file.truncate()
-                        self.output(f"Session started: {current_session} in {self.status_file_path}", 3)
+                        self.output(f"Сессия запущена: {current_session} в {self.status_file_path}", 3)
                         flock(file, LOCK_UN)
                         session_started = True
                         break
                     flock(file, LOCK_UN)
 
                 if not session_started:
-                    self.output(f"Waiting for slot. Current sessions: {len(active_sessions)}/{self.settings['maxSessions']}", output_priority)
+                    self.output(f"Ожидание свободного слота. Текущие сессии: {len(active_sessions)}/{self.settings['maxSessions']}", output_priority)
                     if new_message:
                         new_message = False
                         output_priority = 3
@@ -578,16 +578,16 @@ class Claimer:
                     break
 
             except FileNotFoundError:
-                # Create file if it doesn't exist
+                # Создаем файл, если его нет
                 with open(self.status_file_path, "w") as file:
                     flock(file, LOCK_EX)
                     json.dump({}, file)
                     flock(file, LOCK_UN)
             except json.decoder.JSONDecodeError:
-                # Handle empty or corrupt JSON
+                # Обработка пустого или поврежденного JSON
                 with open(self.status_file_path, "w") as file:
                     flock(file, LOCK_EX)
-                    self.output("Corrupted status file. Resetting...", 3)
+                    self.output("Файл статуса поврежден. Сброс...", 3)
                     json.dump({}, file)
                     flock(file, LOCK_UN)
 
@@ -604,13 +604,13 @@ class Claimer:
                 json.dump(status, file)
                 file.truncate()
             flock(file, LOCK_UN)
-            self.output(f"Session released: {current_session}", 3)
+            self.output(f"Сессия освобождена: {current_session}", 3)
     
     def log_into_telegram(self, user_input=None):
 
         self.step = "01"
 
-        # Check and recreate directories
+        # Проверка и создание директорий
         self.session_path = f"./selenium/{user_input}"
         if os.path.exists(self.session_path):
             shutil.rmtree(self.session_path)
@@ -629,63 +629,63 @@ class Claimer:
         def visible_QR_code():
             max_attempts = 5
             attempt_count = 0
-            last_url = "not a url"  # Placeholder for the last detected QR code URL
+            last_url = "not a url"  # Заглушка для последнего обнаруженного URL QR-кода
 
             xpath = "//canvas[@class='qr-canvas']"
             self.driver.get(self.url)
             wait = WebDriverWait(self.driver, 20)
             QR_code = wait.until(EC.visibility_of_element_located((By.XPATH, xpath)))
             wait = WebDriverWait(self.driver, 3)
-            self.output(f"Step {self.step} - Waiting for the first QR code - may take up to 30 seconds.", 1)
+            self.output(f"Шаг {self.step} - Ожидание первого QR-кода - может занять до 30 секунд.", 1)
             self.increase_step()
 
             while attempt_count < max_attempts:
                 try:
-                    # Attempt to find the QR code element
+                    # Пытаемся найти элемент QR-кода
                     QR_code = wait.until(EC.visibility_of_element_located((By.XPATH, xpath)))
                     try:
-                        # Attempt to take a screenshot of the QR code
-                        QR_code.screenshot(f"{self.screenshots_path}/Step {self.step} - Initial QR code.png")
+                        # Пытаемся сделать скриншот QR-кода
+                        QR_code.screenshot(f"{self.screenshots_path}/Шаг {self.step} - Начальный QR код.png")
                     except StaleElementReferenceException:
-                        self.output(f"Step {self.step} - QR code element is stale, refinding...", 1)
-                        continue  # Retry by refinding the QR code element
+                        self.output(f"Шаг {self.step} - Элемент QR-кода устарел, ищем заново...", 1)
+                        continue  # Повторяем, найдя элемент заново
 
-                    image = Image.open(f"{self.screenshots_path}/Step {self.step} - Initial QR code.png")
+                    image = Image.open(f"{self.screenshots_path}/Шаг {self.step} - Начальный QR код.png")
                     decoded_objects = decode(image)
                     if decoded_objects:
                         this_url = decoded_objects[0].data.decode('utf-8')
                         if this_url != last_url:
-                            last_url = this_url  # Update the last seen URL
+                            last_url = this_url  # Обновляем последний URL
                             attempt_count += 1
-                            self.output("*** Important: Having GUI open in your Telegram App might stop this script from logging in! ***\n", 2)
-                            self.output(f"Step {self.step} - Our screenshot path is {self.screenshots_path}\n", 1)
-                            self.output(f"Step {self.step} - Generating screenshot {attempt_count} of {max_attempts}\n", 2)
+                            self.output("*** Важно: Открытый GUI в вашем Telegram может помешать входу скрипта! ***\n", 2)
+                            self.output(f"Шаг {self.step} - Путь к скриншотам: {self.screenshots_path}\n", 1)
+                            self.output(f"Шаг {self.step} - Генерация скриншота {attempt_count} из {max_attempts}\n", 2)
                             qrcode_terminal.draw(this_url)
                         if attempt_count >= max_attempts:
-                            self.output(f"Step {self.step} - Max attempts reached with no new QR code.", 1)
+                            self.output(f"Шаг {self.step} - Достигнуто максимальное количество попыток без нового QR-кода.", 1)
                             return False
-                        time.sleep(0.5)  # Wait before the next check
+                        time.sleep(0.5)  # Ждем перед следующей проверкой
                     else:
-                        time.sleep(0.5)  # No QR code decoded, wait before retrying
+                        time.sleep(0.5)  # QR-код не распознан, ждем перед повтором
                 except (TimeoutException, NoSuchElementException):
-                    self.output(f"Step {self.step} - QR Code is no longer visible.", 2)
-                    return True  # Indicates the QR code has been scanned or disappeared
+                    self.output(f"Шаг {self.step} - QR-код больше не виден.", 2)
+                    return True  # QR-код отсканирован или исчез
 
-            self.output(f"Step {self.step} - Failed to generate a valid QR code after multiple attempts.", 1)
-            return False  # If loop completes without a successful scan
+            self.output(f"Шаг {self.step} - Не удалось получить валидный QR-код после нескольких попыток.", 1)
+            return False  # Если цикл завершился без успеха
 
         self.driver = self.get_driver()
     
-        # QR Code Method
+        # Метод с QR-кодом
         if self.settings['screenshotQRCode']:
             try:
                 while True:
-                    if visible_QR_code():  # QR code not found
+                    if visible_QR_code():  # QR-код не найден
                         self.test_for_2fa()
-                        return  # Exit the function entirely
+                        return  # Выход из функции
 
-                    # If we reach here, it means the QR code is still present:
-                    choice = input(f"\nStep {self.step} - QR Code still present. Retry (r) with a new QR code or switch to the OTP method (enter): ")
+                    # Если дошли сюда, QR-код все еще есть:
+                    choice = input(f"\nШаг {self.step} - QR-код все еще отображается. Повторить (r) с новым QR-кодом или перейти к методу OTP (нажмите Enter): ")
                     print("")
                     if choice.lower() == 'r':
                         visible_QR_code()
@@ -693,150 +693,150 @@ class Claimer:
                         break
 
             except TimeoutException:
-                self.output(f"Step {self.step} - Canvas not found: Restart the script and retry the QR Code or switch to the OTP method.", 1)
+                self.output(f"Шаг {self.step} - Canvas не найден: Перезапустите скрипт и попробуйте QR-код или переключитесь на метод OTP.", 1)
 
-        # OTP Login Me,thod
+        # Метод входа по одноразовому паролю (OTP)
         self.increase_step()
-        self.output(f"Step {self.step} - Initiating the One-Time Password (OTP) method...\n",1)
+        self.output(f"Шаг {self.step} - Инициация метода одноразового пароля (OTP)...\n",1)
         self.driver.get(self.url)
         xpath = "//button[contains(@class, 'btn-primary') and contains(., 'Log in by phone Number')]"
-        self.move_and_click(xpath, 30, True, "switch to log in by phone number", self.step, "visible")
+        self.move_and_click(xpath, 30, True, "переключение на вход по номеру телефона", self.step, "visible")
         self.increase_step()
 
-        # Country Code Selection
+        # Выбор кода страны
         xpath = "//div[contains(@class, 'input-field-input')]"
-        self.target_element = self.move_and_click(xpath, 30, True, "update user's country", self.step, "visible")
+        self.target_element = self.move_and_click(xpath, 30, True, "обновление страны пользователя", self.step, "visible")
         if not self.target_element:
-            self.output(f"Step {self.step} - Failed to find country input field.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти поле ввода страны.", 1)
             return
 
-        user_input = input(f"Step {self.step} - Please enter your Country Name as it appears in the Telegram list: ").strip()
+        user_input = input(f"Шаг {self.step} - Пожалуйста, введите название вашей страны, как в списке Telegram: ").strip()
         self.target_element.send_keys(user_input)
         self.target_element.send_keys(Keys.RETURN)
         self.increase_step()
 
-        # Phone Number Input
+        # Ввод номера телефона
         xpath = "//div[contains(@class, 'input-field-input') and @inputmode='decimal']"
-        self.target_element = self.move_and_click(xpath, 30, True, "request user's phone number", self.step, "visible")
+        self.target_element = self.move_and_click(xpath, 30, True, "запрос номера телефона пользователя", self.step, "visible")
         if not self.target_element:
-            self.output(f"Step {self.step} - Failed to find phone number input field.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти поле ввода номера телефона.", 1)
             return
     
         def validate_phone_number(phone):
-            # Regex for validating an international phone number without leading 0 and typically 7 to 15 digits long
+            # Регулярное выражение для проверки международного номера без ведущего 0, длиной от 7 до 15 цифр
             pattern = re.compile(r"^[1-9][0-9]{6,14}$")
             return pattern.match(phone)
 
         while True:
             if self.settings['hideSensitiveInput']:
-                user_phone = getpass.getpass(f"Step {self.step} - Please enter your phone number without leading 0 (hidden input): ")
+                user_phone = getpass.getpass(f"Шаг {self.step} - Введите номер телефона без ведущего 0 (ввод скрыт): ")
             else:
-                user_phone = input(f"Step {self.step} - Please enter your phone number without leading 0 (visible input): ")
+                user_phone = input(f"Шаг {self.step} - Введите номер телефона без ведущего 0 (видимый ввод): ")
     
             if validate_phone_number(user_phone):
-                self.output(f"Step {self.step} - Valid phone number entered.",3)
+                self.output(f"Шаг {self.step} - Введен корректный номер телефона.",3)
                 break
             else:
-                self.output(f"Step {self.step} - Invalid phone number, must be 7 to 15 digits long and without leading 0.",1)
+                self.output(f"Шаг {self.step} - Некорректный номер телефона, должно быть от 7 до 15 цифр без ведущего 0.",1)
         self.target_element.send_keys(user_phone)
         self.increase_step()
 
-        # Wait for the "Next" button to be clickable and click it    
+        # Ожидание кнопки "Далее" и клик по ней    
         xpath = "//button//span[contains(text(), 'Next')]"
-        self.move_and_click(xpath, 15, True, "click next to proceed to OTP entry", self.step, "visible")
+        self.move_and_click(xpath, 15, True, "нажать далее для перехода к вводу OTP", self.step, "visible")
         self.increase_step()
 
         try:
-            # Attempt to locate and interact with the OTP field
+            # Пытаемся найти и взаимодействовать с полем OTP
             wait = WebDriverWait(self.driver, 20)
             if self.settings['debugIsOn']:
-                self.debug_information("preparing for TG OTP","check")
+                self.debug_information("подготовка к вводу OTP Telegram","check")
             password = wait.until(EC.visibility_of_element_located((By.XPATH, "//input[@type='tel']")))
-            otp = input(f"Step {self.step} - What is the Telegram OTP from your app? ")
+            otp = input(f"Шаг {self.step} - Введите OTP Telegram из приложения: ")
             password.click()
             password.send_keys(otp)
-            self.output(f"Step {self.step} - Let's try to log in using your Telegram OTP.\n",3)
+            self.output(f"Шаг {self.step} - Пытаемся войти с вашим OTP Telegram.\n",3)
             self.increase_step()
 
         except TimeoutException:
-            # Check for Storage Offline
+            # Проверка на Storage Offline
             xpath = "//button[contains(text(), 'STORAGE_OFFLINE')]"
-            self.move_and_click(xpath, 10, True, "check for 'STORAGE_OFFLINE'", self.step, "visible")
+            self.move_and_click(xpath, 10, True, "проверка на 'STORAGE_OFFLINE'", self.step, "visible")
             if self.target_element:
-                self.output(f"Step {self.step} - ***Progress is blocked by a 'STORAGE_OFFLINE' button",1)
-                self.output(f"Step {self.step} - If you are re-usi,ng an old Wallet session; try to delete or create a new session.",1)
+                self.output(f"Шаг {self.step} - ***Прогресс заблокирован кнопкой 'STORAGE_OFFLINE'",1)
+                self.output(f"Шаг {self.step} - Если вы используете старую сессию Wallet; попробуйте удалить или создать новую.",1)
                 found_error = True
-            # Check for flood wait
+            # Проверка на flood wait
             xpath = "//button[contains(text(), 'FLOOD_WAIT')]"
-            self.move_and_click(xpath, 10, True, "check for 'FLOOD_WAIT'", self.step, "visible")
+            self.move_and_click(xpath, 10, True, "проверка на 'FLOOD_WAIT'", self.step, "visible")
             if self.target_element:
-                self.output(f"Step {self.step} - ***Progress is blocked by a 'FLOOD_WAIT' button", 1)
-                self.output(f"Step {self.step} - You need to wait for the specified number of seconds before retrying.", 1)
-                self.output(f"Step {self.step} - {self.target_element.text}")
+                self.output(f"Шаг {self.step} - ***Прогресс заблокирован кнопкой 'FLOOD_WAIT'", 1)
+                self.output(f"Шаг {self.step} - Нужно подождать указанное количество секунд перед повтором.", 1)
+                self.output(f"Шаг {self.step} - {self.target_element.text}")
                 found_error = True
             if not found_error:
-                self.output(f"Step {self.step} - Selenium was unable to interact with the OTP screen for an unknown reason.")
+                self.output(f"Шаг {self.step} - Selenium не смог взаимодействовать с экраном OTP по неизвестной причине.")
 
-        except Exception as e:  # Catch any other unexpected errors
-            self.output(f"Step {self.step} - Login failed. Error: {e}", 1) 
+        except Exception as e:  # Другие неожиданные ошибки
+            self.output(f"Шаг {self.step} - Вход не удался. Ошибка: {e}", 1) 
             if self.settings['debugIsOn']:
-                self.debug_information("telegram login failed","error")
+                self.debug_information("неудачный вход в telegram","error")
 
         self.increase_step()
         self.test_for_2fa()
 
         if self.settings['debugIsOn']:
-            self.debug_information("telegram OTP successfully entered","check")
+            self.debug_information("OTP Telegram успешно введен","check")
 
     def test_for_2fa(self):
         try:
             self.increase_step()
             WebDriverWait(self.driver, 30).until(lambda d: d.execute_script('return document.readyState') == 'complete')
             xpath = "//input[@type='password' and contains(@class, 'input-field-input')]"
-            fa_input = self.move_and_click(xpath, 15, False, "check for 2FA requirement (will timeout if you don't have 2FA)", self.step, "present")
+            fa_input = self.move_and_click(xpath, 15, False, "проверка необходимости 2FA (таймаут, если 2FA нет)", self.step, "present")
         
             if fa_input:
                 if self.settings['hideSensitiveInput']:
-                    tg_password = getpass.getpass(f"Step {self.step} - Enter your Telegram 2FA password: ")
+                    tg_password = getpass.getpass(f"Шаг {self.step} - Введите пароль 2FA Telegram: ")
                 else:
-                    tg_password = input(f"Step {self.step} - Enter your Telegram 2FA password: ")
+                    tg_password = input(f"Шаг {self.step} - Введите пароль 2FA Telegram: ")
                 fa_input.send_keys(tg_password + Keys.RETURN)
-                self.output(f"Step {self.step} - 2FA password sent.\n", 3)
-                self.output(f"Step {self.step} - Checking if the 2FA password is correct.\n", 2)
+                self.output(f"Шаг {self.step} - Пароль 2FA отправлен.\n", 3)
+                self.output(f"Шаг {self.step} - Проверка правильности пароля 2FA.\n", 2)
             
                 xpath = "//*[contains(text(), 'Incorrect password')]"
                 try:
                     incorrect_password = WebDriverWait(self.driver, 8).until(EC.visibility_of_element_located((By.XPATH, xpath)))
-                    self.output(f"Step {self.step} - 2FA password is marked as incorrect by Telegram - check your debug screenshot if active.", 1)
+                    self.output(f"Шаг {self.step} - Пароль 2FA отмечен как неверный Telegram - проверьте скриншоты отладки, если включены.", 1)
                     if self.settings['debugIsOn']:
-                        self.debug_information("incorrect telegram 2FA entered","error")
+                        self.debug_information("введен неверный пароль 2FA telegram","error")
                     self.quit_driver()
-                    sys.exit()  # Exit if incorrect password is detected
+                    sys.exit()  # Выход при неверном пароле
                 except TimeoutException:
                     pass
 
-                self.output(f"Step {self.step} - No password error found.", 3)
+                self.output(f"Шаг {self.step} - Ошибок пароля не найдено.", 3)
                 xpath = "//input[@type='password' and contains(@class, 'input-field-input')]"
-                fa_input = self.move_and_click(xpath, 5, False, "final check to make sure we are correctly logged in", self.step, "present")
+                fa_input = self.move_and_click(xpath, 5, False, "финальная проверка успешного входа", self.step, "present")
                 if fa_input:
-                    self.output(f"Step {self.step} - 2FA password entry is still showing, check your debug screenshots for further information.\n", 1)
+                    self.output(f"Шаг {self.step} - Поле ввода 2FA все еще отображается, проверьте скриншоты отладки.\n", 1)
                     sys.exit()
-                self.output(f"Step {self.step} - 2FA password check appears to have passed OK.\n", 3)
+                self.output(f"Шаг {self.step} - Проверка пароля 2FA пройдена успешно.\n", 3)
             else:
-                self.output(f"Step {self.step} - 2FA input field not found.\n", 1)
+                self.output(f"Шаг {self.step} - Поле ввода 2FA не найдено.\n", 1)
 
         except TimeoutException:
-            # 2FA field not found
-            self.output(f"Step {self.step} - Two-factor Authorization not required.\n", 3)
+            # Поле 2FA не найдено
+            self.output(f"Шаг {self.step} - Двухфакторная авторизация не требуется.\n", 3)
 
-        except Exception as e:  # Catch any other unexpected errors
-            self.output(f"Step {self.step} - Login failed. 2FA Error - you'll probably need to restart the script: {e}", 1)
+        except Exception as e:  # Другие неожиданные ошибки
+            self.output(f"Шаг {self.step} - Ошибка входа. 2FA ошибка - вероятно, нужно перезапустить скрипт: {e}", 1)
             if self.settings['debugIsOn']:
-                self.debug_information("unspecified error during telegram 2FA","error")
+                self.debug_information("неуказанная ошибка при 2FA telegram","error")
 
     def next_steps(self):
-        # Must OVERRIDE this function in the child class
-        self.output("Function 'next-steps' - Not defined (Need override in child class) \n", 1)
+        # Должна быть ПЕРЕОПРЕДЕЛЕНА в дочернем классе
+        self.output("Функция 'next-steps' не определена (требуется переопределение в дочернем классе) \n", 1)
 
     def launch_iframe(self):
         def wait_ready(driver, timeout=30):
@@ -847,41 +847,41 @@ class Claimer:
         self.driver = self.get_driver()
         self.driver.set_window_size(1920, 1080)
     
-        # start with clean screenshots dir (once per session)
+        # Очистка папки скриншотов (один раз за сессию)
         if int(self.step) < 101:
             if os.path.exists(self.screenshots_path):
                 shutil.rmtree(self.screenshots_path)
             os.makedirs(self.screenshots_path)
     
-        # --- Initial bounce and QR sanity check (non-fatal) ---
+        # --- Начальная проверка и проверка QR (нефатальная) ---
         try:
             self.driver.get("https://www.google.com/")
             wait_ready(self.driver)
-            self.driver.get(self.url)  # your deep link like https://web.telegram.org/k/#@IcebergAppBot
+            self.driver.get(self.url)  # ваша deep-ссылка, например https://web.telegram.org/k/#@IcebergAppBot
             wait_ready(self.driver)
-            time.sleep(5)  # let TG lazy pieces attach
+            time.sleep(5)  # даем TG подгрузиться
     
-            self.output(f"Step {self.step} - Attempting QR presence check (expecting none).", 2)
+            self.output(f"Шаг {self.step} - Проверка наличия QR (ожидается отсутствие).", 2)
             if self.settings.get('debugIsOn'):
-                self.debug_information("QR code check during session start", "check")
+                self.debug_information("проверка QR кода при старте сессии", "check")
     
             try:
                 WebDriverWait(self.driver, 5).until(
                     EC.visibility_of_element_located((By.XPATH, "//canvas[@class='qr-canvas']"))
                 )
                 self.output(
-                    f"Step {self.step} - QR visible (likely logged out). You may see follow-up input errors.",
+                    f"Шаг {self.step} - QR виден (вероятно, вышли из системы). Возможны ошибки ввода.",
                     2
                 )
             except TimeoutException:
-                self.output(f"Step {self.step} - No QR detected; proceeding.", 3)
+                self.output(f"Шаг {self.step} - QR не обнаружен; продолжаем.", 3)
     
         except Exception as e:
-            self.output(f"Step {self.step} - Initial load error: {e}", 1)
+            self.output(f"Шаг {self.step} - Ошибка начальной загрузки: {e}", 1)
     
         self.increase_step()
     
-        # --- Verify chat title (up to 3 tries), rebouncing via Google between tries ---
+        # --- Проверка заголовка чата (до 3 попыток), с промежуточным переходом на Google ---
         title_xpath = "(//div[@class='user-title']//span[contains(@class,'peer-title')])[1]"
         verified = False
         for attempt in range(1, 4):
@@ -889,19 +889,19 @@ class Claimer:
                 WebDriverWait(self.driver, 30).until(
                     EC.visibility_of_element_located((By.XPATH, title_xpath))
                 )
-                title = (self.monitor_element(title_xpath, 8, "Get current page title") or "").strip()
+                title = (self.monitor_element(title_xpath, 8, "Получение заголовка страницы") or "").strip()
                 if title:
-                    self.output(f"Step {self.step} - The current page title is: {title}", 3)
+                    self.output(f"Шаг {self.step} - Текущий заголовок страницы: {title}", 3)
                     verified = True
                     break
                 else:
-                    self.output(f"Step {self.step} - Attempt {attempt}: title element present but empty.", 3)
+                    self.output(f"Шаг {self.step} - Попытка {attempt}: элемент заголовка есть, но пустой.", 3)
             except TimeoutException:
-                self.output(f"Step {self.step} - Attempt {attempt}: title not visible yet.", 3)
+                self.output(f"Шаг {self.step} - Попытка {attempt}: заголовок еще не виден.", 3)
                 if self.settings.get('debugIsOn'):
-                    self.debug_information("App title check during telegram load", "check")
+                    self.debug_information("проверка заголовка приложения при загрузке telegram", "check")
     
-            # Re-bounce to force TG to respect the deep link next try
+            # Повторный переход для принудительного обновления deep link
             try:
                 self.driver.get("https://www.google.com/")
                 wait_ready(self.driver)
@@ -909,24 +909,24 @@ class Claimer:
                 wait_ready(self.driver)
                 time.sleep(3)
             except Exception as e:
-                self.output(f"Step {self.step} - Re-bounce error before attempt {attempt+1}: {e}", 2)
+                self.output(f"Шаг {self.step} - Ошибка повторного перехода перед попыткой {attempt+1}: {e}", 2)
     
         if not verified:
             self.output(
-                "STATUS: Could not reach the game after 3 attempts. "
-                "You may need to manually bump the game up in your Telegram chat list.",
+                "СТАТУС: Не удалось достичь игры после 3 попыток. "
+                "Возможно, нужно вручную поднять игру в списке чатов Telegram.",
                 1
             )
     
-        # --- Continue with the existing flow ---
+        # --- Продолжаем текущий поток ---
         self.increase_step()
     
-        # Press START if present (some chats need this to reveal the thread)
+        # Нажать START, если есть (некоторые чаты требуют для раскрытия темы)
         self.move_and_click("//button[contains(., 'START')]", 8, True,
-                            "check for the start button (may not be present)", self.step, "clickable")
+                            "проверка кнопки старт (может отсутствовать)", self.step, "clickable")
         self.increase_step()
     
-        # Find or send a working deep-link
+        # Найти или отправить рабочую deep-ссылку
         if self.find_working_link(self.step):
             self.increase_step()
         else:
@@ -935,114 +935,114 @@ class Claimer:
             self.find_working_link(self.step)
             self.increase_step()
     
-        # Click 'Launch' in the popup, if present
+        # Нажать 'Launch' в всплывающем окне, если есть
         self.move_and_click(
             "//button[contains(@class,'popup-button') and contains(.,'Launch')]",
-            8, True, "click the 'Launch' button (probably not present)", self.step, "clickable"
+            8, True, "нажать кнопку 'Launch' (вероятно отсутствует)", self.step, "clickable"
         )
         self.increase_step()
     
-        # Patch platform and switch into game iframe
+        # Патчим платформу и переключаемся в iframe игры
         self.replace_platform()
         self.select_iframe(self.step)
         self.increase_step()
     
-        self.output(f"Step {self.step} - Preparatory steps complete, handing over to main flow…", 2)
+        self.output(f"Шаг {self.step} - Подготовительные шаги завершены, передаем управление основному потоку…", 2)
         time.sleep(2)
 
     def replace_platform(self):
-        # Insert the platform replacement code here
-        self.output(f"Step {self.step} - Attempting to replace platform in iframe URL if necessary...", 2)
+        # Вставьте код замены платформы здесь
+        self.output(f"Шаг {self.step} - Пытаемся заменить платформу в URL iframe при необходимости...", 2)
         try:
             wait = WebDriverWait(self.driver, 20)
-            # Locate the container div with the specified class name
+            # Находим контейнер div с указанным классом
             container = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'web-app-body')))
-            # Find the iframe within the located container
+            # Находим iframe внутри контейнера
             iframe = container.find_element(By.TAG_NAME, "iframe")
-            # Get the iframe src
+            # Получаем src iframe
             iframe_url = iframe.get_attribute("src")
 
             if "tgWebAppPlatform=web" in iframe_url:
-                # Replace 'tgWebAppPlatform=web' with the desired platform
+                # Заменяем 'tgWebAppPlatform=web' на нужную платформу
                 iframe_url = iframe_url.replace("tgWebAppPlatform=web", f"tgWebAppPlatform={self.default_platform}")
-                self.output(f"Step {self.step} - Platform 'web' found in iframe URL and replaced with '{self.default_platform}'.", 2)
-                # Update the iframe src to reload it
+                self.output(f"Шаг {self.step} - Параметр 'web' найден в URL iframe и заменен на '{self.default_platform}'.", 2)
+                # Обновляем src iframe для перезагрузки
                 self.driver.execute_script("arguments[0].src = arguments[1];", iframe, iframe_url)
             else:
-                self.output("Step {self.step} - No 'tgWebAppPlatform=web' parameter found in the iframe URL.", 2)
+                self.output("Шаг {self.step} - Параметр 'tgWebAppPlatform=web' не найден в URL iframe.", 2)
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to locate the iframe within 'web-app-body' container.", 3)
+            self.output(f"Шаг {self.step} - Не удалось найти iframe внутри контейнера 'web-app-body'.", 3)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred while attempting to modify the iframe URL: {e}", 3)
+            self.output(f"Шаг {self.step} - Произошла ошибка при попытке изменить URL iframe: {e}", 3)
         self.increase_step()
 
-        # Give it a few seconds to reload
+        # Ждем несколько секунд для перезагрузки
         time.sleep(5)
 
 
     def full_claim(self):
-        # Must OVERRIDE this function in the child class
-        self.output("Function 'full_claim' - Not defined (Need override in child class) \n", 1)
+        # Должна быть ПЕРЕОПРЕДЕЛЕНА в дочернем классе
+        self.output("Функция 'full_claim' не определена (требуется переопределение в дочернем классе) \n", 1)
 
     def select_iframe(self, old_step, iframe_id=None, iframe_container_class="web-app-body"):
-        self.output(f"Step {self.step} - Attempting to switch to the app's iFrame with id '{iframe_id}' or within '{iframe_container_class}'...", 2)
+        self.output(f"Шаг {self.step} - Пытаемся переключиться на iFrame приложения с id '{iframe_id}' или внутри '{iframe_container_class}'...", 2)
 
         try:
             wait = WebDriverWait(self.driver, 20)
             
             if iframe_id:
-                # Try locating the iframe directly by ID
+                # Пытаемся найти iframe по ID
                 iframe = wait.until(EC.presence_of_element_located((By.ID, iframe_id)))
                 self.driver.switch_to.frame(iframe)
-                self.output(f"Step {self.step} - Successfully switched to iframe with id '{iframe_id}'.", 3)
+                self.output(f"Шаг {self.step} - Успешно переключились на iframe с id '{iframe_id}'.", 3)
                 if self.settings['debugIsOn']:
-                    self.debug_information("successfully switched to iFrame by id", "success")
+                    self.debug_information("успешно переключились на iFrame по id", "success")
             else:
-                # Locate the container div with the specified class name
+                # Находим контейнер div с указанным классом
                 container = wait.until(EC.presence_of_element_located((By.CLASS_NAME, iframe_container_class)))
-                # Find the iframe within the located container
+                # Находим iframe внутри контейнера
                 iframe = container.find_element(By.TAG_NAME, "iframe")
-                # Switch to the iframe
+                # Переключаемся на iframe
                 self.driver.switch_to.frame(iframe)
-                self.output(f"Step {self.step} - Successfully switched to the app's iFrame within '{iframe_container_class}'.", 3)
+                self.output(f"Шаг {self.step} - Успешно переключились на iFrame приложения внутри '{iframe_container_class}'.", 3)
                 if self.settings['debugIsOn']:
-                    self.debug_information("successfully switched to iFrame within container", "success")
+                    self.debug_information("успешно переключились на iFrame внутри контейнера", "success")
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe with id '{iframe_id}' or within '{iframe_container_class}' within the timeout period.", 3)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe с id '{iframe_id}' или внутри '{iframe_container_class}' за отведенное время.", 3)
             if self.settings['debugIsOn']:
-                self.debug_information("timeout while trying to switch to iFrame", "error")
+                self.debug_information("таймаут при попытке переключения на iFrame", "error")
         except Exception:
-            self.output(f"Step {self.step} - An error occurred while attempting to switch to the iframe with id '{iframe_id}' or within '{iframe_container_class}'.", 3)
+            self.output(f"Шаг {self.step} - Произошла ошибка при попытке переключения на iframe с id '{iframe_id}' или внутри '{iframe_container_class}'.", 3)
             if self.settings['debugIsOn']:
-                self.debug_information("an unspecified error occurred during switch to iFrame", "error")
+                self.debug_information("неуказанная ошибка при переключении на iFrame", "error")
 
     def send_start(self, old_step):
         xpath = "//div[contains(@class, 'input-message-container')]/div[contains(@class, 'input-message-input')][1]"
         
         def attempt_send_start():
-            chat_input = self.move_and_click(xpath, 5, False, "find the chat window message input box", self.step, "present")
+            chat_input = self.move_and_click(xpath, 5, False, "найти поле ввода сообщений чата", self.step, "present")
             if chat_input:
                 self.increase_step()
-                self.output(f"Step {self.step} - Attempting to send the '/start' command...",2)
+                self.output(f"Шаг {self.step} - Пытаемся отправить команду '/start'...",2)
                 chat_input.send_keys("/start")
                 chat_input.send_keys(Keys.RETURN)
-                self.output(f"Step {self.step} - Successfully sent the '/start' command.\n",3)
+                self.output(f"Шаг {self.step} - Команда '/start' успешно отправлена.\n",3)
                 if self.settings['debugIsOn']:
-                    self.debug_information("we sent the start command to the chat window","success")
+                    self.debug_information("отправлена команда start в окно чата","success")
                 return True
             else:
-                self.output(f"Step {self.step} - Failed to find the message input box.\n",1)
+                self.output(f"Шаг {self.step} - Не удалось найти поле ввода сообщений.\n",1)
                 return False
 
         if not attempt_send_start():
-            # Attempt failed, try restoring from backup and retry
-            self.output(f"Step {self.step} - Attempting to restore from backup and retry.\n",2)
+            # Попытка не удалась, пробуем восстановить из резервной копии и повторить
+            self.output(f"Шаг {self.step} - Пытаемся восстановить из резервной копии и повторить.\n",2)
             if self.restore_from_backup(self.backup_path):
-                if not attempt_send_start():  # Retry after restoring backup
-                    self.output(f"Step {self.step} - Retried after restoring backup, but still failed to send the '/start' command.\n",1)
+                if not attempt_send_start():  # Повтор после восстановления
+                    self.output(f"Шаг {self.step} - Повтор после восстановления не удался, не удалось отправить команду '/start'.\n",1)
             else:
-                self.output(f"Step {self.step} - Backup restoration failed or backup directory does not exist.\n",1)
+                self.output(f"Шаг {self.step} - Восстановление из резервной копии не удалось или директория не существует.\n",1)
 
     def restore_from_backup(self, path):
         if os.path.exists(path):
@@ -1053,29 +1053,29 @@ class Claimer:
                 self.driver = self.get_driver()
                 self.driver.get(self.url)
                 WebDriverWait(self.driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
-                self.output(f"Step {self.step} - Backup restored successfully.",2)
+                self.output(f"Шаг {self.step} - Резервная копия успешно восстановлена.",2)
                 return True
             except Exception as e:
-                self.output(f"Step {self.step} - Error restoring backup: {e}\n",1)
+                self.output(f"Шаг {self.step} - Ошибка при восстановлении резервной копии: {e}\n",1)
                 return False
         else:
-            self.output(f"Step {self.step} - Backup directory does not exist.\n",1)
+            self.output(f"Шаг {self.step} - Директория резервной копии не существует.\n",1)
             return False
 
     def move_and_click(self, xpath, wait_time, click, action_description, old_step, expectedCondition, attempts=5):
         """
-        Wait for an element with a single overall timeout budget, retrying silently.
-        On success, returns the WebElement (or None if not clicking). On failure, returns None.
+        Ожидание элемента с общим таймаутом, повтор без вывода ошибок.
+        При успехе возвращает WebElement (или None, если не кликает). При неудаче - None.
         """
         def timer():
             return random.randint(1, 3) / 10.0
     
-        self.output(f"Step {self.step} - Attempting to {action_description}...", 2)
+        self.output(f"Шаг {self.step} - Пытаемся {action_description}...", 2)
     
         deadline = time.time() + float(wait_time)
         target_element = None
     
-        # Helper: get element according to expected condition with fallback chain (no logs).
+        # Помощник: получить элемент согласно ожидаемому условию с fallback (без логов).
         def wait_for_element(remaining):
             wait = WebDriverWait(self.driver, max(0.5, remaining))
             if expectedCondition == "visible":
@@ -1085,7 +1085,7 @@ class Claimer:
             elif expectedCondition == "invisible":
                 wait.until(EC.invisibility_of_element_located((By.XPATH, xpath)))
                 if self.settings.get('debugIsOn'):
-                    self.debug_information(f"{action_description} was found to be invisible", "check")
+                    self.debug_information(f"{action_description} оказался невидимым", "check")
                 return None
             elif expectedCondition == "clickable":
                 try:
@@ -1106,10 +1106,10 @@ class Claimer:
             try:
                 target_element = wait_for_element(remaining)
                 if target_element is None:
-                    # 'invisible' path succeeded (nothing to click/do)
+                    # Путь 'invisible' успешен (нет клика/действия)
                     return None
     
-                # Ensure in-view; only log once if we had to scroll
+                # Убедиться, что элемент в поле зрения; логируем один раз при скролле
                 in_view = self.driver.execute_script("""
                     var elem = arguments[0], box = elem.getBoundingClientRect();
                     if (!(box.top >= 0 && box.left >= 0 &&
@@ -1121,18 +1121,18 @@ class Claimer:
                     return true;
                 """, target_element)
                 if not in_view:
-                    # keep this low-noise
+                    # низкий уровень шума
                     if self.settings.get('debugIsOn'):
-                        self.debug_information(f"{action_description} was out of bounds and scrolled into view", "info")
+                        self.debug_information(f"{action_description} был вне поля зрения и проскроллен", "info")
     
-                # Staleness guard
+                # Защита от устаревания
                 try:
                     _ = target_element.tag_name
                 except StaleElementReferenceException:
                     try:
                         target_element = self.driver.find_element(By.XPATH, xpath)
                     except Exception:
-                        # Try again within the same budget
+                        # Повторить в пределах бюджета времени
                         time.sleep(0.1 + timer())
                         continue
     
@@ -1141,44 +1141,44 @@ class Claimer:
                     result = self._safe_click_webelement(target_element, action_description=action_description)
                     if result is not None:
                         if self.settings.get('debugIsOn'):
-                            self.debug_information(f"Moved & clicked {action_description}", "success")
+                            self.debug_information(f"Переместились и кликнули {action_description}", "success")
                         return target_element
-                    # click failed; brief backoff and retry within same budget
+                    # клик не удался; небольшой откат и повтор в пределах бюджета
                     time.sleep(0.2 + timer())
                     continue
                 else:
                     if self.settings.get('debugIsOn'):
-                        self.debug_information(f"Moved to {action_description} without clicking", "no click")
+                        self.debug_information(f"Переместились к {action_description} без клика", "no click")
                     return target_element
     
             except TimeoutException:
-                # silent retry within the same overall budget
+                # тихий повтор в пределах общего бюджета
                 continue
             except StaleElementReferenceException:
-                # silent retry
+                # тихий повтор
                 continue
             except Exception as e:
                 if "has no size and location" in str(e):
-                    self.output(f"Step {self.step} - Element issue during {action_description}: Element not properly located or sized.", 1)
+                    self.output(f"Шаг {self.step} - Проблема с элементом при {action_description}: элемент некорректно расположен или размер равен нулю.", 1)
                     if self.settings.get('debugIsOn'):
-                        self.debug_information(f"Fatal error during {action_description}: {str(e)}", "error")
+                        self.debug_information(f"Фатальная ошибка при {action_description}: {str(e)}", "error")
                     return None
-                # Non-fatal: retry within budget
+                # Нефатальная: повтор в пределах бюджета
                 time.sleep(0.1 + timer())
                 continue
     
-        # Final failure (single line)
-        self.output(f"Step {self.step} - {action_description} not found/clickable after {attempts} attempts (~{wait_time}s).", 2)
+        # Итоговый провал (одна строка)
+        self.output(f"Шаг {self.step} - {action_description} не найден/не кликабелен после {attempts} попыток (~{wait_time}s).", 2)
         if self.settings.get('debugIsOn'):
-            self.debug_information(f"{action_description} not found after {attempts} attempts", "error")
+            self.debug_information(f"{action_description} не найден после {attempts} попыток", "error")
         return None
     
     def _safe_click_webelement(self, elem, action_description=""):
         try:
-            # Center within viewport/scroll parent
+            # Центрируем в области прокрутки
             self._center_in_scroll_parent(elem)
     
-            # Wait for visible, enabled and non-zero size (no invalid "." XPath)
+            # Ждем видимости, доступности и ненулевого размера
             WebDriverWait(self.driver, 5).until(EC.visibility_of(elem))
             WebDriverWait(self.driver, 5).until(lambda d: elem.is_enabled())
             WebDriverWait(self.driver, 5).until(
@@ -1187,50 +1187,50 @@ class Claimer:
                 )
             )
     
-            # Try normal click first
+            # Пробуем клик через ActionChains
             try:
                 ActionChains(self.driver).move_to_element(elem).pause(0.05).click(elem).perform()
                 if self.settings['debugIsOn']:
-                    self.debug_information(f"ClickElem {action_description} - ActionChains click performed", "success")
+                    self.debug_information(f"ClickElem {action_description} - Клик ActionChains выполнен", "success")
                 return elem
             except (MoveTargetOutOfBoundsException, ElementClickInterceptedException) as e1:
-                self.output(f"Step {self.step} - ActionChains click failed ({type(e1).__name__}). Trying JS…", 3)
+                self.output(f"Шаг {self.step} - Клик ActionChains не удался ({type(e1).__name__}). Пробуем JS…", 3)
                 if self.settings['debugIsOn']:
-                    self.debug_information(f"ClickElem {action_description} - AC failed: {type(e1).__name__}", "warning")
+                    self.debug_information(f"ClickElem {action_description} - AC неудача: {type(e1).__name__}", "warning")
     
-            # Temporarily disable blockers over the center point and try JS clicks
+            # Временно отключаем блокировщики над центром и пробуем JS клики
             blockers = self._temporarily_disable_blockers(elem)
             try:
                 if self._js_click_variants(elem):
-                    self.output(f"Step {self.step} - JS click fallback used for {action_description}.", 3)
+                    self.output(f"Шаг {self.step} - Использован JS клик для {action_description}.", 3)
                     if self.settings['debugIsOn']:
-                        self.debug_information(f"ClickElem {action_description} - JS fallback success", "success")
+                        self.debug_information(f"ClickElem {action_description} - JS fallback успешен", "success")
                     return elem
             finally:
                 self._restore_blockers(blockers)
     
-            # One last try: re-center & try JS again
+            # Последняя попытка: центрируем и пробуем JS снова
             self._center_in_scroll_parent(elem)
             if self._js_click_variants(elem):
-                self.output(f"Step {self.step} - JS click fallback (second attempt) used for {action_description}.", 3)
+                self.output(f"Шаг {self.step} - JS клик fallback (вторая попытка) для {action_description}.", 3)
                 if self.settings['debugIsOn']:
-                    self.debug_information(f"ClickElem {action_description} - JS fallback #2 success", "success")
+                    self.debug_information(f"ClickElem {action_description} - JS fallback #2 успешен", "success")
                 return elem
     
-            self.output(f"Step {self.step} - All click strategies failed for {action_description}.", 2)
+            self.output(f"Шаг {self.step} - Все стратегии клика не удались для {action_description}.", 2)
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} - all strategies failed", "error")
+                self.debug_information(f"ClickElem {action_description} - все стратегии неудачны", "error")
             return None
     
         except StaleElementReferenceException:
-            self.output(f"Step {self.step} - Element went stale during click for {action_description}.", 2)
+            self.output(f"Шаг {self.step} - Элемент устарел во время клика для {action_description}.", 2)
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} - stale element", "error")
+                self.debug_information(f"ClickElem {action_description} - устаревший элемент", "error")
             return None
         except Exception as e:
-            self.output(f"Step {self.step} - Click failed: {type(e).__name__}: {e}", 2)
+            self.output(f"Шаг {self.step} - Клик не удался: {type(e).__name__}: {e}", 2)
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} fatal: {type(e).__name__}: {e}", "error")
+                self.debug_information(f"ClickElem {action_description} фатальная ошибка: {type(e).__name__}: {e}", "error")
             return None
 
     def click_element(self, xpath, timeout=30, action_description=""):
@@ -1239,51 +1239,51 @@ class Claimer:
                 EC.element_to_be_clickable((By.XPATH, xpath))
             )
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} - Element located", "info")
+                self.debug_information(f"ClickElem {action_description} - Элемент найден", "info")
             res = self._safe_click_webelement(element, action_description=action_description)
             return res is not None
         except TimeoutException:
-            self.output(f"Step {self.step} - Element not found within timeout: {xpath}. Skipping click.", 2)
+            self.output(f"Шаг {self.step} - Элемент не найден за время ожидания: {xpath}. Пропускаем клик.", 2)
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} timed out waiting for element", "error")
+                self.debug_information(f"ClickElem {action_description} таймаут ожидания элемента", "error")
             return False
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred during {action_description}: {type(e).__name__}: {e}", 3)
+            self.output(f"Шаг {self.step} - Ошибка во время {action_description}: {type(e).__name__}: {e}", 3)
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} fatal error: {str(e)}", "error")
+                self.debug_information(f"ClickElem {action_description} фатальная ошибка: {str(e)}", "error")
             return False
     
         except (StaleElementReferenceException, Exception) as e:
             if "has no size and location" in str(e):
-                self.output(f"Step {self.step} - Element issue during {action_description}: Element not properly located or sized.", 1)
+                self.output(f"Шаг {self.step} - Проблема с элементом при {action_description}: элемент некорректно расположен или размер равен нулю.", 1)
                 if self.settings['debugIsOn']:
-                    self.debug_information(f"ClickElem {action_description} fatal error: {str(e)}", "error")
+                    self.debug_information(f"ClickElem {action_description} фатальная ошибка: {str(e)}", "error")
                 return False
-            self.output(f"Step {self.step} - An error occurred during {action_description}.", 3)
+            self.output(f"Шаг {self.step} - Ошибка во время {action_description}.", 3)
             if self.settings['debugIsOn']:
-                self.debug_information(f"ClickElem {action_description} fatal error: {str(e)}", "error")
+                self.debug_information(f"ClickElem {action_description} фатальная ошибка: {str(e)}", "error")
             return False
 
     def brute_click(self, xpath, timeout=30, action_description="", state_check=None, post_click_wait=0.6):
         """
-        Brute-force click:
-          1) Ensure element is present & in view (no click yet).
-          2) Try ActionChains click -> JS click variants -> temporarily disable blockers and retry ->
-             click closest('button') -> final center/coords click.
-          3) After each attempt, consider success if:
-               A) element disappears, or
-               B) state_check() returns True, or
-               C) element's DOM 'signature' changes (outerHTML/id).
-        Returns True on likely success, False otherwise.
+        Брутфорс клик:
+          1) Убедиться, что элемент присутствует и в поле зрения (пока без клика).
+          2) Пробовать клик через ActionChains -> JS варианты -> временно отключить блокировщики и повторить ->
+             кликнуть ближайшую кнопку -> финальный клик по координатам.
+          3) После каждой попытки считать успешным, если:
+               A) элемент исчез,
+               B) state_check() возвращает True,
+               C) изменился DOM-«подпись» элемента (outerHTML/id).
+        Возвращает True при вероятном успехе, иначе False.
         """
     
-        # ---- 0) Ensure present & in view (no click yet)
+        # ---- 0) Убедиться, что элемент присутствует и в поле зрения (без клика)
         if not self.move_and_click(
             xpath, 10, False,
-            f"locate the element to Brute Click ({action_description})",
+            f"найти элемент для Brute Click ({action_description})",
             self.step, "clickable"
         ):
-            self.output(f"Step {self.step} - Element not found or not scrollable: {xpath}", 2)
+            self.output(f"Шаг {self.step} - Элемент не найден или не прокручивается: {xpath}", 2)
             if self.settings.get('debugIsOn'):
                 self.debug_information(f"BruteClick locate failed: {action_description}", "error")
             return False
@@ -1291,7 +1291,7 @@ class Claimer:
         end = time.time() + timeout
     
         def html_sig(el):
-            """Lightweight signature of the element for change detection."""
+            """Легковесная подпись элемента для обнаружения изменений."""
             try:
                 outer = self.driver.execute_script("return arguments[0].outerHTML.slice(0, 200);", el) or ""
                 return (el.get_attribute("id") or "", outer)
@@ -1299,15 +1299,15 @@ class Claimer:
                 return None
     
         def js_click_variants(el) -> bool:
-            """Progressively more realistic JS click paths."""
-            # a) Native element.click()
+            """Постепенно более реалистичные JS клики."""
+            # a) Нативный element.click()
             try:
                 self.driver.execute_script("arguments[0].click();", el)
                 return True
             except Exception:
                 pass
     
-            # b) MouseEvent bubbling
+            # b) MouseEvent с всплытием
             try:
                 self.driver.execute_script("""
                     const e = new MouseEvent('click', {bubbles:true, cancelable:true, composed:true, view:window});
@@ -1317,7 +1317,7 @@ class Claimer:
             except Exception:
                 pass
     
-            # c) Pointer + mouse sequence on the element (PointerEvent may not exist)
+            # c) Последовательность Pointer + mouse
             try:
                 self.driver.execute_script("""
                     const el = arguments[0];
@@ -1333,7 +1333,7 @@ class Claimer:
             except Exception:
                 pass
     
-            # d) Center click using elementFromPoint (some libs require coords)
+            # d) Клик по центру через elementFromPoint
             try:
                 self.driver.execute_script("""
                   const el = arguments[0];
@@ -1355,15 +1355,15 @@ class Claimer:
             return False
     
         while time.time() < end:
-            # ---- 1) (Re)locate current element
+            # ---- 1) (Пере)находим текущий элемент
             try:
                 el = self.driver.find_element(By.XPATH, xpath)
             except Exception:
-                # If not found at loop start, a prior iteration probably succeeded
-                self.output(f"Step {self.step} - Click successful: element not found before attempt.", 2)
+                # Если не найден в начале цикла, значит предыдущая попытка скорее всего удалась
+                self.output(f"Шаг {self.step} - Клик успешен: элемент не найден перед попыткой.", 2)
                 return True
     
-            # ---- 2) Pre-click: scroll, clear overlays, record signature
+            # ---- 2) Перед кликом: скролл, очистка оверлеев, запись подписи
             try:
                 self.driver.execute_script("arguments[0].scrollIntoView({block:'center', inline:'center'});", el)
             except Exception:
@@ -1375,25 +1375,25 @@ class Claimer:
     
             pre_sig = html_sig(el)
     
-            # ---- 3) Attempt chain
+            # ---- 3) Цепочка попыток
             clicked = False
     
-            # 3.1 Native (ActionChains)
+            # 3.1 Нативный клик (ActionChains)
             try:
                 ActionChains(self.driver).move_to_element(el).pause(0.05).click(el).perform()
                 clicked = True
             except Exception:
-                # 3.2 JS variants
+                # 3.2 JS варианты
                 clicked = js_click_variants(el)
     
-                # 3.3 Temporarily disable blockers and retry JS
+                # 3.3 Временно отключаем блокировщики и повторяем JS
                 if not clicked:
                     blockers = None
                     try:
                         blockers = self._temporarily_disable_blockers(el)
                         clicked = js_click_variants(el)
     
-                        # 3.4 Click closest button ancestor
+                        # 3.4 Клик по ближайшему предку button
                         if not clicked:
                             try:
                                 self.driver.execute_script("const b = arguments[0].closest('button'); if (b) b.click();", el)
@@ -1401,7 +1401,7 @@ class Claimer:
                             except Exception:
                                 pass
     
-                        # 3.5 Final center-pointer sequence on top element at coords
+                        # 3.5 Финальный клик по координатам
                         if not clicked:
                             try:
                                 self.driver.execute_script("""
@@ -1431,11 +1431,11 @@ class Claimer:
                         except Exception:
                             pass
     
-            # ---- 4) Give UI a moment to react
+            # ---- 4) Ждем реакцию UI
             time.sleep(post_click_wait)
     
-            # ---- 5) Success checks
-            # A) Disappeared?
+            # ---- 5) Проверки успеха
+            # A) Исчез ли элемент?
             try:
                 self.driver.find_element(By.XPATH, xpath)
                 still_there = True
@@ -1443,36 +1443,36 @@ class Claimer:
                 still_there = False
     
             if not still_there:
-                self.output(f"Step {self.step} - BruteClick success: element disappeared.", 3)
+                self.output(f"Шаг {self.step} - BruteClick успешен: элемент исчез.", 3)
                 return True
     
-            # B) Custom state check?
+            # B) Проверка состояния через state_check?
             if callable(state_check):
                 try:
                     if state_check():
-                        self.output(f"Step {self.step} - BruteClick success: state_check passed.", 3)
+                        self.output(f"Шаг {self.step} - BruteClick успешен: проверка состояния пройдена.", 3)
                         return True
                 except Exception:
                     pass
     
-            # C) Signature changed?
+            # C) Изменилась подпись DOM?
             try:
                 el2 = self.driver.find_element(By.XPATH, xpath)
                 post_sig = html_sig(el2)
             except Exception:
-                self.output(f"Step {self.step} - BruteClick success: element replaced and then missing.", 3)
+                self.output(f"Шаг {self.step} - BruteClick вероятный успех: элемент заменен и затем отсутствует.", 3)
                 return True
     
             if pre_sig is not None and post_sig is not None and post_sig != pre_sig:
-                self.output(f"Step {self.step} - BruteClick probable success: DOM signature changed.", 3)
+                self.output(f"Шаг {self.step} - BruteClick вероятный успех: изменился DOM.", 3)
                 return True
     
-            # Otherwise, small backoff and try again
+            # Иначе небольшой откат и повтор
             time.sleep(0.1)
     
-        self.output(f"Step {self.step} - Brute click timed out without clear success. ({action_description})", 2)
+        self.output(f"Шаг {self.step} - Brute click превысил время ожидания без явного успеха. ({action_description})", 2)
         if self.settings.get('debugIsOn'):
-            self.debug_information(f"BruteClick timeout: {action_description}", "error")
+            self.debug_information(f"BruteClick таймаут: {action_description}", "error")
         return False
 
     def clear_overlays(self, target_element, step):
@@ -1490,14 +1490,14 @@ class Claimer:
                     self.driver.execute_script("arguments[0].style.display = 'none';", overlay)
                     overlays_cleared += 1
             if overlays_cleared > 0:
-                self.output(f"Step {step} - Removed {overlays_cleared} overlay(s) covering the target.", 3)
+                self.output(f"Шаг {step} - Удалено {overlays_cleared} перекрывающих элементов.", 3)
             return overlays_cleared
         except Exception as e:
-            self.output(f"Step {step} - An error occurred while trying to clear overlays: {e}", 1)
+            self.output(f"Шаг {step} - Ошибка при попытке очистить перекрытия: {e}", 1)
             return 0
 
     def _center_in_scroll_parent(self, elem):
-        # Scrolls either the nearest scrollable parent or the window to center the element
+        # Скроллит ближайшего прокручиваемого родителя или окно, чтобы центрировать элемент
         self.driver.execute_script("""
           function getScrollableParent(el){
             while (el && el !== document.body){
@@ -1521,14 +1521,14 @@ class Claimer:
         """, elem)
     
     def _js_click_variants(self, elem):
-        # 1) Native element.click()
+        # 1) Нативный element.click()
         try:
             self.driver.execute_script("arguments[0].click();", elem)
             return True
         except Exception:
             pass
     
-        # 2) MouseEvent (bubbling + composed) – closer to real user click
+        # 2) MouseEvent (всплытие + composed) – ближе к реальному клику пользователя
         try:
             self.driver.execute_script("""
               const e = new MouseEvent('click', {
@@ -1540,7 +1540,7 @@ class Claimer:
         except Exception:
             pass
     
-        # 3) Pointer + mouse sequence on element (with composed)
+        # 3) Последовательность Pointer + mouse (с composed)
         try:
             self.driver.execute_script("""
               const el = arguments[0];
@@ -1560,7 +1560,7 @@ class Claimer:
         except Exception:
             pass
     
-        # 4) Click center point using elementFromPoint (some libs require coords)
+        # 4) Клик по центру через elementFromPoint (некоторые библиотеки требуют координаты)
         try:
             self.driver.execute_script("""
               const el = arguments[0];
@@ -1581,7 +1581,7 @@ class Claimer:
         except Exception:
             pass
     
-        # 5) If inner child is targeted, try the nearest button ancestor directly
+        # 5) Если целевой внутренний элемент, пробуем кликнуть ближайшую кнопку
         try:
             self.driver.execute_script("""
               const el = arguments[0];
@@ -1592,7 +1592,7 @@ class Claimer:
         except Exception:
             pass
     
-        # 6) Focus + ENTER as a final nudge (some frameworks bind key handlers)
+        # 6) Фокус + ENTER как последний вариант (некоторые фреймворки привязывают обработчики клавиш)
         try:
             self.driver.execute_script("""
               const el = arguments[0];
@@ -1614,14 +1614,14 @@ class Claimer:
         return False
     
     def _temporarily_disable_blockers(self, elem):
-        # Disable pointer events on any element covering the target's center.
+        # Отключаем pointer events на элементах, перекрывающих центр цели.
         return self.driver.execute_script("""
           const el = arguments[0];
           const r = el.getBoundingClientRect();
           const cx = r.left + r.width/2;
           const cy = r.top + r.height/2;
     
-          // Gather elements stacked at the click point
+          // Собираем элементы, находящиеся в точке клика
           const hidden = [];
           const seen = new Set();
           for (let i=0; i<20; i++){
@@ -1631,20 +1631,20 @@ class Claimer:
     
             if (top !== el && !el.contains(top)) {
               const cs = getComputedStyle(top);
-              // Only disable if it's visually blocking
+              // Отключаем только если элемент визуально блокирует
               if (cs.pointerEvents !== 'none' && cs.visibility !== 'hidden' && cs.display !== 'none'){
                 hidden.push([top, top.style.pointerEvents]);
                 top.style.pointerEvents = 'none';
               }
             }
-            // If we've exposed the target, stop early
+            // Если цель открыта, прекращаем
             if (document.elementFromPoint(cx, cy) === el) break;
           }
           return hidden;
         """, elem)
     
     def _restore_blockers(self, state):
-        # Restore pointer-events on previously disabled elements
+        # Восстанавливаем pointer-events на ранее отключенных элементах
         if not state:
             return
         try:
@@ -1659,10 +1659,10 @@ class Claimer:
     
     def _safe_click_webelement(self, elem, action_description=""):
         try:
-            # 1) Ensure in view (container aware)
+            # 1) Центрируем в контейнере
             self._center_in_scroll_parent(elem)
     
-            # 2) Wait for visible, enabled and with size
+            # 2) Ждем видимости, доступности и размера
             WebDriverWait(self.driver, 5).until(EC.visibility_of(elem))
             WebDriverWait(self.driver, 5).until(lambda d: elem.is_enabled())
             WebDriverWait(self.driver, 5).until(
@@ -1671,41 +1671,41 @@ class Claimer:
                 )
             )
     
-            # 3) Try ActionChains click first
+            # 3) Пробуем клик через ActionChains
             try:
                 ActionChains(self.driver).move_to_element(elem).pause(0.05).click(elem).perform()
                 return elem
             except (MoveTargetOutOfBoundsException, ElementClickInterceptedException):
-                # Will try JS paths below
+                # Попробуем JS ниже
                 pass
     
-            # 4) If something’s still blocking, temporarily disable blockers over center
+            # 4) Если что-то блокирует, временно отключаем блокировщики
             blockers = self._temporarily_disable_blockers(elem)
             try:
                 if self._js_click_variants(elem):
-                    self.output(f"Step {self.step} - JS click fallback used for {action_description}.", 3)
+                    self.output(f"Шаг {self.step} - Использован JS клик для {action_description}.", 3)
                     return elem
             finally:
                 self._restore_blockers(blockers)
     
-            # 5) As a final attempt, re-center & retry JS once more
+            # 5) Последняя попытка: центрируем и пробуем JS еще раз
             self._center_in_scroll_parent(elem)
             if self._js_click_variants(elem):
-                self.output(f"Step {self.step} - JS click fallback (second attempt) used for {action_description}.", 3)
+                self.output(f"Шаг {self.step} - JS клик fallback (вторая попытка) для {action_description}.", 3)
                 return elem
     
-            self.output(f"Step {self.step} - All click strategies failed for {action_description}.", 2)
+            self.output(f"Шаг {self.step} - Все стратегии клика не удались для {action_description}.", 2)
             return None
     
         except StaleElementReferenceException:
-            self.output(f"Step {self.step} - Element went stale during click for {action_description}.", 2)
+            self.output(f"Шаг {self.step} - Элемент устарел во время клика для {action_description}.", 2)
             return None
         except Exception as e:
-            self.output(f"Step {self.step} - Click failed: {type(e).__name__}: {e}", 2)
+            self.output(f"Шаг {self.step} - Клик не удался: {type(e).__name__}: {e}", 2)
             return None
 
     def element_still_exists_by_id(self, element_id):
-        """Check if an element still exists by its ID."""
+        """Проверяет, существует ли элемент по ID."""
         try:
             element = self.driver.find_element(By.ID, element_id)
             return element.is_displayed()
@@ -1721,7 +1721,7 @@ class Claimer:
             try:
                 elements = self.driver.find_elements(By.XPATH, xpath)
                 if first_time:
-                    self.output(f"Step {self.step} - Found {len(elements)} elements with XPath: {xpath} for {action_description}", 3)
+                    self.output(f"Шаг {self.step} - Найдено {len(elements)} элементов по XPath: {xpath} для {action_description}", 3)
                     first_time = False
 
                 texts = [element.text.replace('\n', ' ').replace('\r', ' ').strip() for element in elements if element.text.strip()]
@@ -1730,33 +1730,33 @@ class Claimer:
             except (StaleElementReferenceException, TimeoutException, NoSuchElementException):
                 pass
             except Exception as e:
-                self.output(f"An error occurred: {e}", 3)
+                self.output(f"Произошла ошибка: {e}", 3)
                 if self.settings['debugIsOn']:
-                    self.debug_information(f"MonElem failed on {action_description}","error")
+                    self.debug_information(f"MonElem ошибка при {action_description}","error")
                 return False
         return False
 
     def debug_information(self, action_description, error_type="error"):
-        # Use only the first line to avoid including a full stacktrace
+        # Используем только первую строку, чтобы избежать полного стектрейса
         short_description = action_description.splitlines()[0]
     
-        # Replace characters that might corrupt the intended filename structure
+        # Заменяем символы, которые могут повредить имя файла
         sanitized_description = re.sub(r'[\/\0\\\*\?\:\|\<\>\"\&\;\$~ ]', '-', short_description)
     
-        # Truncate the sanitized description to prevent exceeding max filename limits
-        max_filename_length = 50  # adjust as needed
+        # Ограничиваем длину имени файла
+        max_filename_length = 50  # при необходимости изменить
         sanitized_description = sanitized_description[:max_filename_length]
     
-        # Take a screenshot if the element should have been present
+        # Делаем скриншот, если элемент должен быть виден
         time.sleep(3)
         screenshot_path = f"{self.screenshots_path}/{self.step}_{sanitized_description}.png"
         self.driver.save_screenshot(screenshot_path)
     
-        # Check if "not" is present in the action_description enclosed in brackets; if so, skip further debugging
+        # Проверяем, есть ли "not" в скобках в описании; если да, пропускаем отладку
         if re.search(r'\(.*?not.*?\)', action_description, re.IGNORECASE):
             return
     
-        # Save the HTML page source on error
+        # Сохраняем исходный HTML при ошибке
         if error_type == "error":
             page_source = self.driver.page_source
             page_source_path = f"{self.screenshots_path}/{self.step}_{sanitized_description}_page_source.html"
@@ -1764,106 +1764,106 @@ class Claimer:
                 f.write(page_source)
 
     def find_working_link(self, old_step, custom_xpath=None):
-        # Use custom_xpath if provided, otherwise fall back to self.start_app_xpath
+        # Используем custom_xpath, если задан, иначе self.start_app_xpath
         start_app_xpath = custom_xpath if custom_xpath is not None else self.start_app_xpath
-        self.output(f"Step {self.step} - Attempting to open a link for the app: {start_app_xpath}...", 2)
+        self.output(f"Шаг {self.step} - Пытаемся открыть ссылку для приложения: {start_app_xpath}...", 2)
     
         try:
-            # Wait for elements to be present in the DOM
+            # Ждем появления элементов в DOM
             start_app_buttons = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_all_elements_located((By.XPATH, start_app_xpath))
             )
     
             num_buttons = len(start_app_buttons)
-            self.output(f"Step {self.step} - Found {num_buttons} matching link(s) by presence.", 2)
+            self.output(f"Шаг {self.step} - Найдено {num_buttons} подходящих ссылок.", 2)
     
             if num_buttons == 0:
-                self.output(f"Step {self.step} - No buttons found with XPath: {start_app_xpath}\n", 1)
+                self.output(f"Шаг {self.step} - Кнопки не найдены по XPath: {start_app_xpath}\n", 1)
                 if self.settings['debugIsOn']:
-                    self.debug_information("find working link - no buttons found", "error")
+                    self.debug_information("find working link - кнопки не найдены", "error")
                 return False
     
-            # Iterate through buttons in reverse order
-            for idx in range(num_buttons - 1, -1, -1):  # Reverse order
-                link_xpath = f"({start_app_xpath})[{idx + 1}]"  # XPath indexes start from 1
-                self.output(f"Step {self.step} - Attempting to click link {idx + 1}...", 2)
+            # Перебираем кнопки в обратном порядке
+            for idx in range(num_buttons - 1, -1, -1):  # Обратный порядок
+                link_xpath = f"({start_app_xpath})[{idx + 1}]"  # Индексы XPath начинаются с 1
+                self.output(f"Шаг {self.step} - Пытаемся кликнуть по ссылке {idx + 1}...", 2)
     
-                # Use move_and_click to handle visibility, scrolling, and clicking
-                if self.move_and_click(link_xpath, 10, True, "find game launch link", self.step, "clickable"):
-                    self.output(f"Step {self.step} - Successfully opened a link for the app.\n", 3)
+                # Используем move_and_click для видимости, скролла и клика
+                if self.move_and_click(link_xpath, 10, True, "найти ссылку запуска игры", self.step, "clickable"):
+                    self.output(f"Шаг {self.step} - Ссылка для запуска приложения успешно открыта.\n", 3)
                     if self.settings['debugIsOn']:
-                        self.debug_information("successfully opened a game start link", "success")
+                        self.debug_information("успешно открыта ссылка запуска игры", "success")
                     return True
                 else:
-                    self.output(f"Step {self.step} - Link {idx + 1} was not clickable, moving on to next link...", 2)
+                    self.output(f"Шаг {self.step} - Ссылка {idx + 1} не кликабельна, переходим к следующей...", 2)
     
-            # If none of the links worked
-            self.output(f"Step {self.step} - None of the matching links were clickable.\n", 1)
+            # Если ни одна ссылка не сработала
+            self.output(f"Шаг {self.step} - Ни одна из подходящих ссылок не была кликабельна.\n", 1)
             if self.settings['debugIsOn']:
-                self.debug_information("no working game link", "error")
+                self.debug_information("нет рабочей ссылки на игру", "error")
             return False
     
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find the 'Open Wallet' button within the expected timeframe.\n", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти кнопку 'Open Wallet' в отведенное время.\n", 1)
             if self.settings['debugIsOn']:
-                self.debug_information("timeout while trying to open the game", "error")
+                self.debug_information("таймаут при попытке открыть игру", "error")
             return False
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred while trying to open the app: {e}\n", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка при попытке открыть приложение: {e}\n", 1)
             if self.settings['debugIsOn']:
-                self.debug_information("unspecified error while trying to launch the game", "error")
+                self.debug_information("неуказанная ошибка при запуске игры", "error")
             return False
 
     def validate_seed_phrase(self, allowed_lengths=(12, 13)):
         """
-        Prompt the user for a seed phrase and validate it.
+        Запрашивает у пользователя фразу восстановления и валидирует её.
     
-        - Accepts 12 or 13 words by default (configurable via allowed_lengths).
-        - Normalizes input: lowercases, strips extra whitespace, and splits on spaces.
-        - Returns the normalized seed phrase (words joined with single spaces).
+        - По умолчанию принимает 12 или 13 слов (настраивается allowed_lengths).
+        - Нормализует ввод: приводит к нижнему регистру, убирает лишние пробелы, разбивает по пробелам.
+        - Возвращает нормализованную фразу (слова через один пробел).
         """
         lengths_str = "/".join(str(n) for n in allowed_lengths)
     
         while True:
-            prompt = f"Step {self.step} - Please enter your {lengths_str}-word seed phrase"
+            prompt = f"Шаг {self.step} - Пожалуйста, введите вашу фразу восстановления из {lengths_str} слов"
             phrase_raw = (
-                getpass.getpass(prompt + " (your input is hidden): ")
+                getpass.getpass(prompt + " (ввод скрыт): ")
                 if self.settings.get('hideSensitiveInput')
-                else input(prompt + " (your input is visible): ")
+                else input(prompt + " (ввод видим): ")
             )
     
             try:
                 if not phrase_raw or not phrase_raw.strip():
-                    raise ValueError("Seed phrase cannot be empty.")
+                    raise ValueError("Фраза восстановления не может быть пустой.")
     
-                # Normalize: lowercase, strip, split by whitespace
+                # Нормализация: нижний регистр, обрезка, разделение по пробелам
                 words = phrase_raw.strip().lower().split()
     
-                # Length check
+                # Проверка длины
                 if len(words) not in allowed_lengths:
                     raise ValueError(
-                        f"Seed phrase must contain exactly {lengths_str} words (got {len(words)})."
+                        f"Фраза восстановления должна содержать ровно {lengths_str} слов (получено {len(words)})."
                     )
     
-                # Character check (letters only)
+                # Проверка символов (только буквы)
                 if not all(re.fullmatch(r"[a-z]+", w) for w in words):
-                    raise ValueError("Seed phrase may only contain letters a–z.")
+                    raise ValueError("Фраза восстановления может содержать только буквы a–z.")
     
-                # Success: store normalized phrase
+                # Успех: сохраняем нормализованную фразу
                 self.seed_phrase = " ".join(words)
                 return self.seed_phrase
     
             except ValueError as e:
-                # Keep logs safe—don’t echo the phrase itself
-                self.output(f"Error: {e}", 1)
+                # Безопасность: не выводим саму фразу
+                self.output(f"Ошибка: {e}", 1)
 
-    # Start a new PM2 process
+    # Запуск нового процесса PM2
     def start_pm2_app(self, script_path, app_name, session_name):
         interpreter_path = "venv/bin/python3"
         command = f"NODE_NO_WARNINGS=1 pm2 start {script_path} --name {app_name} --interpreter {interpreter_path} --watch {script_path} -- {session_name}"
         subprocess.run(command, shell=True, check=True)
 
-    # Save the new PM2 process
+    # Сохранение процесса PM2
     def save_pm2(self):
         command = f"NODE_NO_WARNINGS=1 pm2 save"
         result = subprocess.run(command, shell=True, text=True, capture_output=True)
@@ -1871,29 +1871,29 @@ class Claimer:
         
     def backup_telegram(self):
 
-        # Ask the user if they want to backup their Telegram directory
-        backup_prompt = input("Would you like to backup your Telegram directory? (Y/n): ").strip().lower()
+        # Спрашиваем пользователя, хочет ли он сделать резервную копию директории Telegram
+        backup_prompt = input("Хотите сделать резервную копию директории Telegram? (Y/n): ").strip().lower()
         if backup_prompt == 'n':
-            self.output(f"Step {self.step} - Backup skipped by user choice.", 3)
+            self.output(f"Шаг {self.step} - Резервное копирование пропущено по выбору пользователя.", 3)
             return
 
-        # Ask the user for a custom filename
-        custom_filename = input("Enter a custom filename for the backup (leave blank for default): ").strip()
+        # Запрашиваем пользовательское имя файла
+        custom_filename = input("Введите имя файла для резервной копии (оставьте пустым для значения по умолчанию): ").strip()
 
-        # Define the backup destination path
+        # Определяем путь назначения резервной копии
         if custom_filename:
             backup_directory = os.path.join(os.path.dirname(self.session_path), f"Telegram:{custom_filename}")
         else:
             backup_directory = os.path.join(os.path.dirname(self.session_path), "Telegram")
 
         try:
-            # Ensure the backup directory exists and copy the contents
+            # Создаем директорию резервной копии и копируем содержимое
             if not os.path.exists(backup_directory):
                 os.makedirs(backup_directory)
             shutil.copytree(self.session_path, backup_directory, dirs_exist_ok=True)
-            self.output(f"Step {self.step} - We backed up the session data in case of a later crash!", 3)
+            self.output(f"Шаг {self.step} - Мы сделали резервную копию данных сессии на случай сбоя!", 3)
         except Exception as e:
-            self.output(f"Step {self.step} - Oops, we weren't able to make a backup of the session data! Error: {e}", 1)
+            self.output(f"Шаг {self.step} - Упс, не удалось сделать резервную копию данных сессии! Ошибка: {e}", 1)
 
     def get_seed_phrase_from_file(self, screenshots_path):
         seed_file_path = os.path.join(screenshots_path, 'seed.txt')
@@ -1906,47 +1906,47 @@ class Claimer:
         hours = int(time / 60)
         minutes = time % 60
         if hours > 0:
-            hour_str = f"{hours} hour" if hours == 1 else f"{hours} hours"
+            hour_str = f"{hours} час" if hours == 1 else f"{hours} часов"
             if minutes > 0:
-                minute_str = f"{minutes} minute" if minutes == 1 else f"{minutes} minutes"
-                return f"{hour_str} and {minute_str}"
+                minute_str = f"{minutes} минута" if minutes == 1 else f"{minutes} минут"
+                return f"{hour_str} и {minute_str}"
             return hour_str
-        minute_str = f"{minutes} minute" if minutes == 1 else f"{minutes} minutes"
+        minute_str = f"{minutes} минута" if minutes == 1 else f"{minutes} минут"
         return minute_str
 
     def strip_html_and_non_numeric(self, text):
-        """Remove HTML tags and keep only numeric characters and decimal points."""
+        """Удаляет HTML теги и оставляет только цифры и точки."""
         text = self.strip_html(text)
         text = self.strip_non_numeric(text)
         return text
     
     def strip_html(self, text):
-        """Remove HTML tags."""
+        """Удаляет HTML теги."""
         clean = re.compile('<.*?>')
         return clean.sub('', text)
     
     def strip_non_numeric(self, text):
-        """Keep only numeric characters and decimal points."""
+        """Оставляет только цифры и точки."""
         return re.sub(r'[^0-9.]', '', text)
     
     def apply_random_offset(self, unmodifiedTimer):
-        # Helper function to format minutes into hours and minutes
+        # Вспомогательная функция форматирования минут в часы и минуты
         def format_time(minutes):
             hours = int(minutes) // 60
             mins = int(minutes) % 60
             time_parts = []
             if hours > 0:
-                time_parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+                time_parts.append(f"{hours} час{'а' if hours != 1 else ''}")
             if mins > 0 or hours == 0:
-                time_parts.append(f"{mins} minute{'s' if mins != 1 else ''}")
+                time_parts.append(f"{mins} минута{'ы' if mins != 1 else ''}")
             return ' '.join(time_parts)
     
-        # Try to convert unmodifiedTimer to float, default to 60 on failure
+        # Пытаемся преобразовать unmodifiedTimer в float, по умолчанию 60 при ошибке
         try:
             unmodifiedTimer = float(unmodifiedTimer)
         except Exception as e:
             self.output(
-                f"Error converting unmodifiedTimer to float: {str(e)}. Defaulting to 60 minutes.",
+                f"Ошибка преобразования unmodifiedTimer в float: {str(e)}. Используется значение по умолчанию 60 минут.",
                 2
             )
             unmodifiedTimer = 60.0
@@ -1956,71 +1956,71 @@ class Claimer:
                 low = self.settings['lowestClaimOffset']
                 high = self.settings['highestClaimOffset']
                 self.output(
-                    f"Step {self.step} - Picking a random offset between {low} and {high} minutes.",
+                    f"Шаг {self.step} - Выбираем случайное смещение между {low} и {high} минутами.",
                     3
                 )
                 self.random_offset = random.randint(low, high)
                 modifiedTimer = unmodifiedTimer + self.random_offset
                 self.output(
-                    f"Step {self.step} - Random offset applied the random offset of: {self.random_offset} minutes to original time of {unmodifiedTimer} minutes.",
+                    f"Шаг {self.step} - Случайное смещение применено: {self.random_offset} минут к исходному времени {unmodifiedTimer} минут.",
                     3
                 )
                 self.output(
-                    f"Step {self.step} - Returned modified timer: {modifiedTimer} minutes ({format_time(modifiedTimer)}).",
+                    f"Шаг {self.step} - Возвращаемое измененное время: {modifiedTimer} минут ({format_time(modifiedTimer)}).",
                     3
                 )
                 return int(modifiedTimer)
         else:
             if self.settings['lowestClaimOffset'] <= self.settings['highestClaimOffset']:
-                # Original offsets
+                # Исходные смещения
                 original_low = self.settings['lowestClaimOffset']
                 original_high = self.settings['highestClaimOffset']
-                # Cap the offsets to at least 0
+                # Ограничиваем смещения минимумом 0
                 capped_lowest = max(original_low, 0)
                 capped_highest = max(original_high, 0)
-                # Determine if capping occurred
+                # Проверяем, были ли ограничения
                 low_capped = capped_lowest != original_low
                 high_capped = capped_highest != original_high
-                # Prepare strings for outputs
-                low_str = f"{capped_lowest}" + (" (capped)" if low_capped else "")
-                high_str = f"{capped_highest}" + (" (capped)" if high_capped else "")
+                # Формируем строки для вывода
+                low_str = f"{capped_lowest}" + (" (ограничено)" if low_capped else "")
+                high_str = f"{capped_highest}" + (" (ограничено)" if high_capped else "")
                 self.output(
-                    f"Step {self.step} - Picking a random offset between {low_str} and {high_str} minutes.",
+                    f"Шаг {self.step} - Выбираем случайное смещение между {low_str} и {high_str} минутами.",
                     3
                 )
                 if low_capped or high_capped:
                     self.output(
-                        f"Step {self.step} - Offsets were capped to 0: lowestClaimOffset={low_str}, highestClaimOffset={high_str}",
+                        f"Шаг {self.step} - Смещения были ограничены до 0: lowestClaimOffset={low_str}, highestClaimOffset={high_str}",
                         3
                     )
                 self.random_offset = random.randint(capped_lowest, capped_highest)
                 modifiedTimer = unmodifiedTimer + self.random_offset
                 self.output(
-                    f"Step {self.step} - Random offset applied to the wait timer of: {self.random_offset} minutes ({format_time(self.random_offset)}).",
+                    f"Шаг {self.step} - Случайное смещение применено к таймеру ожидания: {self.random_offset} минут ({format_time(self.random_offset)}).",
                     3
                 )
                 self.output(
-                    f"Step {self.step} - Returned modified timer: {modifiedTimer} minutes ({format_time(modifiedTimer)}).",
+                    f"Шаг {self.step} - Возвращаемое измененное время: {modifiedTimer} минут ({format_time(modifiedTimer)}).",
                     3
                 )
                 return int(modifiedTimer)
-        # If no conditions are met, return the original unmodifiedTimer
+        # Если условия не выполнены, возвращаем исходное unmodifiedTimer
         return unmodifiedTimer
 
     def get_balance(self, balance_xpath, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
         priority = max(self.settings['verboseLevel'], default_priority)
-        balance_text = f'{prefix} BALANCE:'
+        balance_text = f'{prefix} БАЛАНС:'
         
         try:
-            # Move to the balance element
-            # self.move_and_click(balance_xpath, 20, False, "move to the balance", self.step, "visible")
-            monitor_result = self.monitor_element(balance_xpath, 15, "get balance")
+            # Перемещаемся к элементу баланса
+            # self.move_and_click(balance_xpath, 20, False, "переместиться к балансу", self.step, "visible")
+            monitor_result = self.monitor_element(balance_xpath, 15, "получить баланс")
             
-            # Fallback if nothing was captured
+            # Резервный вариант, если ничего не получено
             if not monitor_result:
-                self.output(f"Step {self.step} - monitor_element returned nothing. Attempting fallback method for balance...", priority)
+                self.output(f"Шаг {self.step} - monitor_element вернул пустое значение. Пробуем резервный метод для баланса...", priority)
                 try:
                     elements = self.driver.find_elements(By.XPATH, balance_xpath)
                     fallback_texts = []
@@ -2033,43 +2033,43 @@ class Claimer:
                     else:
                         monitor_result = False
                 except Exception as fallback_e:
-                    self.output(f"Step {self.step} - Fallback method failed: {fallback_e}", priority)
+                    self.output(f"Шаг {self.step} - Резервный метод не удался: {fallback_e}", priority)
                     monitor_result = False
 
             if monitor_result is False:
-                self.output(f"Step {self.step} - No balance text found. Restarting driver...", priority)
+                self.output(f"Шаг {self.step} - Текст баланса не найден. Перезапускаем драйвер...", priority)
                 self.quit_driver()
                 self.launch_iframe()
-                monitor_result = self.monitor_element(balance_xpath, 20, "get balance")
+                monitor_result = self.monitor_element(balance_xpath, 20, "получить баланс")
             
-            # Clean and convert the result
+            # Очищаем и конвертируем результат
             element = self.strip_html_and_non_numeric(monitor_result)
             if element:
                 balance_float = round(float(element), 3)
-                self.output(f"Step {self.step} - {balance_text} {balance_float}", priority)
+                self.output(f"Шаг {self.step} - {balance_text} {balance_float}", priority)
                 return balance_float
             else:
-                self.output(f"Step {self.step} - {balance_text} not found or not numeric.", priority)
+                self.output(f"Шаг {self.step} - {balance_text} не найден или не является числом.", priority)
                 return None
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Balance:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с '{prefix} Баланс:' не найден.", priority)
             return None
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)
             return None
         finally:
             self.increase_step()
 
     def get_wait_time(self, wait_time_xpath, step_number="108", beforeAfter="pre-claim"):
         try:
-            self.output(f"Step {self.step} - Get the wait time...", 3)
+            self.output(f"Шаг {self.step} - Получаем время ожидания...", 3)
             
-            # Move to the wait timer element and capture its text
-            wait_time_text = self.monitor_element(wait_time_xpath, 20, "claim timer")
+            # Перемещаемся к элементу таймера и получаем текст
+            wait_time_text = self.monitor_element(wait_time_xpath, 20, "таймер клэйма")
             
-            # Fallback if nothing was captured
+            # Резервный вариант, если ничего не получено
             if not wait_time_text:
-                self.output(f"Step {self.step} - monitor_element returned nothing. Attempting fallback method for wait time...", 3)
+                self.output(f"Шаг {self.step} - monitor_element вернул пустое значение. Пробуем резервный метод для времени ожидания...", 3)
                 try:
                     elements = self.driver.find_elements(By.XPATH, wait_time_xpath)
                     fallback_texts = []
@@ -2082,14 +2082,14 @@ class Claimer:
                     else:
                         wait_time_text = False
                 except Exception as fallback_e:
-                    self.output(f"Step {self.step} - Fallback method failed: {fallback_e}", 3)
+                    self.output(f"Шаг {self.step} - Резервный метод не удался: {fallback_e}", 3)
                     wait_time_text = False
     
             if wait_time_text:
                 wait_time_text = wait_time_text.strip()
-                self.output(f"Step {self.step} - Extracted wait time text: '{wait_time_text}'", 3)
+                self.output(f"Шаг {self.step} - Извлеченный текст времени ожидания: '{wait_time_text}'", 3)
                 
-                # Updated patterns to ignore preceding text and to match explicit hour-minute format
+                # Обновленные шаблоны для игнорирования предшествующего текста и явного формата часы-минуты
                 patterns = [
                     r".*?(\d+)h\s*(\d+)m(?:\s*(\d+)(?:s|d))?",
                     r".*?(\d{1,2}):(\d{2})(?::(\d{2}))?"
@@ -2111,7 +2111,7 @@ class Claimer:
                                 total_minutes += int(seconds) / 60.0
                             if not any([hours, minutes, seconds]):
                                 total_minutes = None
-                        # If matching colon separated pattern (hours and minutes, optional seconds)
+                        # Если совпадение с паттерном с двоеточием (часы и минуты, опционально секунды)
                         elif len(groups) == 2:
                             hours, minutes = groups
                             if hours:
@@ -2123,19 +2123,15 @@ class Claimer:
                 
                 if total_minutes is not None and total_minutes > 0:
                     total_minutes = round(total_minutes, 1)
-                    self.output(f"Step {self.step} - Total wait time in minutes: {total_minutes}", 3)
+                    self.output(f"Шаг {self.step} - Общее время ожидания в минутах: {total_minutes}", 3)
                     return total_minutes
                 else:
-                    self.output(f"Step {self.step} - Wait time pattern not matched in text: '{wait_time_text}'", 3)
+                    self.output(f"Шаг {self.step} - Шаблон времени ожидания не совпал с текстом: '{wait_time_text}'", 3)
                     return False
             else:
-                self.output(f"Step {self.step} - No wait time text found.", 3)
+                self.output(f"Шаг {self.step} - Текст времени ожидания не найден.", 3)
                 return False
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 3)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 3)
 
             return False
-
-
-
-

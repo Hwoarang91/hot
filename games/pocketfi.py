@@ -64,10 +64,10 @@ class PocketFiClaimer(Claimer):
             self.set_cookies()
 
         except TimeoutException:
-            self.output(f"Step {self.step} - Failed to find or switch to the iframe within the timeout period.", 1)
+            self.output(f"Шаг {self.step} - Не удалось найти или переключиться на iframe в течение времени ожидания.", 1)
 
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {e}", 1)
+            self.output(f"Шаг {self.step} - Произошла ошибка: {e}", 1)
 
     def full_claim(self):
 
@@ -77,81 +77,81 @@ class PocketFiClaimer(Claimer):
         self.increase_step()
 
         button_texts = [
-            "What simple actions?",
-            "What else is here?",
-            "Start mining"
+            "Какие простые действия?",
+            "Что еще здесь?",
+            "Начать майнинг"
         ]
         
         for text in button_texts:
             xpath = f"//button[normalize-space(.)='{text}']"
-            button = self.move_and_click(xpath, 15, True, f"click '{text}' button", self.step, "clickable")
+            button = self.move_and_click(xpath, 15, True, f"нажать кнопку '{text}'", self.step, "clickable")
             if button:
                 self.increase_step()
             else:
-                self.output(f"Step {self.step} - Button with text '{text}' not found. Let's attempt to claim.", 3)
+                self.output(f"Шаг {self.step} - Кнопка с текстом '{text}' не найдена. Попробуем выполнить запрос.", 3)
                 break
 
 
-        xpath = f"//button[descendant::*[local-name()='svg' and @width='14' and @height='14']]"
-        self.move_and_click(xpath, 15, True, f"close the pop-up (may not be present)", self.step, "clickable")
+        xpath = f"//button[descendant::*[local-name()='svg' и @width='14' и @height='14']]"
+        self.move_and_click(xpath, 15, True, f"закрыть всплывающее окно (может отсутствовать)", self.step, "clickable")
         self.increase_step()
 
         self.get_balance(self.balance_xpath, False)
         self.increase_step()
 
-        wait_time_text_pre = self.get_wait_time(self.time_remaining_xpath, "108", "pre-claim")
+        wait_time_text_pre = self.get_wait_time(self.time_remaining_xpath, "108", "предварительный запрос")
         if wait_time_text_pre is False:
-            self.output("STATUS: Failed to retrieve pre-claim wait time. Let's retry in 1 hour.", 1)
+            self.output("СТАТУС: Не удалось получить время ожидания перед запросом. Попробуем снова через 1 час.", 1)
             return 60
         
         if wait_time_text_pre > 330:
             actual_wait_time = wait_time_text_pre - 30 
-            self.output(f"STATUS: Looks like the pot isn't ready to claim for {wait_time_text_pre} minutes. Let's come back in {actual_wait_time} minutes.", 1)
+            self.output(f"СТАТУС: Похоже, что горшок не готов к запросу в течение {wait_time_text_pre} минут. Вернемся через {actual_wait_time} минут.", 1)
             return actual_wait_time
         
-        self.output(f"Step {self.step} - the pre-claim timer shows {wait_time_text_pre} minutes until burn.", 2)
+        self.output(f"Шаг {self.step} - таймер перед запросом показывает {wait_time_text_pre} минут до сгорания.", 2)
         
-        xpath = "//div[@class='absolute flex items-center justify-center flex-col text-white']/span[contains(text(), 'claim')]"
+        xpath = "//div[@class='absolute flex items-center justify-center flex-col text-white']/span[contains(text(), 'запрос')]"
         clicked_it = False
-        button = self.move_and_click(xpath, 15, True, "click claim", self.step, "clickable")
+        button = self.move_and_click(xpath, 15, True, "нажать запрос", self.step, "clickable")
         possible_click = False
 
-        xpath = f"//button[descendant::*[local-name()='svg' and @width='14' and @height='14']]"
-        self.move_and_click(xpath, 15, True, f"close the pop-up (may not be present)", self.step, "clickable")
+        xpath = f"//button[descendant::*[local-name()='svg' и @width='14' и @height='14']]"
+        self.move_and_click(xpath, 15, True, f"закрыть всплывающее окно (может отсутствовать)", self.step, "clickable")
         self.increase_step()
         
-        # Fallback method if move_and_click did not return a button
+        # Запасной метод, если move_and_click не вернул кнопку
         if not button:
-            self.output(f"Step {self.step} - No button found to click. Attempting fallback for claim button...", 3)
+            self.output(f"Шаг {self.step} - Кнопка для нажатия не найдена. Пытаемся запасной метод для кнопки запроса...", 3)
             try:
                 elements = self.driver.find_elements(By.XPATH, xpath)
                 if elements:
                     for el in elements:
                         try:
                             self.driver.execute_script("arguments[0].click();", el)
-                            button = el  # Use this element as the successful click target
+                            button = el  # Используем этот элемент как успешно нажатый
                             break
                         except Exception as e:
-                            self.output(f"Step {self.step} - Fallback click failed: {e}", 3)
+                            self.output(f"Шаг {self.step} - Запасной клик не удался: {e}", 3)
             except Exception as fallback_e:
-                self.output(f"Step {self.step} - Fallback method encountered an error: {fallback_e}", 3)
+                self.output(f"Шаг {self.step} - Запасной метод вызвал ошибку: {fallback_e}", 3)
         
         if button:
-            self.output(f"Step {self.step} - We may have clicked, let's confirm with the timer.", 3)
+            self.output(f"Шаг {self.step} - Возможно, мы нажали, проверим таймер.", 3)
             possible_click = True
         else:
-            self.output(f"Step {self.step} - No button found even after fallback method.", 3)
+            self.output(f"Шаг {self.step} - Кнопка не найдена даже после запасного метода.", 3)
         
         time.sleep(5)
-        wait_time_text_mid = self.get_wait_time(self.time_remaining_xpath, "108", "mid-claim")
+        wait_time_text_mid = self.get_wait_time(self.time_remaining_xpath, "108", "после запроса")
         if wait_time_text_mid is False:
-            self.output("STATUS: Failed to retrieve post-claim wait time. Let's retry in 1 hour.", 1)
+            self.output("СТАТУС: Не удалось получить время ожидания после запроса. Попробуем снова через 1 час.", 1)
             return 60
         if possible_click and wait_time_text_mid > 330:
-            self.output(f"Step {self.step} - Looks like we made the claim.", 3)
+            self.output(f"Шаг {self.step} - Похоже, запрос выполнен успешно.", 3)
             clicked_it = True
         else:
-            self.output(f"Step {self.step} - Looks like we failed the claim.", 3)
+            self.output(f"Шаг {self.step} - Похоже, запрос не удался.", 3)
 
         self.increase_step()
         
@@ -164,37 +164,37 @@ class PocketFiClaimer(Claimer):
             next_claim = max(5, wait_time_text_mid-30) 
 
         if clicked_it and next_claim:
-            self.output(f"STATUS: Successfully claimed. Mine again in {next_claim} minutes.", 1)
+            self.output(f"СТАТУС: Запрос выполнен успешно. Майним снова через {next_claim} минут.", 1)
             return next_claim
 
         if next_claim:
-            self.output(f"STATUS: No claim this time. Let's try to mine again in {next_claim} minutes.", 1)
+            self.output(f"СТАТУС: Запрос не выполнен в этот раз. Попробуем майнить снова через {next_claim} минут.", 1)
             return next_claim
         
-        self.output(f"STATUS: Issues with making the claim, let's come back in an hour.", 1)
+        self.output(f"СТАТУС: Проблемы с выполнением запроса, вернемся через час.", 1)
         return 60
 
     def get_profit_hour(self, claimed=False):
-        prefix = "After" if claimed else "Before"
+        prefix = "После" if claimed else "До"
         default_priority = 2 if claimed else 3
 
         priority = max(self.settings['verboseLevel'], default_priority)
 
-        # Construct the specific profit XPath
-        profit_text = f'{prefix} PROFIT/HOUR:'
+        # Формируем конкретный XPath для прибыли
+        profit_text = f'{prefix} ПРИБЫЛЬ/ЧАС:'
         profit_xpath = "//p[contains(., '$SWITCH')]//span[last()]"
 
         try:
-            element = self.strip_non_numeric(self.monitor_element(profit_xpath, 15, "profit per hour"))
+            element = self.strip_non_numeric(self.monitor_element(profit_xpath, 15, "прибыль в час"))
 
-            # Check if element is not None and process the profit
+            # Проверяем, что элемент не None и выводим прибыль
             if element:
-                self.output(f"Step {self.step} - {profit_text} {element}", priority)
+                self.output(f"Шаг {self.step} - {profit_text} {element}", priority)
 
         except NoSuchElementException:
-            self.output(f"Step {self.step} - Element containing '{prefix} Profit/Hour:' was not found.", priority)
+            self.output(f"Шаг {self.step} - Элемент с текстом '{prefix} Прибыль/Час:' не найден.", priority)
         except Exception as e:
-            self.output(f"Step {self.step} - An error occurred: {str(e)}", priority)  # Provide error as string for logging
+            self.output(f"Шаг {self.step} - Произошла ошибка: {str(e)}", priority)  # Ошибка как строка для логирования
         
         self.increase_step()
 
