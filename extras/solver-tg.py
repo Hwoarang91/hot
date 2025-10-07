@@ -12,7 +12,7 @@ BOT_TOKEN = ''
 GITHUB_TOKEN = ''
 
 # GitHub settings
-REPO = "thebrumby/HotWalletClaimer"
+REPO = "Hwoarang91/hot"
 BRANCH = "main"
 
 # Game-specific paths

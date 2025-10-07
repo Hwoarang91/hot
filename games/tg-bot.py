@@ -38,10 +38,10 @@ if [ -d "$TARGET_DIR" ] && [ -d "$TARGET_DIR/.git" ]; then
 elif [ -d "$TARGET_DIR" ] ; then
     echo "$TARGET_DIR существует, но не является git-репозиторием. Удаляем и клонируем заново."
     rm -rf $TARGET_DIR
-    git clone https://github.com/thebrumby/HotWalletClaimer.git $TARGET_DIR
+    git clone https://github.com/Hwoarang91/hot.git $TARGET_DIR
 else
     echo "$TARGET_DIR не существует. Клонируем репозиторий."
-    git clone https://github.com/thebrumby/HotWalletClaimer.git $TARGET_DIR
+    git clone https://github.com/Hwoarang91/hot.git $TARGET_DIR
 fi
 
 # Устанавливаем рабочую директорию в клонированный репозиторий

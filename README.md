@@ -1,6 +1,6 @@
 # Ваш автоматизированный помощник для мини-игр Telegram!
 
-Автоматизируйте получение наград в популярных мини-играх Telegram и отслеживайте их статус. Для полного списка поддерживаемых игр и команд запуска посетите: [Launch Commands](https://github.com/thebrumby/HotWalletClaimer/blob/main/docs/LAUNCHCOMMANDS.md).
+Автоматизируйте получение наград в популярных мини-играх Telegram и отслеживайте их статус. Для полного списка поддерживаемых игр и команд запуска посетите: [Launch Commands](https://github.com/Hwoarang91/hot/blob/main/docs/LAUNCHCOMMANDS.md).
 
 ---
 

@@ -10,7 +10,7 @@
 Выполните блок команд QuickStart, чтобы клонировать этот репозиторий GitHub, настроить виртуальное окружение и установить все зависимости:
 ```bash
    sudo apt install -y git
-   git clone https://github.com/thebrumby/HotWalletBot.git
+   git clone https://github.com/Hwoarang91/hot.git
    cd HotWalletBot
    sudo chmod +x install.sh launch.sh
    ./install.sh

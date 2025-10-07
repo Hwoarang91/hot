@@ -13,10 +13,10 @@ if [ -d "$TARGET_DIR" ] && [ -d "$TARGET_DIR/.git" ]; then
 elif [ -d "$TARGET_DIR" ]; then
     echo "$TARGET_DIR exists but is not a git repository. Removing and cloning afresh."
     rm -rf $TARGET_DIR
-    git clone https://github.com/thebrumby/HotWalletClaimer.git $TARGET_DIR
+    git clone https://github.com/Hwoarang91/hot.git $TARGET_DIR
 else
     echo "$TARGET_DIR does not exist. Cloning repository."
-    git clone https://github.com/thebrumby/HotWalletClaimer.git $TARGET_DIR
+    git clone https://github.com/Hwoarang91/hot.git $TARGET_DIR
 fi
 
 # Set the working directory to the cloned repository
