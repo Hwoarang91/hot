@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  hot-wallet-claimer:
+    image: hwoarang91/hot-wallet-claimer:latest
+    container_name: hot-wallet-claimer
+    restart: unless-stopped
+    
+    # Монтирование папок для сохранения данных
+    volumes:
+      - ./data:/usr/src/app/data
+      - ./sessions:/usr/src/app/sessions
+      - ./games:/usr/src/app/games
+      - ./logs:/root/.pm2/logs
+    
+    # Переменные окружения (при необходимости)
+    environment:
+      - TZ=Europe/Moscow
+      # Добавьте другие переменные окружения здесь
+    
+    # Порты (если нужно)
+    # ports:
+    #   - "8080:8080"
+    
+    # Ограничения ресурсов (опционально)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 1G

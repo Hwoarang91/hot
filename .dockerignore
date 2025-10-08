@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+LICENSE
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+*.out
+
+# Data and sessions (will be mounted as volumes)
+data/
+sessions/
+.pm2/
+
+# Build artifacts
+build/
+dist/
+*.egg
+
+# Docker
+docker-compose.yml
+Dockerfile*
+.dockerignore
+
+# Scripts
+build.sh
+build.ps1
+QUICK_START_RU.md
